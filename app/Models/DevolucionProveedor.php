@@ -22,10 +22,10 @@ class DevolucionProveedor extends Model
         'almacen_id'
     ];
     
-    protected $dates = [
-        'fecha_emision',
-        'created_at',
-        'updated_at'
+    protected $casts = [
+        'fecha_emision' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
     
     public function proveedor()

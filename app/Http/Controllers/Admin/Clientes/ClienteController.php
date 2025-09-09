@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Services\DocumentValidationService;
 
 class ClienteController extends Controller
 {
@@ -259,65 +260,49 @@ public function buscar(Request $request)
         ]);
 
         $tipoDocumento = $request->tipo_documento;
-        $numeroDocumento = $request->numero_documento;
+        $numeroDocumento = trim($request->numero_documento);
 
-        $token = config('services.apiperu.token');
-        $tipoDocumentoApi = strtolower($tipoDocumento);
-        $url = "https://apiperu.dev/api/{$tipoDocumentoApi}/{$numeroDocumento}";
-
-        Log::info("Validando documento: Tipo: {$tipoDocumento}, Número: {$numeroDocumento}, URL: {$url}, Token: {$token}");
+        Log::info("Validando documento: Tipo: {$tipoDocumento}, Número: {$numeroDocumento}");
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => "Bearer {$token}",
-                'Accept' => 'application/json',
-            ])->get($url);
-
-            Log::info("Respuesta de la API: Status: {$response->status()}, Body: " . $response->body());
-
-            if ($response->successful() && isset($response['success']) && $response['success']) {
-                $data = $response->json()['data'];
-                
-                if ($tipoDocumento === 'DNI') {
-                    return response()->json([
-                        'success' => true,
-                        'data' => [
-                            'nombres' => $data['nombres'] ?? '',
-                            'apellido_paterno' => $data['apellido_paterno'] ?? '',
-                            'apellido_materno' => $data['apellido_materno'] ?? '',
-                        ]
-                    ]);
-                } else { // RUC
-                    // Extraer departamento, provincia y distrito de la dirección
-                    $ubigeo = $this->extraerUbigeoDeDireccion($data['direccion'] ?? '');
-                    
-                    return response()->json([
-                        'success' => true,
-                        'data' => [
-                            'nombre_o_razon_social' => $data['nombre_o_razon_social'] ?? '',
-                            'direccion' => $data['direccion'] ?? '',
-                            'departamento' => $ubigeo['departamento'] ?? '',
-                            'provincia' => $ubigeo['provincia'] ?? '',
-                            'distrito' => $ubigeo['distrito'] ?? '',
-                        ]
-                    ]);
-                }
+            $validationService = new DocumentValidationService();
+            
+            if ($tipoDocumento === 'DNI') {
+                $result = $validationService->validateDni($numeroDocumento);
             } else {
-                // Valores de ejemplo para pruebas
-                $data = $tipoDocumento === 'DNI'
-                    ? ['apellido_paterno' => 'Pérez', 'apellido_materno' => 'Gómez', 'nombres' => 'Juan']
-                    : ['nombre_o_razon_social' => 'Empresa Ejemplo SAC'];
-                
-                return response()->json([
-                    'success' => true,
-                    'data' => $data,
-                ]);
+                $result = $validationService->validateRuc($numeroDocumento);
             }
+            
+            if ($result['success']) {
+                // Si es RUC y no tiene ubicación completa, intentar extraerla de la dirección
+                if ($tipoDocumento === 'RUC' && isset($result['data']['direccion'])) {
+                    $ubigeo = $this->extraerUbigeoDeDireccion($result['data']['direccion']);
+                    if (!empty($ubigeo['departamento']) && empty($result['data']['departamento'])) {
+                        $result['data']['departamento'] = $ubigeo['departamento'];
+                        $result['data']['provincia'] = $ubigeo['provincia'];
+                        $result['data']['distrito'] = $ubigeo['distrito'];
+                    }
+                }
+                
+                Log::info("Documento validado exitosamente", [
+                    'documento' => $numeroDocumento,
+                    'source' => $result['source'] ?? 'unknown'
+                ]);
+            } else {
+                Log::warning("No se pudo validar el documento: {$numeroDocumento}");
+            }
+            
+            return response()->json($result);
+            
         } catch (\Exception $e) {
-            Log::error("Error al consultar la API: " . $e->getMessage());
+            Log::error("Error inesperado al validar documento: " . $e->getMessage(), [
+                'documento' => $numeroDocumento,
+                'tipo' => $tipoDocumento
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Error al consultar la API: ' . $e->getMessage(),
+                'message' => 'Error interno del servidor. Por favor, intente nuevamente.'
             ], 500);
         }
     }

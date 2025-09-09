@@ -46,7 +46,7 @@
                                     <tr>
                                         <td>{{ $devolucion->codigo }}</td>
                                         <td>{{ $devolucion->proveedor->nombre_completo }}</td>
-                                        <td>{{ $devolucion->fecha_emision->format('d/m/Y') }}</td>
+                                        <td>{{ $devolucion->fecha_emision ? $devolucion->fecha_emision->format('d/m/Y') : '-' }}</td>
                                         <td>{{ $devolucion->motivo }}</td>
                                         <td>{{ $devolucion->almacen->nombre }}</td>
                                         <td>
@@ -59,42 +59,50 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Acciones
-                                                </button>
-                                                <ul class="dropdown-menu">
-                                                    <li>
-                                                        <a href="{{ route('admin.inventario.devoluciones.show', $devolucion->id) }}" class="dropdown-item">
-                                                            Ver Detalles
-                                                        </a>
-                                                    </li>
-                                                    @if($devolucion->estado == 'PENDIENTE')
-                                                        <li>
-                                                            <a href="{{ route('admin.inventario.devoluciones.edit', $devolucion->id) }}" class="dropdown-item">
-                                                                Editar
-                                                            </a>
-                                                        </li>
-                                                        <li>
-                                                            <form action="{{ route('admin.inventario.devoluciones.confirmar', $devolucion->id) }}" method="POST" class="d-inline">
-                                                                @csrf
-                                                                @method('PUT')
-                                                                <button type="submit" class="dropdown-item" onclick="return confirm('¿Estás seguro de confirmar esta devolución? Esta acción no se puede deshacer.')">
-                                                                    Confirmar Devolución
-                                                                </button>
-                                                            </form>
-                                                        </li>
-                                                        <li>
-                                                            <form action="{{ route('admin.inventario.devoluciones.destroy', $devolucion->id) }}" method="POST" class="d-inline">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="dropdown-item text-danger" onclick="return confirm('¿Estás seguro de eliminar esta devolución?')">
-                                                                    Eliminar
-                                                                </button>
-                                                            </form>
-                                                        </li>
-                                                    @endif
-                                                </ul>
+                                            <div class="btn-group" role="group" aria-label="Acciones">
+                                                <!-- Ver Detalles -->
+                                                <a href="{{ route('admin.inventario.devoluciones.show', $devolucion->id) }}" 
+                                                   class="btn btn-outline-info btn-sm" 
+                                                   title="Ver Detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                
+                                                @if($devolucion->estado == 'PENDIENTE')
+                                                    <!-- Editar -->
+                                                    <a href="{{ route('admin.inventario.devoluciones.edit', $devolucion->id) }}" 
+                                                       class="btn btn-outline-warning btn-sm" 
+                                                       title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    
+                                                    <!-- Confirmar Devolución -->
+                                                    <form action="{{ route('admin.inventario.devoluciones.confirmar', $devolucion->id) }}" 
+                                                          method="POST" 
+                                                          class="d-inline">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <button type="submit" 
+                                                                class="btn btn-outline-success btn-sm" 
+                                                                title="Confirmar Devolución"
+                                                                onclick="return confirm('¿Estás seguro de confirmar esta devolución? Esta acción no se puede deshacer.')">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                    
+                                                    <!-- Eliminar -->
+                                                    <form action="{{ route('admin.inventario.devoluciones.destroy', $devolucion->id) }}" 
+                                                          method="POST" 
+                                                          class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" 
+                                                                class="btn btn-outline-danger btn-sm" 
+                                                                title="Eliminar"
+                                                                onclick="return confirm('¿Estás seguro de eliminar esta devolución?')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -116,3 +124,45 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+/* Estilos para los botones de acción */
+.btn-group .btn {
+    border-radius: 0.375rem;
+    margin-right: 2px;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+/* Colores específicos para cada acción */
+.btn-outline-info:hover {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+.btn-outline-warning:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.btn-outline-success:hover {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+</style>
+@endpush

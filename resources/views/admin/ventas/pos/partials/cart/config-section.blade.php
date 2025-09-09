@@ -43,6 +43,27 @@
         </div>
     </div>
     
+    <!-- Tipo de Cambio (visible cuando hay USD/PEN) -->
+    <div class="mb-3" id="tipo-cambio-section">
+        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exchange-alt text-success me-2"></i>
+                <span class="small fw-bold">Tipo de Cambio:</span>
+                <button type="button" class="btn btn-link btn-sm p-0 ms-2" 
+                        id="refresh-tc-btn" title="Actualizar tipo de cambio">
+                    <i class="fas fa-refresh text-muted"></i>
+                </button>
+            </div>
+            <div class="text-end">
+                <div class="small">
+                    <span class="badge bg-success" id="tc-compra">Compra: S/ 0.0000</span>
+                    <span class="badge bg-primary ms-1" id="tc-venta">Venta: S/ 0.0000</span>
+                </div>
+                <div class="tiny text-muted mt-1" id="tc-fecha">Última actualización: --</div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Porcentaje de Abono (solo visible en crédito) -->
     <div class="mb-3 d-none" id="abono-section">
         <div class="d-flex align-items-center gap-2">
@@ -144,6 +165,80 @@ $(document).ready(function() {
         habilitar_descuentos: false
     };
     
+    // Variables para tipo de cambio
+    let tipoCambio = {
+        compra: 0,
+        venta: 0,
+        fecha: null,
+        disponible: false
+    };
+    
+    // Cargar tipo de cambio desde la API
+    async function cargarTipoCambio() {
+        try {
+            console.log('💱 Cargando tipo de cambio...');
+            const response = await fetch('/admin/mantenimiento/api/tipo-cambio', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                    tipoCambio = {
+                        compra: parseFloat(data.data.compra),
+                        venta: parseFloat(data.data.venta),
+                        fecha: data.data.fecha,
+                        disponible: true
+                    };
+                    
+                    actualizarUITipoCambio();
+                    console.log('✅ Tipo de cambio cargado:', tipoCambio);
+                } else {
+                    console.warn('⚠️ No hay tipo de cambio disponible');
+                    tipoCambio.disponible = false;
+                }
+            } else {
+                throw new Error('Error en la respuesta del servidor');
+            }
+        } catch (error) {
+            console.error('❌ Error al cargar tipo de cambio:', error);
+            tipoCambio.disponible = false;
+            mostrarErrorTipoCambio();
+        }
+    }
+    
+    // Actualizar UI del tipo de cambio
+    function actualizarUITipoCambio() {
+        if (tipoCambio.disponible) {
+            $('#tc-compra').text(`Compra: S/ ${tipoCambio.compra.toFixed(4)}`);
+            $('#tc-venta').text(`Venta: S/ ${tipoCambio.venta.toFixed(4)}`);
+            
+            // Formatear fecha
+            const fechaFormateada = tipoCambio.fecha ? 
+                new Date(tipoCambio.fecha).toLocaleDateString('es-PE') : 
+                'Sin fecha';
+            $('#tc-fecha').text(`Actualizado: ${fechaFormateada}`);
+            
+            $('#tipo-cambio-section').removeClass('d-none');
+        } else {
+            $('#tipo-cambio-section').addClass('d-none');
+        }
+    }
+    
+    // Mostrar error en tipo de cambio
+    function mostrarErrorTipoCambio() {
+        $('#tc-compra').text('No disponible');
+        $('#tc-venta').text('No disponible');
+        $('#tc-fecha').text('Error al cargar');
+        $('#tipo-cambio-section').removeClass('d-none');
+        
+        // Agregar clases de error
+        $('#tipo-cambio-section .bg-light').removeClass('bg-light').addClass('bg-warning-subtle');
+    }
+
     // Inicializar configuración
     function initConfig() {
         // Cargar configuración guardada si existe
@@ -160,6 +255,9 @@ $(document).ready(function() {
         // Aplicar configuración a la interfaz
         applyConfigToUI();
         updateCartTotals();
+        
+        // Cargar tipo de cambio
+        cargarTipoCambio();
     }
     
     // Aplicar configuración a la interfaz
@@ -249,6 +347,23 @@ $(document).ready(function() {
         $('#btn-guardar-configuracion').on('click', function() {
             guardarConfiguracion();
         });
+        
+        // Botón de actualizar tipo de cambio
+        $('#refresh-tc-btn').on('click', function() {
+            const btn = $(this);
+            const icon = btn.find('i');
+            
+            // Animar botón
+            icon.addClass('fa-spin');
+            btn.prop('disabled', true);
+            
+            cargarTipoCambio().finally(() => {
+                setTimeout(() => {
+                    icon.removeClass('fa-spin');
+                    btn.prop('disabled', false);
+                }, 1000);
+            });
+        });
     }
     
     // Mostrar/ocultar sección de abono
@@ -324,14 +439,45 @@ function updateCartTotals() {
     const abono = total * (config.porcentaje_abono / 100);
     const saldo = total - abono;
     
+    // Conversión de moneda si es necesario
+    let subtotalFinal = subtotal;
+    let impuestosFinal = impuestos;
+    let totalFinal = total;
+    let abonoFinal = abono;
+    let saldoFinal = saldo;
+    
+    if (config.moneda === 'Dólares' && tipoCambio.disponible) {
+        // Convertir de soles a dólares usando tipo de cambio de venta
+        subtotalFinal = subtotal / tipoCambio.venta;
+        impuestosFinal = impuestos / tipoCambio.venta;
+        totalFinal = total / tipoCambio.venta;
+        abonoFinal = abono / tipoCambio.venta;
+        saldoFinal = saldo / tipoCambio.venta;
+    }
+    
     const simboloMoneda = config.moneda === 'Dólares' ? 'US$' : 'S/';
     
     // Actualizar información de abono
-    $('#abono-monto').text(`${simboloMoneda} ${abono.toFixed(2)}`);
-    $('#saldo-monto').text(`${simboloMoneda} ${saldo.toFixed(2)}`);
+    $('#abono-monto').text(`${simboloMoneda} ${abonoFinal.toFixed(2)}`);
+    $('#saldo-monto').text(`${simboloMoneda} ${saldoFinal.toFixed(2)}`);
     
-    // Trigger evento para otros componentes
-    $(document).trigger('configUpdated', [config, { subtotal, impuestos, total, abono, saldo }]);
+    // Trigger evento para otros componentes con información de conversión
+    const totales = {
+        subtotal: subtotalFinal,
+        impuestos: impuestosFinal,
+        total: totalFinal,
+        abono: abonoFinal,
+        saldo: saldoFinal,
+        subtotalOriginal: subtotal,
+        impuestosOriginal: impuestos,
+        totalOriginal: total,
+        abonoOriginal: abono,
+        saldoOriginal: saldo,
+        moneda: config.moneda,
+        tipoCambio: tipoCambio.disponible ? tipoCambio : null
+    };
+    
+    $(document).trigger('configUpdated', [config, totales]);
 }
     
     // Limpiar carrito
@@ -395,7 +541,12 @@ function updateCartTotals() {
         setAbono: setAbono,
         updateTotals: updateCartTotals,
         save: guardarConfiguracion,
-        clear: limpiarCarrito
+        clear: limpiarCarrito,
+        tipoCambio: {
+            obtener: () => tipoCambio,
+            recargar: cargarTipoCambio,
+            disponible: () => tipoCambio.disponible
+        }
     };
     
     // Hacer setAbono global para los botones

@@ -2,9 +2,12 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
 x-data="{
           darkMode: localStorage.getItem('darkMode') === 'true',
-          sidebarOpen: false,
-          collapsed: false,
+          sidebarOpen: window.innerWidth >= 768,
+          collapsed: localStorage.getItem('sidebarCollapsed') === 'true',
           activeMenu: null,
+          isMobile() {
+              return window.innerWidth < 768;
+          },
           isActive(route) {
               const currentPath = window.location.pathname;
               
@@ -32,9 +35,25 @@ x-data="{
           // Función auxiliar para verificar múltiples rutas
           isAnyActive(paths) {
               return paths.some(path => window.location.pathname.startsWith(`/${path}`));
+          },
+          toggleSidebar() {
+              if (this.isMobile()) {
+                  this.sidebarOpen = !this.sidebarOpen;
+              } else {
+                  this.collapsed = !this.collapsed;
+                  localStorage.setItem('sidebarCollapsed', this.collapsed);
+              }
           }
       }"
       x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val));
+        $watch('collapsed', val => localStorage.setItem('sidebarCollapsed', val));
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebarOpen = true;
+            } else {
+                sidebarOpen = false;
+            }
+        });
         activeMenu = shouldBeOpen(['admin/ventas']) ? 'ventas' :
             shouldBeOpen(['admin/clientes']) ? 'clientes' :
             shouldBeOpen(['admin/compras']) ? 'compras' :
@@ -104,7 +123,21 @@ x-data="{
         }
         
         .sidebar {
-            transition: all 0.3s ease-in-out;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1050;
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.show {
+            opacity: 1;
         }
         
         /* Estilos para el menú de usuario */
@@ -114,6 +147,29 @@ x-data="{
             left: 0;
             z-index: 1000;
             margin-bottom: 0.5rem;
+        }
+        
+        /* Mejoras en el scroll del sidebar */
+        .sidebar-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 2px;
+        }
+        
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(156, 163, 175, 0.7);
         }
 
         /* Sin bordes para botones de toggle */
@@ -208,36 +264,99 @@ x-data="{
         .hover-dark:hover {
             background-color: rgba(255, 255, 255, 0.05);
         }
+        
+        /* Responsive adjustments */
+        @media (max-width: 767.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        /* Main content responsive adjustments */
+        .main-content {
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Fix for notification badges */
+        .badge-notification {
+            font-size: 0.6rem;
+            font-weight: 500;
+            padding: 0.25em 0.5em;
+        }
     </style>
 </head>
 <body class="min-vh-100 transition bg-light" :class="darkMode ? 'dark bg-dark text-light' : 'bg-light'">
+    <!-- Mobile Sidebar Overlay -->
+    <div x-show="sidebarOpen && isMobile()" 
+         @click="sidebarOpen = false"
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="sidebar-overlay show"></div>
+
     <div class="d-flex min-vh-100">
+        <!-- Mobile Menu Button -->
+        <button @click="toggleSidebar()" 
+                class="btn btn-primary position-fixed d-md-none"
+                style="top: 1rem; left: 1rem; z-index: 1060; border-radius: 0.5rem;"
+                :class="sidebarOpen ? 'd-none' : 'd-block'">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <!-- Sidebar -->
-        <div class="sidebar position-fixed top-0 bottom-0 start-0 bg-white shadow-lg transition" 
+        <div class="sidebar position-fixed top-0 bottom-0 start-0 bg-white shadow-lg" 
              :class="{ 
-                 'translate-x-100': !sidebarOpen, 
-                 'translate-x-0': sidebarOpen, 
-                 'w-64': !collapsed, 
-                 'w-20': collapsed && !sidebarOpen,
+                 'show': sidebarOpen,
                  'bg-dark-custom': darkMode
              }"
-             style="width: 16rem;"
-             :style="collapsed && !sidebarOpen ? 'width: 5rem;' : 'width: 16rem;'">
+             :style="!isMobile() ? (collapsed ? 'width: 5rem;' : 'width: 16rem;') : 'width: 16rem;'"">
             <div class="d-flex flex-column sidebar-height">
                 <!-- Sidebar Header -->
                 <div class="d-flex align-items-center justify-content-between p-3 border-bottom" :class="darkMode ? 'border-dark-custom' : ''">
                     <div class="d-flex align-items-center">
-                        <img :class="{ 'me-3': !collapsed }" class="logo-img" src="{{ asset('img/logo-MSA.png') }}" alt="MSA Automotriz">
+                        <img :class="{ 'me-3': !collapsed || isMobile() }" 
+                             class="logo-img" 
+                             src="{{ asset('img/logo-MSA.png') }}" 
+                             alt="MSA Automotriz">
+                        <h5 x-show="!collapsed || isMobile()" 
+                            class="mb-0 fw-bold" 
+                            :class="darkMode ? 'text-light' : 'text-dark'">
+                            MSA
+                        </h5>
                     </div>
-                    <button @click="collapsed = !collapsed" class="btn btn-sm btn-no-border d-none d-md-block" :class="darkMode ? 'text-light' : 'text-secondary'">
-                        <svg xmlns="http://www.w3.org/2000/svg" :class="{ 'rotate-180': !collapsed }" class="h-6 w-6 transition" style="height: 1.5rem; width: 1.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    
+                    <!-- Mobile close button -->
+                    <button @click="sidebarOpen = false" 
+                            class="btn btn-sm btn-no-border d-md-none" 
+                            :class="darkMode ? 'text-light' : 'text-secondary'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    
+                    <!-- Desktop collapse button -->
+                    <button @click="toggleSidebar()" 
+                            class="btn btn-sm btn-no-border d-none d-md-block" 
+                            :class="darkMode ? 'text-light' : 'text-secondary'">
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                             :class="{ 'rotate-180': !collapsed }" 
+                             class="transition" 
+                             style="height: 1.25rem; width: 1.25rem;" 
+                             fill="none" 
+                             viewBox="0 0 24 24" 
+                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
                         </svg>
                     </button>
                 </div>
                 
                 <!-- Navigation Links -->
-                <div class="flex-grow-1 overflow-auto py-3">
+                <div class="flex-grow-1 overflow-auto py-3 sidebar-scroll">
                     <ul class="nav flex-column px-2">
                         <!-- Dashboard -->
                         <li class="nav-item">
@@ -252,7 +371,7 @@ x-data="{
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                     </svg>
                                 </div>
-                                <span x-show="!collapsed">Dashboard</span>
+                                <span x-show="!collapsed || isMobile()">Dashboard</span>
                             </a>
                         </li>
 
@@ -270,13 +389,13 @@ x-data="{
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                     </div>
-                                    <span x-show="!collapsed">Ventas</span>
+                                    <span x-show="!collapsed || isMobile()">Ventas</span>
                                 </div>
-                                <svg x-show="!collapsed" :class="{ 'rotate-180': activeMenu === 'ventas' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'ventas' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div x-show="activeMenu === 'ventas' && !collapsed" class="ms-4 my-1">
+                            <div x-show="activeMenu === 'ventas' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <a href="{{ route('admin.ventas.cotizaciones.index') }}" 
                                 class="nav-link d-block py-2 px-3 rounded small"
                                 :class="[
@@ -286,13 +405,13 @@ x-data="{
                                     Cotizaciones
                                 </a>
 
-<a href="{{ route('admin.ventas.pos.index') }}" class="nav-link d-block py-2 px-3 rounded small position-relative" :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'" title="Terminal POS">
-    <i class="fas fa-cash-register me-2"></i> Terminal POS
-</a>
+                                <a href="{{ route('admin.ventas.pos.index') }}" class="nav-link d-block py-2 px-3 rounded small position-relative" :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'" title="Terminal POS">
+                                    <i class="fas fa-cash-register me-2"></i> Terminal POS
+                                </a>
 
-<a href="{{ route('admin.ventas.index') }}" class="nav-link d-block py-2 px-3 rounded small position-relative" :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'" title="Gestión de Ventas">
-    <i class="fas fa-list-alt me-2"></i> Gestión de Ventas
-</a>
+                                <a href="{{ route('admin.ventas.pos.ventas') }}" class="nav-link d-block py-2 px-3 rounded small position-relative" :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'" title="Gestión de Ventas">
+                                    <i class="fas fa-list-alt me-2"></i> Gestión de Ventas
+                                </a>
                                 <div x-data="{ openSub: shouldBeOpen(['admin/ventas/ventas']) }" x-init="openSub = shouldBeOpen(['admin/ventas/ventas'])">
                                     <button @click="openSub = !openSub" 
                                             class="nav-link d-flex align-items-center justify-content-between w-100 px-3 py-2 rounded text-start small btn-no-border" 
@@ -309,19 +428,19 @@ x-data="{
                                         <a href="#" class="nav-link d-block py-2 px-3 rounded small position-relative" :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
                                             Guías de entrega
                                             <small class="ms-2 d-inline-flex align-items-center">
-                                                <span class="badge bg-danger bg-opacity-75 px-2 py-1 rounded-pill" style="font-size: 0.6rem; font-weight: 400;">Prox</span>
+                                                <span class="badge bg-danger badge-notification rounded-pill">Prox</span>
                                             </small>
                                         </a>
                                         <a href="#" class="nav-link d-block py-2 px-3 rounded small position-relative" :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
                                             Vales de devolución
                                             <small class="ms-2 d-inline-flex align-items-center">
-                                                <span class="badge bg-danger bg-opacity-75 px-2 py-1 rounded-pill" style="font-size: 0.6rem; font-weight: 400;">Prox</span>
+                                                <span class="badge bg-danger badge-notification rounded-pill">Prox</span>
                                             </small>
                                         </a>
                                         <a href="#" class="nav-link d-block py-2 px-3 rounded small position-relative" :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
                                             Recepción
                                             <small class="ms-2 d-inline-flex align-items-center">
-                                                <span class="badge bg-danger bg-opacity-75 px-2 py-1 rounded-pill" style="font-size: 0.6rem; font-weight: 400;">Prox</span>
+                                                <span class="badge bg-danger badge-notification rounded-pill">Prox</span>
                                             </small>
                                         </a>
                                     </div>
@@ -343,13 +462,13 @@ x-data="{
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                     </div>
-                                    <span x-show="!collapsed">Clientes</span>
+                                    <span x-show="!collapsed || isMobile()">Clientes</span>
                                 </div>
-                                <svg x-show="!collapsed" :class="{ 'rotate-180': activeMenu === 'clientes' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'clientes' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div x-show="activeMenu === 'clientes' && !collapsed" class="ms-4 my-1">
+                            <div x-show="activeMenu === 'clientes' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <a href="{{ route('admin.clientes.index') }}" 
                                 class="nav-link d-block py-2 px-3 rounded small"
                                 :class="[
@@ -383,13 +502,13 @@ x-data="{
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                         </svg>
                                     </div>
-                                    <span x-show="!collapsed">Compras</span>
+                                    <span x-show="!collapsed || isMobile()">Compras</span>
                                 </div>
-                                <svg x-show="!collapsed" :class="{ 'rotate-180': activeMenu === 'compras' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'compras' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div x-show="activeMenu === 'compras' && !collapsed" class="ms-4 my-1">
+                            <div x-show="activeMenu === 'compras' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <a href="{{ route('admin.compras.requerimientos.index') }}" 
                                 class="nav-link d-block py-2 px-3 rounded small"
                                 :class="[
@@ -471,13 +590,13 @@ x-data="{
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                         </svg>
                                     </div>
-                                    <span x-show="!collapsed">Productos/Servicios</span>
+                                    <span x-show="!collapsed || isMobile()">Productos/Servicios</span>
                                 </div>
-                                <svg x-show="!collapsed" :class="{ 'rotate-180': activeMenu === 'productos-servicios' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'productos-servicios' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div x-show="activeMenu === 'productos-servicios' && !collapsed" class="ms-4 my-1">
+                            <div x-show="activeMenu === 'productos-servicios' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <div x-data="{ openSub: shouldBeOpen(['admin/almacenes/partes']) }" x-init="openSub = shouldBeOpen(['admin/almacenes/partes'])">
                                     <button @click="openSub = !openSub" 
                                             class="nav-link d-flex align-items-center justify-content-between w-100 px-3 py-2 rounded text-start small btn-no-border" 
@@ -577,15 +696,15 @@ x-data="{
                                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
                                     </div>
-                                    <span x-show="!collapsed">Inventario</span>
+                                    <span x-show="!collapsed || isMobile()">Inventario</span>
                                 </div>
-                                <svg x-show="!collapsed" :class="{ 'rotate-180': activeMenu === 'inventario' }" class="ms-2"
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'inventario' }" class="ms-2"
                                     style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
 
-                            <div x-show="activeMenu === 'inventario' && !collapsed" class="ms-4 my-1">
+                            <div x-show="activeMenu === 'inventario' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <a href="{{ route('admin.inventario.index') }}"
                                     class="nav-link d-block py-2 px-3 rounded small"
                                     :class="[
@@ -645,14 +764,14 @@ x-data="{
                                     <div class="menu-icon-container me-2" :class="isActive('admin/mantenimiento') ? 'icon-active' : ''">
                                         <i class="fas fa-tools"></i>
                                     </div>
-                                    <span x-show="!collapsed">Mantenimiento</span>
+                                    <span x-show="!collapsed || isMobile()">Mantenimiento</span>
                                 </div>
-                                <svg x-show="!collapsed" :class="{ 'rotate-180': activeMenu === 'mantenimiento' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'mantenimiento' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
                             
-                            <div x-show="activeMenu === 'mantenimiento' && !collapsed" class="ms-4 my-1">
+                            <div x-show="activeMenu === 'mantenimiento' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <!-- Dashboard -->
                                 <a href="{{ route('admin.mantenimiento.dashboard') }}"
                                 class="nav-link d-block py-2 px-3 rounded small"
@@ -681,6 +800,16 @@ x-data="{
                                     isActive('admin/mantenimiento/ordenes') ? 'submenu-active' : ''
                                 ]">
                                     <i class="fas fa-tools me-2"></i>Órdenes de Trabajo
+                                </a>
+                                
+                                <!-- Planes de Mantenimiento -->
+                                <a href="{{ route('admin.planes-mantenimiento.index') }}"
+                                class="nav-link d-block py-2 px-3 rounded small"
+                                :class="[
+                                    darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
+                                    isActive('admin/planes-mantenimiento') ? 'submenu-active' : ''
+                                ]">
+                                    <i class="fas fa-wrench me-2"></i>Planes de Mantenimiento
                                 </a>
                                 
                                 <!-- Reportes -->
@@ -768,7 +897,7 @@ x-data="{
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>
-                                <span x-show="!collapsed">Almacenes</span>
+                                <span x-show="!collapsed || isMobile()">Almacenes</span>
                             </a>
                         </li>
                         
@@ -785,7 +914,7 @@ x-data="{
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
                                 </div>
-                                <span x-show="!collapsed">Establecimientos</span>
+                                <span x-show="!collapsed || isMobile()">Establecimientos</span>
                             </a>
                         </li>
                         
@@ -802,7 +931,7 @@ x-data="{
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <span x-show="!collapsed">Talleres</span>
+                                <span x-show="!collapsed || isMobile()">Talleres</span>
                             </a>
                         </li>
                         
@@ -819,9 +948,9 @@ x-data="{
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                 </div>
-                                <span x-show="!collapsed">Reportes</span>
+                                <span x-show="!collapsed || isMobile()">Reportes</span>
                                 <small class="ms-2 d-inline-flex align-items-center">
-                                    <span class="badge bg-danger bg-opacity-75 px-2 py-1 rounded-pill" style="font-size: 0.6rem; font-weight: 400;">Prox</span>
+                                    <span class="badge bg-danger badge-notification rounded-pill">Prox</span>
                                 </small>
                             </a>
                         </li>
@@ -840,13 +969,13 @@ x-data="{
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                     </div>
-                                    <span x-show="!collapsed">Usuarios</span>
+                                    <span x-show="!collapsed || isMobile()">Usuarios</span>
                                 </div>
-                                <svg x-show="!collapsed" :class="{ 'rotate-180': activeMenu === 'usuarios' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'usuarios' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div x-show="activeMenu === 'usuarios' && !collapsed" class="ms-4 my-1">
+                            <div x-show="activeMenu === 'usuarios' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <a href="{{ route('admin.usuarios.usuarios.index') }}"
                                 class="nav-link d-block py-2 px-3 rounded small position-relative"
                                 :class="[
@@ -881,13 +1010,13 @@ x-data="{
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
                                     </div>
-                                    <span x-show="!collapsed">Configuración</span>
+                                    <span x-show="!collapsed || isMobile()">Configuración</span>
                                 </div>
-                                <svg x-show="!collapsed" :class="{ 'rotate-180': activeMenu === 'configuracion' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'configuracion' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            <div x-show="activeMenu === 'configuracion' && !collapsed" class="ms-4 my-1">
+                            <div x-show="activeMenu === 'configuracion' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <a href="{{ route('admin.configuracion.maestros.fabricantes.index') }}" 
                                 class="nav-link d-block py-2 px-3 rounded small"
                                 :class="[
@@ -924,6 +1053,23 @@ x-data="{
                                     darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
                                     isActive('admin/configuracion/unidades') ? 'submenu-active' : ''
                                 ]">Unidades</a>
+                                <a href="{{ route('admin.configuracion.reglas-vencimiento-cotizaciones.index') }}" 
+                                class="nav-link d-block py-2 px-3 rounded small"
+                                :class="[
+                                    darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
+                                    isActive('admin/configuracion/reglas-vencimiento-cotizaciones') ? 'submenu-active' : ''
+                                ]">Reglas de Vencimiento</a>
+                                <a href="{{ route('admin.configuracion.tipos-cambio.index') }}"
+                                class="nav-link d-block py-2 px-3 rounded small"
+                                :class="[
+                                    darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
+                                    isActive('admin/configuracion/tipos-cambio') ? 'submenu-active' : ''
+                                ]">
+                                    <i class="fas fa-exchange-alt me-2"></i>Tipos de Cambio
+                                    <small class="ms-2 d-inline-flex align-items-center">
+                                        <span class="badge bg-success badge-notification rounded-pill">USD/PEN</span>
+                                    </small>
+                                </a>
                             </div>
                         </li>
                     </ul>
@@ -941,7 +1087,7 @@ x-data="{
                                      style="height: 1.5rem; width: 1.5rem; object-fit: cover;" 
                                      src="{{ Auth::user()->profile_photo_url }}" 
                                      alt="{{ Auth::user()->name }}">
-                                <div x-show="!collapsed" class="flex-grow-1 overflow-hidden">
+                                <div x-show="!collapsed || isMobile()" class="flex-grow-1 overflow-hidden">
                                     <p class="mb-0 small fw-medium text-truncate" 
                                        :class="darkMode ? 'text-light' : 'text-dark'">
                                         {{ Auth::user()->name }}
@@ -950,7 +1096,7 @@ x-data="{
                                         {{ Auth::user()->email }}
                                     </p>
                                 </div>
-                                <svg x-show="!collapsed" 
+                                <svg x-show="!collapsed || isMobile()" 
                                      xmlns="http://www.w3.org/2000/svg" 
                                      class="ms-2" 
                                      :class="{ 'rotate-180': userDropdown }" 
@@ -1041,16 +1187,20 @@ x-data="{
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex-grow-1 overflow-hidden transition-all"
-             :class="{ 'ms-0': sidebarOpen && window.innerWidth < 768 }"
-             style="transition: margin-left 0.3s ease-in-out;"
-             :style="window.innerWidth >= 768 ? (!collapsed ? 'margin-left: 16rem;' : 'margin-left: 5rem;') : (sidebarOpen ? 'margin-left: 0;' : 'margin-left: 0;')">
+        <div class="flex-grow-1 overflow-hidden main-content"
+             :style="!isMobile() ? (collapsed ? 'margin-left: 5rem;' : 'margin-left: 16rem;') : 'margin-left: 0;'">
             <!-- Main Content -->
-            <main class="bg-light overflow-auto p-4 w-100" style="min-height: 100vh;" :class="darkMode ? 'bg-dark' : 'bg-light'">
-                @if (isset($header))
-                    <div class="container-fluid mb-4">{{ $header }}</div>
-                @endif
-                <div class="container-fluid">@yield('content')</div>
+            <main class="bg-light overflow-auto w-100" style="min-height: 100vh;" :class="darkMode ? 'bg-dark' : 'bg-light'">
+                <!-- Mobile header spacing -->
+                <div class="d-md-none" style="height: 4rem;"></div>
+                
+                <!-- Content padding -->
+                <div class="p-3 p-md-4">
+                    @if (isset($header))
+                        <div class="mb-4">{{ $header }}</div>
+                    @endif
+                    @yield('content')
+                </div>
             </main>
         </div>
     </div>
@@ -1145,8 +1295,8 @@ x-data="{
     @stack('modals')
     @livewireScripts
     
-    <!-- Script de la aplicación -->
-    <script src="{{ asset('js/app.js') }}"></script>
+    <!-- Scripts de la aplicación con Vite -->
+    @vite(['resources/js/app.js'])
     
     @stack('scripts')
 </body>

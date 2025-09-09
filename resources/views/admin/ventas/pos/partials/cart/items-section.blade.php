@@ -101,15 +101,31 @@ $(document).ready(function() {
         const listGroup = itemsList.find('.list-group');
         listGroup.empty();
         
+        // Obtener configuración actual y tipo de cambio
+        const currentConfig = window.posConfig ? window.posConfig.getConfig() : { moneda: 'Soles' };
+        const tipoCambio = window.posConfig ? window.posConfig.tipoCambio.obtener() : null;
+        
         // Add each item to the list
         items.forEach((item) => {
             const stockBadge = item.tiene_stock 
                 ? '<span class="badge bg-success item-badge-stock">En stock</span>' 
                 : '<span class="badge bg-warning item-badge-stock">Sin stock</span>';
             
-            const monedaSymbol = item.moneda === 'Dólares' ? 'US$' : 'S/';
-            const precio = parseFloat(item.precio || 0);
+            // Determinar moneda de display y conversión de precios
+            const displayCurrency = currentConfig.moneda || 'Soles';
+            const monedaSymbol = displayCurrency === 'Dólares' ? 'US$' : 'S/';
+            
+            let precio = parseFloat(item.precio || 0);
             const cantidad = parseInt(item.cantidad || 1);
+            
+            // Aplicar conversión de moneda si es necesario
+            if (displayCurrency === 'Dólares' && tipoCambio && tipoCambio.disponible) {
+                // El precio original está en soles, convertir a dólares
+                precio = precio / tipoCambio.venta;
+            } else if (displayCurrency === 'Soles' && item.moneda === 'Dólares' && tipoCambio && tipoCambio.disponible) {
+                // El precio original está en dólares, convertir a soles  
+                precio = precio * tipoCambio.venta;
+            }
             
             // Calcular descuento si existe
             let subtotal = precio * cantidad;
@@ -368,13 +384,17 @@ $(document).ready(function() {
     window.pos.limpiarCarrito = clearCart;
     window.pos.obtenerItems = getCartItems;
     
-    // Escuchar cambios de configuración para mostrar/ocultar descuentos
+    // Escuchar cambios de configuración para mostrar/ocultar descuentos y actualizar moneda
     $(document).on('configChanged', function(event, config) {
         if (config.habilitar_descuentos) {
             $('.discount-controls').removeClass('d-none');
         } else {
             $('.discount-controls').addClass('d-none');
         }
+        
+        // Actualizar display del carrito cuando cambie la configuración de moneda
+        console.log('🔄 Configuración cambiada, actualizando display del carrito...');
+        updateCartDisplay();
     });
     
     console.log('✅ Carrito inicializado correctamente');

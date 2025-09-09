@@ -64,7 +64,7 @@ class NotaPedidoController extends Controller
                 
             case 'servicio':
                 $request->validate([
-                    'servicio_id' => 'required|exists:servicios_tercerizados,id',
+                    'servicio_id' => 'required|exists:servicios,id',
                 ]);
                 $servicio = Servicio::with('categoria')->find($request->servicio_id);
                 $item->item_id = $servicio->id;

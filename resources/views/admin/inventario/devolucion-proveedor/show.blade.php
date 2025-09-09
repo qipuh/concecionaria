@@ -56,7 +56,7 @@
                                 </tr>
                                 <tr>
                                     <th class="bg-light">Fecha de Emisión:</th>
-                                    <td>{{ $devolucion->fecha_emision->format('d/m/Y') }}</td>
+                                    <td>{{ $devolucion->fecha_emision ? $devolucion->fecha_emision->format('d/m/Y') : '-' }}</td>
                                 </tr>
                                 <tr>
                                     <th class="bg-light">Almacén:</th>

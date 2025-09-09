@@ -62,4 +62,23 @@ class Movimiento extends Model
     {
         return $this->morphTo('documento', 'documento_tipo', 'documento_id');
     }
+    
+    // Accessor para obtener el número del documento
+    public function getNumeroDocumentoAttribute()
+    {
+        if ($this->documento_referencia) {
+            return $this->documento_referencia;
+        }
+        
+        if ($this->documento) {
+            switch ($this->documento_tipo) {
+                case 'devolucion_proveedor':
+                    return $this->documento->codigo ?? 'N/A';
+                default:
+                    return $this->documento->numero ?? $this->documento->codigo ?? 'N/A';
+            }
+        }
+        
+        return 'N/A';
+    }
 }

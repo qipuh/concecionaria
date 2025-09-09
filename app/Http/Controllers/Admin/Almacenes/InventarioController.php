@@ -87,7 +87,7 @@ class InventarioController extends Controller
         $movimientos = Movimiento::with([
             'tipoMovimiento' => fn($q) => $q->select('id', 'nombre', 'afecta_stock'),
             'usuario' => fn($q) => $q->select('id', 'name'),
-            'documento' => fn($q) => $q->select('id', 'numero')
+            'documento', // Sin especificar campos para relaciones polimórficas
         ])
             ->where('parte_id', $inventario->parte_id)
             ->where('almacen_id', $inventario->almacen_id)
@@ -135,7 +135,7 @@ class InventarioController extends Controller
         $query = Movimiento::with([
             'tipoMovimiento' => fn($q) => $q->select('id', 'nombre', 'afecta_stock'),
             'usuario' => fn($q) => $q->select('id', 'name'),
-            'documento' => fn($q) => $q->select('id', 'numero'),
+            'documento', // Sin especificar campos para relaciones polimórficas
             'almacen' => fn($q) => $q->select('id', 'nombre'),
             'parte' => fn($q) => $q->select('id', 'nombre', 'codigo'),
             'vehiculo.marca', 'vehiculo.modelo', 'vehiculo.version'
@@ -228,7 +228,7 @@ class InventarioController extends Controller
         $query = Movimiento::with([
             'tipoMovimiento' => fn($q) => $q->select('id', 'nombre', 'afecta_stock'),
             'usuario' => fn($q) => $q->select('id', 'name'),
-            'documento' => fn($q) => $q->select('id', 'numero'),
+            'documento', // Sin especificar campos para relaciones polimórficas,
             'almacen' => fn($q) => $q->select('id', 'nombre')
         ])
             ->where('parte_id', $request->parte_id);
@@ -293,7 +293,7 @@ class InventarioController extends Controller
         $query = Movimiento::with([
             'tipoMovimiento' => fn($q) => $q->select('id', 'nombre', 'afecta_stock'),
             'usuario' => fn($q) => $q->select('id', 'name'),
-            'documento' => fn($q) => $q->select('id', 'numero'),
+            'documento', // Sin especificar campos para relaciones polimórficas,
             'almacen' => fn($q) => $q->select('id', 'nombre')
         ])
             ->where('vehiculo_id', $request->vehiculo_id);

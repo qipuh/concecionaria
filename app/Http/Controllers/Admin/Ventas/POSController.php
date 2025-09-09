@@ -48,88 +48,182 @@ public function index()
     }
 
     /**
-     * Vista de gestión/listado de ventas
+     * Vista de gestión/listado de ventas con estadísticas y filtros avanzados
      * Ruta: admin.ventas.index 
      * Vista: resources/views/admin/ventas/index.blade.php
      */
     public function ventas(Request $request)
     {
         try {
-            $query = Venta::with(['cliente', 'usuario', 'almacen', 'cotizacion']);
+            Log::info('Accediendo al dashboard de ventas', ['url' => $request->url(), 'method' => $request->method()]);
             
-            // Filtros de búsqueda
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $query->where(function($q) use ($search) {
-                    $q->where('codigo', 'like', "%{$search}%")
-                      ->orWhereHas('cliente', function($clienteQuery) use ($search) {
-                          $clienteQuery->where('nombres', 'like', "%{$search}%")
-                                      ->orWhere('apellido_paterno', 'like', "%{$search}%")
-                                      ->orWhere('apellido_materno', 'like', "%{$search}%")
-                                      ->orWhere('razon_social', 'like', "%{$search}%")
-                                      ->orWhere('documento_identidad', 'like', "%{$search}%");
-                      });
-                });
+            // Si es petición AJAX, devolver JSON
+            if ($request->ajax() || $request->wantsJson()) {
+                return $this->obtenerVentasAjax($request);
             }
+
+            // Obtener clientes para el filtro
+            $clientes = Cliente::select('id', 'nombres', 'apellido_paterno', 'documento_identidad')
+                              ->where('activo', true)
+                              ->orderBy('nombres')
+                              ->limit(100)
+                              ->get();
+
+            // Obtener almacenes
+            $almacenes = Almacen::where('activo', true)->get();
             
-            // Filtro por fecha
-            if ($request->filled('fecha_desde')) {
-                $query->whereDate('fecha', '>=', $request->fecha_desde);
-            }
-            
-            if ($request->filled('fecha_hasta')) {
-                $query->whereDate('fecha', '<=', $request->fecha_hasta);
-            }
-            
-            // Filtro por estado
-            if ($request->filled('estado')) {
-                $query->where('estado', $request->estado);
-            }
-            
-            // Filtro por almacén
-            if ($request->filled('almacen_id')) {
-                $query->where('almacen_id', $request->almacen_id);
-            }
-            
-            // Filtro por moneda
-            if ($request->filled('moneda')) {
-                $query->where('moneda', $request->moneda);
-            }
-            
-            // Filtro por tipo de pago
-            if ($request->filled('tipo_pago')) {
-                $query->where('tipo_pago', $request->tipo_pago);
-            }
-            
-            // Ordenar por fecha más reciente
-            $query->orderBy('fecha', 'desc')
-                  ->orderBy('created_at', 'desc');
-            
-            // Paginación
-            $ventas = $query->paginate(15);
-            
-            // Datos adicionales para los filtros
-            $almacenes = Almacen::orderBy('nombre')->get();
-            $estados = ['Completada', 'Parcial', 'Pendiente', 'Cancelada'];
-            $monedas = ['Soles', 'Dólares'];
-            $tiposPago = ['Contado', 'Crédito'];
-            
-            // Estadísticas rápidas
-            $estadisticas = $this->obtenerEstadisticas($request);
-            
-            return view('admin.ventas.index', compact(
-                'ventas', 
-                'almacenes', 
-                'estados', 
-                'monedas', 
-                'tiposPago',
-                'estadisticas'
-            ));
-            
+            Log::info('Dashboard de ventas cargado exitosamente', [
+                'clientes_count' => $clientes->count(),
+                'almacenes_count' => $almacenes->count()
+            ]);
+
+            return view('admin.ventas.pos.ventas', compact('clientes', 'almacenes'));
+
         } catch (\Exception $e) {
-            Log::error('Error al cargar ventas: ' . $e->getMessage());
+            Log::error('Error al cargar vista de ventas: ' . $e->getMessage(), [
+                'exception' => $e,
+                'url' => $request->url(),
+                'method' => $request->method()
+            ]);
+            
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al cargar las ventas'
+                ], 500);
+            }
+            
             return redirect()->back()->with('error', 'Error al cargar las ventas');
         }
+    }
+
+    /**
+     * Método auxiliar para obtener ventas vía AJAX
+     */
+    private function obtenerVentasAjax(Request $request)
+    {
+        $query = Venta::with(['cliente', 'usuario', 'almacen', 'pagos']);
+        
+        // Aplicar filtros
+        $this->aplicarFiltrosVentas($query, $request);
+        
+        // Si se solicitan estadísticas
+        if ($request->filled('estadisticas')) {
+            return response()->json([
+                'success' => true,
+                'estadisticas' => $this->calcularEstadisticas($request)
+            ]);
+        }
+        
+        // Obtener ventas paginadas
+        $ventas = $query->orderBy('fecha', 'desc')
+                       ->orderBy('id', 'desc')
+                       ->paginate(20);
+
+        // Agregar información calculada
+        $ventas->getCollection()->transform(function ($venta) {
+            $venta->esta_vencida = $venta->estaVencida();
+            $venta->dias_vencimiento = $venta->diasVencimiento();
+            return $venta;
+        });
+
+        return response()->json([
+            'success' => true,
+            'ventas' => $ventas
+        ]);
+    }
+
+    /**
+     * Aplicar filtros a la consulta de ventas
+     */
+    private function aplicarFiltrosVentas($query, Request $request)
+    {
+        // Filtros de búsqueda
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('codigo', 'like', "%{$search}%")
+                  ->orWhere('numero_factura', 'like', "%{$search}%")
+                  ->orWhereHas('cliente', function($clienteQuery) use ($search) {
+                      $clienteQuery->where('nombres', 'like', "%{$search}%")
+                                  ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                                  ->orWhere('apellido_materno', 'like', "%{$search}%")
+                                  ->orWhere('razon_social', 'like', "%{$search}%")
+                                  ->orWhere('documento_identidad', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        // Filtro por fecha
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('fecha', '>=', $request->fecha_desde);
+        }
+        
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('fecha', '<=', $request->fecha_hasta);
+        }
+        
+        // Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+        
+        // Filtro por cliente
+        if ($request->filled('cliente_id')) {
+            $query->where('cliente_id', $request->cliente_id);
+        }
+        
+        // Filtro por almacén
+        if ($request->filled('almacen_id')) {
+            $query->where('almacen_id', $request->almacen_id);
+        }
+        
+        // Filtro por moneda
+        if ($request->filled('moneda')) {
+            $query->where('moneda', $request->moneda);
+        }
+        
+        // Filtro por tipo de pago
+        if ($request->filled('tipo_pago')) {
+            $query->where('tipo_pago', $request->tipo_pago);
+        }
+        
+        // Filtros especiales
+        if ($request->filled('vencidas')) {
+            if ($request->vencidas === '1') {
+                $query->vencidas();
+            } elseif ($request->vencidas === '0') {
+                $query->proximasVencer();
+            }
+        }
+        
+        // Filtro por prioridad
+        if ($request->filled('prioridad')) {
+            $query->porPrioridad($request->prioridad);
+        }
+    }
+    
+    /**
+     * Calcular estadísticas para el dashboard
+     */
+    private function calcularEstadisticas(Request $request)
+    {
+        $baseQuery = Venta::query();
+        
+        // Aplicar los mismos filtros que la consulta principal (excepto paginación)
+        $this->aplicarFiltrosVentas($baseQuery, $request);
+        
+        $stats = [
+            'total' => $baseQuery->count(),
+            'pagadas' => $baseQuery->clone()->where('estado', 'pagado')->count(),
+            'pendientes' => $baseQuery->clone()->where('estado', 'no_pagado')->count(),
+            'vencidas' => $baseQuery->clone()->vencidas()->count(),
+            'monto_pagadas' => 'S/ ' . number_format($baseQuery->clone()->where('estado', 'pagado')->sum('total'), 2),
+            'monto_pendientes' => 'S/ ' . number_format($baseQuery->clone()->where('estado', 'no_pagado')->sum('saldo_pendiente'), 2),
+            'monto_vencidas' => 'S/ ' . number_format($baseQuery->clone()->vencidas()->sum('saldo_pendiente'), 2)
+        ];
+        
+        return $stats;
     }
 
     public function show($id)
@@ -140,27 +234,27 @@ public function index()
                 'usuario', 
                 'almacen', 
                 'cotizacion',
-                'detalles.parte',
+                'detallesPOS.parte',
                 'detallesPOS.parte' // Para ventas del POS
             ])->findOrFail($id);
             
-            // Determinar qué detalles usar (normal o POS)
-            $detalles = $venta->detalles->isNotEmpty() 
-                ? $venta->detalles 
+            // Determinar qué detallesPOS usar (normal o POS)
+            $detallesPOS = $venta->detallesPOS->isNotEmpty() 
+                ? $venta->detallesPOS 
                 : $venta->detallesPOS;
             
             // Formatear datos del cliente
             $clienteData = $this->formatearCliente($venta->cliente);
             
             // Calcular totales y estadísticas
-            $estadisticasVenta = $this->calcularEstadisticasVenta($venta, $detalles);
+            $estadisticasVenta = $this->calcularEstadisticasVenta($venta, $detallesPOS);
             
             // Historial de pagos si existe la tabla
             $historialPagos = $this->obtenerHistorialPagos($venta->id);
             
             return view('admin.ventas.show', compact(
                 'venta', 
-                'detalles', 
+                'detallesPOS', 
                 'clienteData', 
                 'estadisticasVenta',
                 'historialPagos'
@@ -541,7 +635,7 @@ public function index()
             // Obtener partes más vendidas con stock
             $partesPopulares = collect();
             
-            if (Schema::hasTable('detalles_venta')) {
+            if (Schema::hasTable('detallesPOS_venta')) {
                 $partesPopulares = DB::table('partes')
                     ->select([
                         'partes.id',
@@ -550,10 +644,10 @@ public function index()
                         'partes.precio_venta',
                         'partes.moneda_venta',
                         'inventarios.stock_disponible',
-                        DB::raw('COALESCE(SUM(detalles_venta.cantidad), 0) as total_vendido'),
+                        DB::raw('COALESCE(SUM(detallesPOS_venta.cantidad), 0) as total_vendido'),
                         DB::raw('"parte" as tipo')
                     ])
-                    ->leftJoin('detalles_venta', 'partes.id', '=', 'detalles_venta.parte_id')
+                    ->leftJoin('detallesPOS_venta', 'partes.id', '=', 'detallesPOS_venta.parte_id')
                     ->leftJoin('inventarios', function($join) use ($almacenId) {
                         $join->on('partes.id', '=', 'inventarios.parte_id');
                         if ($almacenId) {
@@ -991,8 +1085,8 @@ public function procesarVenta(Request $request)
             ]);
             
             // Agregar detalle del requerimiento si existe la tabla
-            if (Schema::hasTable('detalles_requerimiento')) {
-                DB::table('detalles_requerimiento')->insert([
+            if (Schema::hasTable('detallesPOS_requerimiento')) {
+                DB::table('detallesPOS_requerimiento')->insert([
                     'requerimiento_id' => $requerimientoId,
                     'parte_id' => $parte->id,
                     'cantidad_solicitada' => $item['cantidad'],
@@ -1070,8 +1164,14 @@ public function procesarVenta(Request $request)
     private function crearVentaDesdeCotizacion($cotizacion, $items)
     {
         try {
+            // Obtener tipo de cambio actual si se está usando
+            $tipoCambio = null;
+            if (class_exists('App\Models\TipoCambio')) {
+                $tipoCambio = \App\Models\TipoCambio::obtenerActual();
+            }
+            
             $venta = new Venta();
-            $venta->codigo = $this->generarCodigoVenta();
+            $venta->codigo = Venta::generarCodigo(); // Usar el método del modelo
             $venta->fecha = now();
             $venta->cliente_id = $cotizacion->cliente_id;
             $venta->usuario_id = $cotizacion->user_id;
@@ -1081,13 +1181,35 @@ public function procesarVenta(Request $request)
             $venta->total = $cotizacion->total;
             $venta->moneda = $cotizacion->moneda;
             $venta->tipo_pago = $cotizacion->forma_pago;
-            $venta->estado = $cotizacion->porcentaje_abono < 100 ? 'Parcial' : 'Completada';
+            $venta->tipo_cambio_usado = $tipoCambio ? $tipoCambio->venta : null;
             
-            // CORRECCIÓN: Usar monto_abonado en lugar de abono
-            $venta->monto_abonado = $cotizacion->abono;
-            $venta->saldo_pendiente = $cotizacion->total - $cotizacion->abono;
+            // Usar los nuevos estados
+            if ($cotizacion->forma_pago === 'Contado') {
+                $venta->estado = 'pagado';
+                $venta->monto_abonado = $cotizacion->total;
+                $venta->saldo_pendiente = 0;
+            } else {
+                // Crédito
+                $venta->estado = $cotizacion->abono >= $cotizacion->total ? 'pagado' : 'no_pagado';
+                $venta->monto_abonado = $cotizacion->abono;
+                $venta->saldo_pendiente = $cotizacion->total - $cotizacion->abono;
+                
+                // Establecer fecha de vencimiento (30 días por defecto)
+                $venta->fecha_vencimiento = now()->addDays(30);
+            }
             
+            $venta->prioridad = 'media';
             $venta->cotizacion_id = $cotizacion->id;
+            
+            // Inicializar tracking de estados
+            $venta->detalle_estados = [[
+                'fecha' => now()->toISOString(),
+                'estado_anterior' => null,
+                'estado_nuevo' => $venta->estado,
+                'usuario_id' => $cotizacion->user_id,
+                'comentario' => 'Venta creada desde POS'
+            ]];
+            
             $venta->save();
             
             foreach ($items as $item) {
@@ -1561,8 +1683,8 @@ public function procesarVenta(Request $request)
                 }
             }
             
-            // Formatear detalles
-            $detalles = $venta->detallesPOS->map(function($detalle) {
+            // Formatear detallesPOS
+            $detallesPOS = $venta->detallesPOS->map(function($detalle) {
                 return [
                     'id' => $detalle->id,
                     'tipo_item' => $detalle->tipo_item,
@@ -1596,7 +1718,7 @@ public function procesarVenta(Request $request)
                 'estado' => $venta->estado,
                 'observaciones' => $venta->observaciones,
                 'cotizacion_codigo' => $venta->cotizacion->codigo ?? null,
-                'detalles' => $detalles
+                'detallesPOS' => $detallesPOS
             ];
             
             // Generar HTML del detalle
@@ -1688,7 +1810,7 @@ public function procesarVenta(Request $request)
                 'cliente', 
                 'usuario', 
                 'almacen', 
-                'detalles.parte'
+                'detallesPOS.parte'
             ])->findOrFail($id);
             
             return view('admin.ventas.pos.imprimir', compact('venta'));
@@ -1921,11 +2043,11 @@ public function anular(Request $request, $id)
             return $cliente->razon_social ?? 'Cliente corporativo';
         }
     }
-    private function calcularEstadisticasVenta($venta, $detalles)
+    private function calcularEstadisticasVenta($venta, $detallesPOS)
     {
-        $totalItems = $detalles->sum('cantidad');
-        $itemsUnicos = $detalles->count();
-        $descuentoTotal = $detalles->sum(function($detalle) {
+        $totalItems = $detallesPOS->sum('cantidad');
+        $itemsUnicos = $detallesPOS->count();
+        $descuentoTotal = $detallesPOS->sum(function($detalle) {
             return ($detalle->precio_unitario * $detalle->cantidad) - $detalle->subtotal;
         });
         

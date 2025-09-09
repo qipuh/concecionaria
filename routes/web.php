@@ -19,7 +19,7 @@ use App\Http\Controllers\Admin\Mantenimiento\FacturaController;
 use App\Http\Controllers\Admin\Almacenes\VehiculoController;
 use App\Http\Controllers\Admin\Almacenes\AlmacenController;
 use App\Http\Controllers\Admin\Almacenes\ParteController;
-use App\Http\Controllers\Admin\Almacenes\UnidadController;
+use App\Http\Controllers\Admin\Configuracion\UnidadController;
 use App\Http\Controllers\Admin\Almacenes\ServicioController;
 use App\Http\Controllers\Admin\Almacenes\MarcaController;
 use App\Http\Controllers\Admin\Almacenes\ModeloController;
@@ -56,6 +56,9 @@ use App\Http\Controllers\Admin\Ventas\ActaEntregaController;
 use App\Http\Controllers\Admin\Ventas\EstadoCotizacionController;
 use App\Http\Controllers\Admin\Ventas\CotizacionOrdenTrabajoController;
 use App\Http\Controllers\Admin\Ventas\POSController;
+use App\Http\Controllers\Admin\Ventas\PagoVentaController;
+use App\Http\Controllers\Admin\TipoCambioController;
+use App\Http\Controllers\Admin\PlanMantenimientoController;
 
 
 ### Rutas públicas
@@ -78,7 +81,7 @@ Route::middleware(['auth'])->group(function () {
         // Rutas existentes
         Route::get('/', [CotizacionController::class, 'index'])->name('index');
         Route::get('/create', [CotizacionController::class, 'create'])->name('create');
-        Route::post('/', [CotizacionController::class, 'store'])->name('store');
+        Route::post('/', [CotizacionController::class, 'store'])->name('store')->middleware('validar.cotizacion.cliente');
         Route::get('/{cotizacion}', [CotizacionController::class, 'show'])->name('show');
         Route::get('/{cotizacion}/edit', [CotizacionController::class, 'edit'])->name('edit');
         Route::put('/{cotizacion}', [CotizacionController::class, 'update'])->name('update');
@@ -189,8 +192,19 @@ Route::middleware(['auth'])->group(function () {
 
     # Módulo Ventas - Dashboard/Vista General (resources\views\admin\ventas\index.blade.php)
     Route::prefix('admin/ventas')->name('admin.ventas.')->group(function () {
-        // CORREGIDO: Ahora usa el método 'ventas' del POSController para diferenciar del POS
+        // Dashboard principal de ventas
         Route::get('/', [POSController::class, 'ventas'])->name('index');
+        
+        // Rutas para gestión de pagos de ventas
+        Route::prefix('{venta}/pagos')->name('pagos.')->group(function () {
+            Route::get('/', [PagoVentaController::class, 'index'])->name('index');
+            Route::post('/', [PagoVentaController::class, 'store'])->name('store');
+            Route::put('{pago}/validar', [PagoVentaController::class, 'validate'])->name('validate');
+            Route::delete('{pago}', [PagoVentaController::class, 'destroy'])->name('destroy');
+        });
+        
+        // Ruta para cuentas por cobrar
+        Route::get('/cuentas-por-cobrar', [PagoVentaController::class, 'cuentasPorCobrar'])->name('cuentas-por-cobrar');
     });
 
     # Módulo Ventas - Oportunidades
@@ -414,6 +428,7 @@ Route::middleware(['auth'])->prefix('admin/mantenimiento')->name('admin.mantenim
     //Seguimiento
     Route::get('admin/mantenimiento/ordenes/seguimientos/{seguimiento}/sidebar', [App\Http\Controllers\Admin\Mantenimiento\SeguimientoOrdenTrabajoController::class, 'sidebar'])
     ->name('ordenes.seguimientos.sidebar');
+    
 });
 Route::prefix('admin/mantenimiento/ordenes/seguimientos')->group(function () {
     Route::get('{seguimiento}/sidebar', [App\Http\Controllers\Admin\Mantenimiento\SeguimientoOrdenTrabajoController::class, 'sidebar'])
@@ -426,6 +441,19 @@ Route::prefix('admin/mantenimiento/ordenes/seguimientos')->group(function () {
         ->name('admin.mantenimiento.ordenes.seguimientos.comentarios.destroy');
     Route::post('{seguimiento}/toggle-realizado', [App\Http\Controllers\Admin\Mantenimiento\SeguimientoOrdenTrabajoController::class, 'toggleRealizado'])
         ->name('admin.mantenimiento.ordenes.seguimientos.toggle-realizado');
+});
+
+// Rutas para Planes de Mantenimiento
+Route::middleware(['auth'])->prefix('admin/planes-mantenimiento')->name('admin.planes-mantenimiento.')->group(function () {
+    Route::get('/', [PlanMantenimientoController::class, 'index'])->name('index');
+    Route::get('/create', [PlanMantenimientoController::class, 'create'])->name('create');
+    Route::post('/', [PlanMantenimientoController::class, 'store'])->name('store');
+    Route::get('/{planMantenimiento}', [PlanMantenimientoController::class, 'show'])->name('show');
+    Route::get('/{planMantenimiento}/edit', [PlanMantenimientoController::class, 'edit'])->name('edit');
+    Route::put('/{planMantenimiento}', [PlanMantenimientoController::class, 'update'])->name('update');
+    Route::delete('/{planMantenimiento}', [PlanMantenimientoController::class, 'destroy'])->name('destroy');
+    Route::patch('/{planMantenimiento}/toggle-status', [PlanMantenimientoController::class, 'toggleStatus'])->name('toggle-status');
+    Route::post('/{planMantenimiento}/duplicate', [PlanMantenimientoController::class, 'duplicate'])->name('duplicate');
 });
 
     Route::prefix('admin/almacenes')->name('admin.almacenes.')->group(function () {
@@ -472,6 +500,33 @@ Route::prefix('admin/mantenimiento/ordenes/seguimientos')->group(function () {
         Route::put('/{unidad}', [UnidadController::class, 'update'])->name('update');
         Route::delete('/{unidad}', [UnidadController::class, 'destroy'])->name('destroy');
     });
+
+    # Módulo Configuración - Reglas de Vencimiento de Cotizaciones
+    Route::prefix('admin/configuracion/reglas-vencimiento-cotizaciones')->name('admin.configuracion.reglas-vencimiento-cotizaciones.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\Configuracion\ReglaVencimientoCotizacionController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\Configuracion\ReglaVencimientoCotizacionController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\Configuracion\ReglaVencimientoCotizacionController::class, 'store'])->name('store');
+        Route::get('/{regla}/edit', [App\Http\Controllers\Admin\Configuracion\ReglaVencimientoCotizacionController::class, 'edit'])->name('edit');
+        Route::put('/{regla}', [App\Http\Controllers\Admin\Configuracion\ReglaVencimientoCotizacionController::class, 'update'])->name('update');
+        Route::delete('/{regla}', [App\Http\Controllers\Admin\Configuracion\ReglaVencimientoCotizacionController::class, 'destroy'])->name('destroy');
+        Route::patch('/{regla}/toggle-activo', [App\Http\Controllers\Admin\Configuracion\ReglaVencimientoCotizacionController::class, 'toggleActivo'])->name('toggle-activo');
+    });
+
+    # Módulo Configuración - Tipos de Cambio
+    Route::prefix('admin/configuracion/tipos-cambio')->name('admin.configuracion.tipos-cambio.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\TipoCambioController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\TipoCambioController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\TipoCambioController::class, 'store'])->name('store');
+        Route::get('/{tipoCambio}', [App\Http\Controllers\Admin\TipoCambioController::class, 'show'])->name('show');
+        Route::get('/{tipoCambio}/edit', [App\Http\Controllers\Admin\TipoCambioController::class, 'edit'])->name('edit');
+        Route::put('/{tipoCambio}', [App\Http\Controllers\Admin\TipoCambioController::class, 'update'])->name('update');
+        Route::delete('/{tipoCambio}', [App\Http\Controllers\Admin\TipoCambioController::class, 'destroy'])->name('destroy');
+        Route::post('/sunat', [App\Http\Controllers\Admin\TipoCambioController::class, 'obtenerDeSunat'])->name('sunat');
+        Route::post('/{tipoCambio}/toggle', [App\Http\Controllers\Admin\TipoCambioController::class, 'toggleActivo'])->name('toggle');
+    });
+
+    # API para tipos de cambio (para uso en POS y otros módulos)
+    Route::get('api/tipo-cambio', [App\Http\Controllers\Admin\TipoCambioController::class, 'api'])->name('api.tipo-cambio');
 
     # Módulo Almacenes - Servicios Tercerizados
     Route::prefix('admin/almacenes/servicios-terceros')->name('admin.almacenes.servicios-terceros.')->group(function () {
@@ -761,27 +816,6 @@ Route::prefix('admin/mantenimiento/ordenes/seguimientos')->group(function () {
     });
 });
 
-#usuarios y roles
-Route::prefix('admin/usuarios')->name('admin.usuarios.')->group(function () {
-    Route::prefix('usuarios')->name('usuarios.')->group(function () {
-        Route::get('/', [UsuarioController::class, 'index'])->name('index');
-        Route::get('/create', [UsuarioController::class, 'create'])->name('create');
-        Route::post('/', [UsuarioController::class, 'store'])->name('store');
-        Route::get('/{usuario}', [UsuarioController::class, 'show'])->name('show');
-        Route::get('/{usuario}/edit', [UsuarioController::class, 'edit'])->name('edit');
-        Route::put('/{usuario}', [UsuarioController::class, 'update'])->name('update');
-        Route::delete('/{usuario}', [UsuarioController::class, 'destroy'])->name('destroy');
-    });
-    Route::prefix('roles')->name('roles.')->group(function () {
-        Route::get('/', [RolController::class, 'index'])->name('index');
-        Route::get('/create', [RolController::class, 'create'])->name('create');
-        Route::post('/', [RolController::class, 'store'])->name('store');
-        Route::get('/{rol}', [RolController::class, 'show'])->name('show');
-        Route::get('/{rol}/edit', [RolController::class, 'edit'])->name('edit');
-        Route::put('/{rol}', [RolController::class, 'update'])->name('update');
-        Route::delete('/{rol}', [RolController::class, 'destroy'])->name('destroy');
-    });
-});
 
 #POS
 
@@ -789,33 +823,33 @@ Route::group(['middleware' => ['auth']], function () {
     Route::prefix('admin/ventas/pos')->name('admin.ventas.pos.')->group(function () {
         
         // Ruta principal del POS
-        Route::get('/', [App\Http\Controllers\Admin\Ventas\POSController::class, 'index'])->name('index');
+        Route::get('/', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'index'])->name('index');
         
         // ========== NUEVAS RUTAS PARA GESTIÓN DE VENTAS ==========
-        Route::get('/ventas', [App\Http\Controllers\Admin\Ventas\POSController::class, 'ventas'])->name('ventas');
-        Route::get('/ventas/list', [App\Http\Controllers\Admin\Ventas\POSController::class, 'listarVentas'])->name('ventas.list');
-        Route::get('/ventas/{id}', [App\Http\Controllers\Admin\Ventas\POSController::class, 'mostrarVenta'])->name('ventas.show');
-        Route::post('/ventas/registrar-pago', [App\Http\Controllers\Admin\Ventas\POSController::class, 'registrarPago'])->name('ventas.registrar-pago');
-        Route::get('/ventas/{id}/imprimir', [App\Http\Controllers\Admin\Ventas\POSController::class, 'imprimirVenta'])->name('ventas.imprimir');
-        Route::get('/ventas/exportar/excel', [App\Http\Controllers\Admin\Ventas\POSController::class, 'exportarVentas'])->name('ventas.exportar');
+        Route::get('/ventas', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'ventas'])->name('ventas');
+        Route::get('/ventas/list', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'listarVentas'])->name('ventas.list');
+        Route::get('/ventas/{id}', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'mostrarVenta'])->name('ventas.show');
+        Route::post('/ventas/registrar-pago', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'registrarPago'])->name('ventas.registrar-pago');
+        Route::get('/ventas/{id}/imprimir', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'imprimirVenta'])->name('ventas.imprimir');
+        Route::get('/ventas/exportar/excel', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'exportarVentas'])->name('ventas.exportar');
         // ========================================================
         
         // Rutas AJAX existentes del POS
-        Route::get('/obtener-todas-partes', [App\Http\Controllers\Admin\Ventas\POSController::class, 'obtenerTodasPartes'])->name('obtener-todas-partes');
-        Route::get('/buscar-partes', [App\Http\Controllers\Admin\Ventas\POSController::class, 'buscarPartes'])->name('buscar-partes');
-        Route::get('/buscar-servicios', [App\Http\Controllers\Admin\Ventas\POSController::class, 'buscarServicios'])->name('buscar-servicios');
-        Route::get('/buscar-clientes', [App\Http\Controllers\Admin\Ventas\POSController::class, 'buscarClientes'])->name('buscar-clientes');
-        Route::get('/items-populares', [App\Http\Controllers\Admin\Ventas\POSController::class, 'itemsPopulares'])->name('items-populares');
-        Route::get('/get-stock-parte', [App\Http\Controllers\Admin\Ventas\POSController::class, 'getStockParte'])->name('get-stock-parte');
+        Route::get('/obtener-todas-partes', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'obtenerTodasPartes'])->name('obtener-todas-partes');
+        Route::get('/buscar-partes', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'buscarPartes'])->name('buscar-partes');
+        Route::get('/buscar-servicios', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'buscarServicios'])->name('buscar-servicios');
+        Route::get('/buscar-clientes', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'buscarClientes'])->name('buscar-clientes');
+        Route::get('/items-populares', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'itemsPopulares'])->name('items-populares');
+        Route::get('/get-stock-parte', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'getStockParte'])->name('get-stock-parte');
        
         // Procesamiento de ventas
-        Route::post('/procesar-venta', [App\Http\Controllers\Admin\Ventas\POSController::class, 'procesarVenta'])->name('procesar-venta');
-        Route::post('/crear-cliente', [App\Http\Controllers\Admin\Ventas\POSController::class, 'crearCliente'])->name('crear-cliente');
+        Route::post('/procesar-venta', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'procesarVenta'])->name('procesar-venta');
+        Route::post('/crear-cliente', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'crearCliente'])->name('crear-cliente');
         
         // Rutas de debug (opcional, puedes removerlas en producción)
-        Route::get('/debug-busqueda', [App\Http\Controllers\Admin\Ventas\POSController::class, 'debugBusqueda'])->name('debug-busqueda');
-        Route::get('/debug-clientes-estructura', [App\Http\Controllers\Admin\Ventas\POSController::class, 'debugClientesEstructura'])->name('debug-clientes-estructura');
-        Route::get('/debug-estructura-completa', [App\Http\Controllers\Admin\Ventas\POSController::class, 'debugEstructuraCompleta'])->name('debug-estructura-completa');
+        Route::get('/debug-busqueda', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'debugBusqueda'])->name('debug-busqueda');
+        Route::get('/debug-clientes-estructura', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'debugClientesEstructura'])->name('debug-clientes-estructura');
+        Route::get('/debug-estructura-completa', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'debugEstructuraCompleta'])->name('debug-estructura-completa');
     });
 });
 Route::get('/admin/productos-servicios/vehiculos/import', [App\Http\Controllers\Admin\VehiculoImportController::class, 'showImportForm'])->name('admin.productos-servicios.vehiculos.import.form');
@@ -842,6 +876,7 @@ Route::prefix('admin/compras/guias')->name('admin.guias.')->group(function () {
     Route::get('/{guia}', [\App\Http\Controllers\Admin\Compras\GuiaEntregaController::class, 'show'])->name('show');
     Route::get('/{guia}/edit', [\App\Http\Controllers\Admin\Compras\GuiaEntregaController::class, 'edit'])->name('edit');
     Route::put('/{guia}', [\App\Http\Controllers\Admin\Compras\GuiaEntregaController::class, 'update'])->name('update');
+    Route::delete('/{guia}', [\App\Http\Controllers\Admin\Compras\GuiaEntregaController::class, 'destroy'])->name('destroy');
 });
 
 // Rutas para vales de devolución
@@ -852,4 +887,5 @@ Route::prefix('admin/compras/devoluciones')->name('admin.devoluciones.')->group(
     Route::get('/{devolucion}', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'show'])->name('show');
     Route::get('/{devolucion}/edit', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'edit'])->name('edit');
     Route::put('/{devolucion}', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'update'])->name('update');
+    Route::delete('/{devolucion}', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'destroy'])->name('destroy');
 });

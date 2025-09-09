@@ -174,10 +174,24 @@ $(document).ready(function() {
     function updateTotalsDisplay() {
         console.log('🔄 Actualizando display de totales...');
         
-        // Actualizar totales principales
+        // Obtener símbolo de moneda actual
+        const currencySymbol = getCurrencySymbol();
+        
+        // Actualizar totales principales con moneda
         $('#subtotal').text(formatCurrency(currentTotals.subtotal));
         $('#igv').text(formatCurrency(currentTotals.igv));
         $('#total').text(formatCurrency(currentTotals.total)).addClass('pulse-animation');
+        
+        // Actualizar labels con la moneda actual
+        $('span:contains("Subtotal:")').html(`<i class="fas fa-calculator me-1 text-muted"></i>Subtotal (${currencySymbol}):`);
+        $('span:contains("IGV (18%):")').html(`<i class="fas fa-percent me-1 text-muted"></i>IGV 18% (${currencySymbol}):`);
+        $('span:contains("Total:")').html(`<i class="fas fa-receipt me-1"></i>Total (${currencySymbol}):`);
+        
+        // Actualizar labels de abono si están visibles
+        if (!$('#abono-info').hasClass('d-none')) {
+            $('#abono-info span:contains("Abono:")').html(`<i class="fas fa-hand-holding-dollar me-1"></i>Abono (${currencySymbol}):`);
+            $('#abono-info span:contains("Saldo pendiente:")').html(`<i class="fas fa-hourglass-half me-1"></i>Saldo pendiente (${currencySymbol}):`);
+        }
         
         // Actualizar información del carrito
         $('#items-count').text(currentTotals.itemCount);
@@ -237,9 +251,18 @@ $(document).ready(function() {
     });
     
     $(document).on('configUpdated', function(event, config, totals) {
-        console.log('📢 Configuración y totales actualizados...');
+        console.log('📢 Configuración y totales actualizados con conversión de moneda...');
         if (totals) {
-            currentTotals = totals;
+            // Usar los totales convertidos desde el config section
+            currentTotals = {
+                subtotal: totals.subtotal,
+                igv: totals.impuestos,
+                total: totals.total,
+                abono: totals.abono,
+                saldo: totals.saldo,
+                itemCount: currentTotals.itemCount
+            };
+            currentConfig = { ...currentConfig, ...config };
             updateTotalsDisplay();
         } else {
             updateConfig(config);

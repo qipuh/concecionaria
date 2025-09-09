@@ -11,7 +11,10 @@ class Venta extends Model
    
     protected $fillable = [
         'codigo',
+        'numero_factura',
         'fecha',
+        'fecha_vencimiento',
+        'fecha_despacho',
         'cliente_id',
         'usuario_id',
         'almacen_id',
@@ -20,20 +23,30 @@ class Venta extends Model
         'total',
         'moneda',
         'tipo_pago',
+        'tipo_cambio_usado',
         'estado',
+        'prioridad',
+        'requiere_importacion',
         'observaciones',
+        'notas_internas',
+        'detalle_estados',
         'cotizacion_id',
-        'monto_abonado',     // Nuevo campo
-        'saldo_pendiente'    // Nuevo campo
+        'monto_abonado',
+        'saldo_pendiente'
     ];
    
     protected $casts = [
         'fecha' => 'datetime',
-        'subtotal' => 'float',
-        'igv' => 'float',
-        'total' => 'float',
-        'monto_abonado' => 'float',    // Convertir a float
-        'saldo_pendiente' => 'float'   // Convertir a float
+        'fecha_vencimiento' => 'date',
+        'fecha_despacho' => 'date',
+        'subtotal' => 'decimal:2',
+        'igv' => 'decimal:2',
+        'total' => 'decimal:2',
+        'tipo_cambio_usado' => 'decimal:4',
+        'monto_abonado' => 'decimal:2',
+        'saldo_pendiente' => 'decimal:2',
+        'requiere_importacion' => 'boolean',
+        'detalle_estados' => 'array'
     ];
    
     // Relaciones
@@ -66,6 +79,12 @@ class Venta extends Model
     public function requerimientosCompra()
     {
         return $this->hasMany(RequerimientoCompra::class, 'venta_id');
+    }
+    
+    // Relación con pagos
+    public function pagos()
+    {
+        return $this->hasMany(PagoVenta::class);
     }
    
     // Generador de código automático
@@ -161,5 +180,168 @@ class Venta extends Model
     public function detallesPOS()
     {
         return $this->hasMany(DetalleVentaPOS::class, 'venta_id');
+    }
+    
+    // ========== MÉTODOS PARA GESTIÓN DE ESTADOS ==========
+    
+    /**
+     * Estados disponibles para las ventas
+     */
+    public static function getEstadosDisponibles()
+    {
+        return [
+            'pendiente' => 'Pendiente',
+            'pagado' => 'Pagado',
+            'no_pagado' => 'No Pagado',
+            'en_cotizacion' => 'En Cotización',
+            'despachado' => 'Despachado',
+            'para_importacion' => 'Para Importación',
+            'pedido_especial' => 'Pedido Especial',
+            'cancelado' => 'Cancelado'
+        ];
+    }
+    
+    /**
+     * Cambiar estado de la venta con tracking
+     */
+    public function cambiarEstado($nuevoEstado, $comentario = null, $usuarioId = null)
+    {
+        $estadoAnterior = $this->estado;
+        
+        // Validar que el estado existe
+        if (!array_key_exists($nuevoEstado, self::getEstadosDisponibles())) {
+            return false;
+        }
+        
+        // Actualizar estado
+        $this->estado = $nuevoEstado;
+        
+        // Tracking de cambios de estado
+        $detalleEstados = $this->detalle_estados ?? [];
+        $detalleEstados[] = [
+            'fecha' => now()->toISOString(),
+            'estado_anterior' => $estadoAnterior,
+            'estado_nuevo' => $nuevoEstado,
+            'usuario_id' => $usuarioId ?? auth()->id(),
+            'comentario' => $comentario
+        ];
+        $this->detalle_estados = $detalleEstados;
+        
+        // Lógica especial según el estado
+        switch ($nuevoEstado) {
+            case 'pagado':
+                $this->saldo_pendiente = 0;
+                $this->monto_abonado = $this->total;
+                break;
+                
+            case 'no_pagado':
+                if ($this->tipo_pago === 'Crédito' && $this->saldo_pendiente <= 0) {
+                    $this->saldo_pendiente = $this->total - $this->monto_abonado;
+                }
+                break;
+                
+            case 'despachado':
+                if (!$this->fecha_despacho) {
+                    $this->fecha_despacho = now()->toDateString();
+                }
+                break;
+        }
+        
+        return $this->save();
+    }
+    
+    /**
+     * Verificar si está vencida (para crédito)
+     */
+    public function estaVencida()
+    {
+        return $this->fecha_vencimiento && 
+               $this->fecha_vencimiento->isPast() && 
+               $this->saldo_pendiente > 0;
+    }
+    
+    /**
+     * Días de vencimiento (negativo si está vencida)
+     */
+    public function diasVencimiento()
+    {
+        if (!$this->fecha_vencimiento) {
+            return null;
+        }
+        
+        return now()->diffInDays($this->fecha_vencimiento, false);
+    }
+    
+    /**
+     * Registrar un pago mejorado
+     */
+    public function registrarPago($monto, $metodo = 'efectivo', $referencia = null, $observaciones = null, $moneda = null)
+    {
+        if ($monto <= 0 || $monto > $this->saldo_pendiente) {
+            return false;
+        }
+        
+        // Crear el registro de pago
+        $pago = new PagoVenta([
+            'venta_id' => $this->id,
+            'numero_pago' => PagoVenta::generarNumeroPago(),
+            'fecha_pago' => now()->toDateString(),
+            'monto' => $monto,
+            'moneda' => $moneda ?? ($this->moneda === 'Dólares' ? 'USD' : 'PEN'),
+            'metodo_pago' => $metodo,
+            'referencia_pago' => $referencia,
+            'observaciones' => $observaciones,
+            'usuario_id' => auth()->id()
+        ]);
+        
+        // Si la moneda del pago es diferente, calcular conversión
+        $monedaVenta = $this->moneda === 'Dólares' ? 'USD' : 'PEN';
+        $montoConvertido = $pago->calcularMontoConvertido($monedaVenta);
+        
+        $pago->save();
+        
+        // Actualizar la venta
+        $this->monto_abonado += $montoConvertido;
+        $this->saldo_pendiente -= $montoConvertido;
+        
+        // Cambiar estado si se pagó todo
+        if ($this->saldo_pendiente <= 0) {
+            $this->cambiarEstado('pagado', 'Pago completado');
+            $this->saldo_pendiente = 0;
+        } else {
+            $this->cambiarEstado('no_pagado', 'Pago parcial registrado');
+        }
+        
+        return $this->save();
+    }
+    
+    // ========== SCOPES ==========
+    
+    public function scopeEstado($query, $estado)
+    {
+        return $query->where('estado', $estado);
+    }
+    
+    public function scopeVencidas($query)
+    {
+        return $query->where('fecha_vencimiento', '<', now())
+                    ->where('saldo_pendiente', '>', 0);
+    }
+    
+    public function scopeProximasVencer($query, $dias = 7)
+    {
+        return $query->whereBetween('fecha_vencimiento', [now(), now()->addDays($dias)])
+                    ->where('saldo_pendiente', '>', 0);
+    }
+    
+    public function scopeCuentasPorCobrar($query)
+    {
+        return $query->where('tipo_pago', 'Crédito')
+                    ->where('saldo_pendiente', '>', 0);
+    }
+    
+    public function scopePorPrioridad($query, $prioridad)
+    {
+        return $query->where('prioridad', $prioridad);
     }
 }

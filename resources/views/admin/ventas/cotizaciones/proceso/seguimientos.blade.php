@@ -3,7 +3,7 @@
     @if($cotizacion->seguimientos && $cotizacion->seguimientos->count() > 0)
     <div class="modern-timeline p-3">
         @foreach($cotizacion->seguimientos->sortByDesc('fecha_seguimiento') as $seguimiento)
-        <div class="modern-timeline-item mb-3">
+        <div class="modern-timeline-item mb-3" data-seguimiento-id="{{ $seguimiento->id }}">
             <div class="modern-timeline-badge 
                 @if($seguimiento->tipo === 'nota') bg-warning
                 @elseif($seguimiento->tipo === 'llamada') bg-success
@@ -562,6 +562,8 @@ window.seguimientoActual = null;
 // Función global para abrir el sidebar
 window.abrirSidebarComentarios = function(seguimientoId) {
     try {
+        console.log('Abriendo sidebar para seguimiento:', seguimientoId);
+        
         // Verificamos si Bootstrap está disponible
         if (typeof bootstrap === 'undefined') {
             console.error('Error: Bootstrap no está disponible');
@@ -577,14 +579,22 @@ window.abrirSidebarComentarios = function(seguimientoId) {
         
         // Almacenar ID para uso posterior
         window.seguimientoActual = seguimientoId;
+        console.log('seguimientoActual establecido:', window.seguimientoActual);
         
         // Inicializar el sidebar con Bootstrap
         const sidebarInstance = new bootstrap.Offcanvas(sidebarComentarios);
         
         // Establecer el ID del seguimiento en el formulario
         const inputSeguimientoId = document.getElementById('seguimientoIdComentario');
+        console.log('Estableciendo seguimientoId en input:', {
+            inputElement: inputSeguimientoId,
+            seguimientoIdToSet: seguimientoId
+        });
         if (inputSeguimientoId) {
             inputSeguimientoId.value = seguimientoId;
+            console.log('Input value después de establecer:', inputSeguimientoId.value);
+        } else {
+            console.error('No se encontró el input seguimientoIdComentario');
         }
         
         // Cargar comentarios y mostrar el sidebar
@@ -605,6 +615,20 @@ window.mostrarAlerta = function(mensaje, tipo) {
 };
 window.ocultarAlerta = function() { console.log('ocultarAlerta no inicializado'); };
 
+// Función para cargar comentarios de todos los seguimientos al inicializar
+function cargarTodosLosComentarios() {
+    // Obtener todos los seguimientos disponibles
+    const seguimientoElements = document.querySelectorAll('[data-seguimiento-id]');
+    
+    seguimientoElements.forEach(element => {
+        const seguimientoId = element.getAttribute('data-seguimiento-id');
+        if (seguimientoId) {
+            console.log('Cargando comentarios para seguimiento:', seguimientoId);
+            window.cargarComentarios(seguimientoId, true); // silencioso = true
+        }
+    });
+}
+
 // Script principal cuando el DOM esté cargado
 document.addEventListener('DOMContentLoaded', function() {
     try {
@@ -615,6 +639,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         console.log('Inicializando componente de comentarios de seguimiento...');
+        
+        // Cargar comentarios existentes para todos los seguimientos
+        cargarTodosLosComentarios();
         
         // Referencias al sidebar
         const sidebarComentarios = document.getElementById('sidebarComentarios');
@@ -730,7 +757,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log(`Cargando comentarios para seguimiento #${seguimientoId}`);
             
-            fetch(`/admin/ventas/cotizaciones/seguimientos/${seguimientoId}/comentarios`, {
+            fetch(`{{ url('/admin/ventas/cotizaciones') }}/seguimientos/${seguimientoId}/comentarios`, {
                 headers: {
                     'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
                     'Accept': 'application/json'
@@ -771,20 +798,25 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         };
         
-        // Referencias para toggle de realizado
-        const togglesRealizado = document.querySelectorAll('.toggle-realizado');
-        
-        // Inicializar toggle de realizado
-        togglesRealizado.forEach(toggle => {
-            toggle.addEventListener('change', function() {
+        // Inicializar toggle de realizado usando delegación de eventos
+        document.addEventListener('change', function(e) {
+            // Solo procesar si el elemento es un toggle de realizado
+            if (e.target && e.target.classList.contains('toggle-realizado')) {
+                const toggle = e.target;
                 try {
-                    const seguimientoId = this.getAttribute('data-id');
+                    const seguimientoId = toggle.getAttribute('data-id');
                     if (!seguimientoId) {
-                        console.error('No se pudo obtener el ID del seguimiento');
+                        console.error('No se pudo obtener el ID del seguimiento para el elemento:', toggle);
+                        console.log('Atributos del elemento:', {
+                            id: toggle.id,
+                            className: toggle.className,
+                            dataId: toggle.getAttribute('data-id'),
+                            allAttributes: Array.from(toggle.attributes).map(attr => `${attr.name}="${attr.value}"`).join(', ')
+                        });
                         return;
                     }
                     
-                    const label = this.nextElementSibling;
+                    const label = toggle.nextElementSibling;
                     const csrfToken = document.querySelector('meta[name="csrf-token"]');
                     
                     if (!csrfToken) {
@@ -796,7 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log(`Cambiando estado 'realizado' para seguimiento #${seguimientoId}`);
                     
                     // Realizar petición AJAX
-                    fetch(`/admin/ventas/cotizaciones/seguimientos/${seguimientoId}/toggle-realizado`, {
+                    fetch(`{{ url('/admin/ventas/cotizaciones') }}/seguimientos/${seguimientoId}/toggle-realizado`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
@@ -838,20 +870,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             window.mostrarAlerta(data.message, 'success');
                         } else {
                             // Revertir el cambio en caso de error
-                            this.checked = !this.checked;
+                            toggle.checked = !toggle.checked;
                             window.mostrarAlerta(data.message || 'Error al actualizar el estado', 'error');
                         }
                     })
                     .catch(error => {
                         console.error('Error en toggle realizado:', error);
-                        this.checked = !this.checked;
+                        toggle.checked = !toggle.checked;
                         window.mostrarAlerta('Error en la comunicación con el servidor: ' + error.message, 'error');
                     });
                 } catch (e) {
                     console.error('Error inesperado en toggle realizado:', e);
-                    this.checked = !this.checked;
+                    toggle.checked = !toggle.checked;
                 }
-            });
+            }
         });
         
         // Iniciar actualización automática cuando el sidebar está abierto
@@ -1325,8 +1357,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 try {
                     const formData = new FormData(formComentario);
-                    const seguimientoId = inputSeguimientoId ? inputSeguimientoId.value : window.seguimientoActual;
+                    const seguimientoId = (inputSeguimientoId && inputSeguimientoId.value && inputSeguimientoId.value.trim()) ? inputSeguimientoId.value : window.seguimientoActual;
                     const comentarioId = inputComentarioId ? inputComentarioId.value : '';
+                    
+                    console.log('Debug info:', {
+                        inputSeguimientoId: inputSeguimientoId,
+                        inputSeguimientoIdValue: inputSeguimientoId ? inputSeguimientoId.value : null,
+                        windowSeguimientoActual: window.seguimientoActual,
+                        finalSeguimientoId: seguimientoId
+                    });
                     
                     if (!seguimientoId) {
                         console.error('No se pudo obtener el ID del seguimiento');
@@ -1338,11 +1377,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     let method = '';
                     
                     if (modoEdicion && comentarioId) {
-                        url = `/admin/ventas/cotizaciones/seguimientos/${seguimientoId}/comentarios/${comentarioId}`;
+                        url = `{{ url('/admin/ventas/cotizaciones') }}/seguimientos/${seguimientoId}/comentarios/${comentarioId}`;
                         method = 'POST';
                         formData.append('_method', 'PUT'); // Simulando PUT con POST + _method
                     } else {
-                        url = `/admin/ventas/cotizaciones/seguimientos/${seguimientoId}/comentarios`;
+                        url = `{{ url('/admin/ventas/cotizaciones') }}/seguimientos/${seguimientoId}/comentarios`;
                         method = 'POST';
                     }
                     
@@ -1426,6 +1465,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try {
                 const seguimientoId = window.seguimientoActual;
+                console.log('Debug delete - window.seguimientoActual:', window.seguimientoActual);
                 if (!seguimientoId) {
                     console.error('No se pudo obtener el ID del seguimiento');
                     window.mostrarAlerta('Error: Falta ID del seguimiento', 'error');
@@ -1442,7 +1482,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log(`Eliminando comentario #${comentarioId} de seguimiento #${seguimientoId}`);
                 
-                fetch(`/admin/ventas/cotizaciones/seguimientos/${seguimientoId}/comentarios/${comentarioId}`, {
+                fetch(`{{ url('/admin/ventas/cotizaciones') }}/seguimientos/${seguimientoId}/comentarios/${comentarioId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

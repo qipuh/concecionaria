@@ -3,98 +3,162 @@
 
 @section('title', 'Gestión de Ventas')
 
+@push('styles')
+<style>
+.estado-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.estado-pagado { background: linear-gradient(45deg, #10b981, #34d399); color: white; }
+.estado-no_pagado { background: linear-gradient(45deg, #ef4444, #f87171); color: white; }
+.estado-pendiente { background: linear-gradient(45deg, #f59e0b, #fbbf24); color: white; }
+.estado-despachado { background: linear-gradient(45deg, #8b5cf6, #a78bfa); color: white; }
+.estado-en_cotizacion { background: linear-gradient(45deg, #06b6d4, #22d3ee); color: white; }
+.estado-para_importacion { background: linear-gradient(45deg, #ec4899, #f472b6); color: white; }
+.estado-pedido_especial { background: linear-gradient(45deg, #6366f1, #818cf8); color: white; }
+.estado-cancelado { background: linear-gradient(45deg, #64748b, #94a3b8); color: white; }
+
+.priority-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.7rem;
+}
+
+.priority-alta { background: #fecaca; color: #dc2626; }
+.priority-media { background: #fde68a; color: #d97706; }
+.priority-baja { background: #d1fae5; color: #059669; }
+.priority-urgente { background: #f3e8ff; color: #7c3aed; }
+
+.card-stats {
+    transition: transform 0.15s ease-in-out;
+    cursor: pointer;
+}
+
+.card-stats:hover {
+    transform: translateY(-2px);
+}
+
+.table-responsive {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.btn-action {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 0.25rem;
+}
+
+.vencido {
+    background: linear-gradient(45deg, #dc2626, #ef4444);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.filter-section {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+</style>
+@endpush
+
 @section('content')
-<div class="container-fluid">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-shopping-cart mr-2"></i>Gestión de Ventas
-        </h1>
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="fas fa-chart-line me-2 text-primary"></i>Gestión de Ventas
+            </h1>
+            <p class="text-muted mb-0">Dashboard completo de ventas con estados y cuentas por cobrar</p>
+        </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.ventas.pos.index') }}" class="btn btn-primary">
-                <i class="fas fa-plus mr-1"></i>Nuevo POS
+                <i class="fas fa-plus me-1"></i>Nueva Venta (POS)
             </a>
-            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exportModal">
-                <i class="fas fa-download mr-1"></i>Exportar
+            <button type="button" class="btn btn-success" onclick="exportarVentas()">
+                <i class="fas fa-download me-1"></i>Exportar
+            </button>
+            <button type="button" class="btn btn-info" onclick="mostrarCuentasPorCobrar()">
+                <i class="fas fa-money-check-alt me-1"></i>Cuentas x Cobrar
             </button>
         </div>
     </div>
 
-    {{-- Estadísticas rápidas --}}
+    <!-- Estadísticas Principales -->
     <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card card-stats border-0 shadow-sm" onclick="filtrarPorEstado('')">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                Total Ventas
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {{ number_format($estadisticas->total_ventas) }}
-                            </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-muted mb-1 small">TOTAL VENTAS</div>
+                            <div class="h4 mb-0 text-dark" id="total-ventas">-</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        <div class="text-primary">
+                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card card-stats border-0 shadow-sm" onclick="filtrarPorEstado('pagado')">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                Monto Total
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                S/ {{ number_format($estadisticas->monto_total, 2) }}
-                            </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-muted mb-1 small">PAGADAS</div>
+                            <div class="h4 mb-0 text-success" id="ventas-pagadas">-</div>
+                            <div class="small text-success" id="monto-pagadas">-</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        <div class="text-success">
+                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card card-stats border-0 shadow-sm" onclick="filtrarPorEstado('no_pagado')">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                Promedio Venta
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                S/ {{ number_format($estadisticas->promedio_venta, 2) }}
-                            </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-muted mb-1 small">PENDIENTES PAGO</div>
+                            <div class="h4 mb-0 text-warning" id="ventas-pendientes">-</div>
+                            <div class="small text-warning" id="monto-pendientes">-</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        <div class="text-warning">
+                            <i class="fas fa-clock fa-2x opacity-75"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card card-stats border-0 shadow-sm" onclick="mostrarVencidas()">
                 <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Saldo Pendiente
-                            </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                S/ {{ number_format($estadisticas->total_pendiente, 2) }}
-                            </div>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-muted mb-1 small">VENCIDAS</div>
+                            <div class="h4 mb-0 text-danger" id="ventas-vencidas">-</div>
+                            <div class="small text-danger" id="monto-vencidas">-</div>
                         </div>
-                        <div class="col-auto">
-                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
                         </div>
                     </div>
                 </div>
@@ -102,442 +166,205 @@
         </div>
     </div>
 
-    {{-- Filtros --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filtros de Búsqueda</h6>
-        </div>
-        <div class="card-body">
-            <form method="GET" action="{{ route('admin.ventas.index') }}" id="filtrosForm">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label for="search" class="form-label">Buscar</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="search" 
-                               name="search" 
-                               value="{{ request('search') }}"
-                               placeholder="Código, cliente, documento...">
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <label for="fecha_desde" class="form-label">Desde</label>
-                        <input type="date" 
-                               class="form-control" 
-                               id="fecha_desde" 
-                               name="fecha_desde" 
-                               value="{{ request('fecha_desde') }}">
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <label for="fecha_hasta" class="form-label">Hasta</label>
-                        <input type="date" 
-                               class="form-control" 
-                               id="fecha_hasta" 
-                               name="fecha_hasta" 
-                               value="{{ request('fecha_hasta') }}">
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <label for="estado" class="form-label">Estado</label>
-                        <select class="form-control" id="estado" name="estado">
-                            <option value="">Todos los estados</option>
-                            @foreach($estados as $estado)
-                                <option value="{{ $estado }}" 
-                                        {{ request('estado') == $estado ? 'selected' : '' }}>
-                                    {{ $estado }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <label for="almacen_id" class="form-label">Almacén</label>
-                        <select class="form-control" id="almacen_id" name="almacen_id">
-                            <option value="">Todos los almacenes</option>
-                            @foreach($almacenes as $almacen)
-                                <option value="{{ $almacen->id }}" 
-                                        {{ request('almacen_id') == $almacen->id ? 'selected' : '' }}>
-                                    {{ $almacen->nombre }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-1 mb-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-2 mb-3">
-                        <label for="moneda" class="form-label">Moneda</label>
-                        <select class="form-control" id="moneda" name="moneda">
-                            <option value="">Todas las monedas</option>
-                            @foreach($monedas as $moneda)
-                                <option value="{{ $moneda }}" 
-                                        {{ request('moneda') == $moneda ? 'selected' : '' }}>
-                                    {{ $moneda }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-2 mb-3">
-                        <label for="tipo_pago" class="form-label">Tipo Pago</label>
-                        <select class="form-control" id="tipo_pago" name="tipo_pago">
-                            <option value="">Todos los tipos</option>
-                            @foreach($tiposPago as $tipo)
-                                <option value="{{ $tipo }}" 
-                                        {{ request('tipo_pago') == $tipo ? 'selected' : '' }}>
-                                    {{ $tipo }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-2 mb-3 d-flex align-items-end">
-                        <a href="{{ route('admin.ventas.index') }}" class="btn btn-secondary btn-block">
-                            <i class="fas fa-times mr-1"></i>Limpiar
-                        </a>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Tabla de ventas --}}
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            <h6 class="m-0 font-weight-bold text-primary">Listado de Ventas</h6>
-            <div class="text-muted">
-                Mostrando {{ $ventas->firstItem() ?? 0 }} - {{ $ventas->lastItem() ?? 0 }} 
-                de {{ $ventas->total() }} ventas
+    <!-- Filtros -->
+    <div class="filter-section">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Estado</label>
+                <select class="form-select" id="filtro-estado">
+                    <option value="">Todos los estados</option>
+                    <option value="pagado">Pagado</option>
+                    <option value="no_pagado">No Pagado</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="despachado">Despachado</option>
+                    <option value="en_cotizacion">En Cotización</option>
+                    <option value="para_importacion">Para Importación</option>
+                    <option value="pedido_especial">Pedido Especial</option>
+                    <option value="cancelado">Cancelado</option>
+                </select>
             </div>
-        </div>
-        <div class="card-body">
-            @if($ventas->count() > 0)
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" width="100%" cellspacing="0">
-                        <thead class="thead-light">
-                            <tr>
-                                <th>Código</th>
-                                <th>Fecha</th>
-                                <th>Cliente</th>
-                                <th>Usuario</th>
-                                <th>Almacén</th>
-                                <th>Total</th>
-                                <th>Estado</th>
-                                <th>% Pagado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($ventas as $venta)
-                                <tr>
-                                    <td>
-                                        <strong>{{ $venta->codigo }}</strong>
-                                        @if($venta->cotizacion)
-                                            <br><small class="text-muted">
-                                                Cot: {{ $venta->cotizacion->codigo }}
-                                            </small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        {{ $venta->fecha->format('d/m/Y') }}
-                                        <br><small class="text-muted">
-                                            {{ $venta->fecha->format('H:i') }}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        @if($venta->cliente)
-                                            @if($venta->cliente->tipo_cliente == 'natural')
-                                                <strong>
-                                                    {{ trim(($venta->cliente->nombres ?? '') . ' ' . ($venta->cliente->apellido_paterno ?? '') . ' ' . ($venta->cliente->apellido_materno ?? '')) ?: 'Sin nombre' }}
-                                                </strong>
-                                            @else
-                                                <strong>{{ $venta->cliente->razon_social ?? 'Cliente corporativo' }}</strong>
-                                            @endif
-                                            <br><small class="text-muted">
-                                                {{ $venta->cliente->documento_identidad ?? 'Sin documento' }}
-                                            </small>
-                                        @else
-                                            <span class="text-muted">Cliente no encontrado</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        {{ $venta->usuario->name ?? 'Usuario no encontrado' }}
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-info">
-                                            {{ $venta->almacen->nombre ?? 'Almacén no encontrado' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <strong>
-                                            {{ $venta->moneda == 'Soles' ? 'S/' : ' ' }} 
-                                            {{ number_format($venta->total, 2) }}
-                                        </strong>
-                                        @if($venta->tipo_pago == 'Credito')
-                                            <br><small class="text-muted">
-                                                Abonado: {{ $venta->moneda == 'Soles' ? 'S/' : '$' }} {{ number_format($venta->monto_abonado, 2) }}
-                                            </small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @switch($venta->estado)
-                                            @case('Completada')
-                                                <span class="badge badge-success">{{ $venta->estado }}</span>
-                                                @break
-                                            @case('Parcial')
-                                                <span class="badge badge-warning">{{ $venta->estado }}</span>
-                                                @break
-                                            @case('Cancelada')
-                                                <span class="badge badge-danger">{{ $venta->estado }}</span>
-                                                @break
-                                            @default
-                                                <span class="badge badge-secondary">{{ $venta->estado }}</span>
-                                        @endswitch
-                                        
-                                        @if($venta->tipo_pago == 'Crédito')
-                                            <br><small class="text-muted">{{ $venta->tipo_pago }}</small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @php
-                                            $porcentaje = $venta->getPorcentajeAbonadoAttribute();
-                                        @endphp
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar 
-                                                @if($porcentaje == 100) bg-success 
-                                                @elseif($porcentaje >= 50) bg-warning 
-                                                @else bg-danger @endif" 
-                                                role="progressbar" 
-                                                style="width: {{ $porcentaje }}%"
-                                                aria-valuenow="{{ $porcentaje }}" 
-                                                aria-valuemin="0" 
-                                                aria-valuemax="100">
-                                                {{ number_format($porcentaje, 1) }}%
-                                            </div>
-                                        </div>
-                                        @if($venta->saldo_pendiente > 0)
-                                            <small class="text-danger">
-                                                Saldo: {{ $venta->moneda == 'Soles' ? 'S/' : ' ' }} {{ number_format($venta->saldo_pendiente, 2) }}
-                                            </small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('admin.ventas.show', $venta->id) }}" 
-                                               class="btn btn-sm btn-info" 
-                                               title="Ver detalle">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            
-                                            @if($venta->saldo_pendiente > 0 && $venta->estado != 'Cancelada')
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-success" 
-                                                        onclick="abrirModalPago({{ $venta->id }}, {{ $venta->saldo_pendiente }})"
-                                                        title="Registrar pago">
-                                                    <i class="fas fa-credit-card"></i>
-                                                </button>
-                                            @endif
-                                            
-                                            @if($venta->estado != 'Cancelada')
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-danger" 
-                                                        onclick="abrirModalAnular({{ $venta->id }})"
-                                                        title="Anular venta">
-                                                    <i class="fas fa-ban"></i>
-                                                </button>
-                                            @endif
-                                            
-                                            <a href="{{ route('admin.ventas.imprimir', $venta->id) }}" 
-                                               class="btn btn-sm btn-secondary" 
-                                               target="_blank"
-                                               title="Imprimir">
-                                                <i class="fas fa-print"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
 
-                {{-- Paginación --}}
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div class="text-muted">
-                        Mostrando {{ $ventas->firstItem() }} - {{ $ventas->lastItem() }} 
-                        de {{ $ventas->total() }} resultados
-                    </div>
-                    {{ $ventas->appends(request()->query())->links() }}
-                </div>
-            @else
-                <div class="text-center py-4">
-                    <i class="fas fa-shopping-cart fa-3x text-gray-300 mb-3"></i>
-                    <h5 class="text-gray-600">No se encontraron ventas</h5>
-                    <p class="text-muted">Prueba ajustando los filtros de búsqueda o 
-                        <a href="{{ route('admin.ventas.pos.index') }}">crea una nueva venta</a>
-                    </p>
-                </div>
-            @endif
-        </div>
-    </div>
-</div>
-
-{{-- Modal para registrar pago --}}
-<div class="modal fade" id="modalPago" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="formPago" method="POST">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-credit-card mr-2"></i>Registrar Pago
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="monto">Monto a Pagar *</label>
-                        <input type="number" 
-                               class="form-control" 
-                               id="monto" 
-                               name="monto" 
-                               step="0.01" 
-                               min="0.01" 
-                               required>
-                        <small class="text-muted">Saldo pendiente: <span id="saldoPendiente"></span></small>
-                    </div>
-                    <div class="form-group">
-                        <label for="referencia">Referencia</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="referencia" 
-                               name="referencia" 
-                               placeholder="Nº de operación, banco, etc.">
-                    </div>
-                    <div class="form-group">
-                        <label for="comentario">Comentario</label>
-                        <textarea class="form-control" 
-                                  id="comentario" 
-                                  name="comentario" 
-                                  rows="3" 
-                                  placeholder="Observaciones del pago..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save mr-1"></i>Registrar Pago
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- Modal para anular venta --}}
-<div class="modal fade" id="modalAnular" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form id="formAnular" method="POST">
-                @csrf
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-ban mr-2"></i>Anular Venta
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        Esta acción no se puede deshacer. La venta será marcada como cancelada.
-                    </div>
-                    <div class="form-group">
-                        <label for="motivo">Motivo de la anulación *</label>
-                        <textarea class="form-control" 
-                                  id="motivo" 
-                                  name="motivo" 
-                                  rows="3" 
-                                  required 
-                                  placeholder="Describe el motivo por el cual se anula esta venta..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-ban mr-1"></i>Anular Venta
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-{{-- Modal para exportar --}}
-<div class="modal fade" id="exportModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form method="GET" action="#">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-download mr-2"></i>Exportar Ventas
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted">Se exportarán las ventas con los filtros actuales aplicados.</p>
-                    
-                    {{-- Preservar filtros actuales --}}
-                    @foreach(request()->query() as $key => $value)
-                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Cliente</label>
+                <select class="form-select" id="filtro-cliente">
+                    <option value="">Todos los clientes</option>
+                    @foreach($clientes as $cliente)
+                        <option value="{{ $cliente->id }}">{{ $cliente->nombres }} {{ $cliente->apellido_paterno }}</option>
                     @endforeach
-                    
-                    <div class="form-group">
-                        <label>Filtros aplicados:</label>
-                        <ul class="list-unstyled">
-                            @if(request('search'))
-                                <li><strong>Búsqueda:</strong> {{ request('search') }}</li>
-                            @endif
-                            @if(request('fecha_desde'))
-                                <li><strong>Desde:</strong> {{ request('fecha_desde') }}</li>
-                            @endif
-                            @if(request('fecha_hasta'))
-                                <li><strong>Hasta:</strong> {{ request('fecha_hasta') }}</li>
-                            @endif
-                            @if(request('estado'))
-                                <li><strong>Estado:</strong> {{ request('estado') }}</li>
-                            @endif
-                            @if(request('almacen_id'))
-                                <li><strong>Almacén:</strong> {{ $almacenes->find(request('almacen_id'))->nombre ?? 'N/A' }}</li>
-                            @endif
-                            @if(!request()->hasAny(['search', 'fecha_desde', 'fecha_hasta', 'estado', 'almacen_id']))
-                                <li class="text-muted">Sin filtros específicos</li>
-                            @endif
-                        </ul>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Fecha Desde</label>
+                <input type="date" class="form-control" id="fecha-desde">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Fecha Hasta</label>
+                <input type="date" class="form-control" id="fecha-hasta">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label small fw-bold">Moneda</label>
+                <select class="form-select" id="filtro-moneda">
+                    <option value="">Todas</option>
+                    <option value="Soles">Soles</option>
+                    <option value="Dólares">Dólares</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary" onclick="aplicarFiltros()">
+                        <i class="fas fa-search me-1"></i>Filtrar
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="limpiarFiltros()">
+                        <i class="fas fa-times me-1"></i>Limpiar
+                    </button>
+                    <div class="ms-auto">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="auto-refresh">
+                            <label class="form-check-label small" for="auto-refresh">
+                                Auto-actualizar (30s)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Ventas -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold">Listado de Ventas</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small text-muted" id="total-registros">Cargando...</span>
+                    <div class="spinner-border spinner-border-sm d-none" id="loading-spinner" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="tabla-ventas">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="px-3 py-3 border-0">Código</th>
+                            <th class="px-3 py-3 border-0">Cliente</th>
+                            <th class="px-3 py-3 border-0">Fecha</th>
+                            <th class="px-3 py-3 border-0">Total</th>
+                            <th class="px-3 py-3 border-0">Estado</th>
+                            <th class="px-3 py-3 border-0">Pagos</th>
+                            <th class="px-3 py-3 border-0">Vencimiento</th>
+                            <th class="px-3 py-3 border-0">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-ventas">
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <div class="mt-2 text-muted">Cargando ventas...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-white border-0">
+            <nav id="pagination-container">
+                <!-- Paginación se carga dinámicamente -->
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Registrar Pago -->
+<div class="modal fade" id="pagoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-money-bill-wave me-2"></i>Registrar Pago
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="form-pago">
+                <div class="modal-body">
+                    <!-- Información de la venta -->
+                    <div class="alert alert-info mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Venta:</strong> <span id="pago-venta-codigo">-</span><br>
+                                <strong>Cliente:</strong> <span id="pago-cliente">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Total:</strong> <span id="pago-total">-</span><br>
+                                <strong>Saldo Pendiente:</strong> <span id="pago-saldo" class="fw-bold text-danger">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Monto del Pago</label>
+                            <input type="number" class="form-control" name="monto" step="0.01" min="0.01" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Moneda</label>
+                            <select class="form-select" name="moneda" required>
+                                <option value="PEN">Soles (S/)</option>
+                                <option value="USD">Dólares (US$)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Método de Pago</label>
+                            <select class="form-select" name="metodo_pago" required>
+                                <option value="efectivo">Efectivo</option>
+                                <option value="transferencia">Transferencia</option>
+                                <option value="deposito">Depósito</option>
+                                <option value="cheque">Cheque</option>
+                                <option value="tarjeta_credito">Tarjeta de Crédito</option>
+                                <option value="tarjeta_debito">Tarjeta de Débito</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha del Pago</label>
+                            <input type="date" class="form-control" name="fecha_pago" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Referencia</label>
+                            <input type="text" class="form-control" name="referencia_pago" placeholder="Nro. de operación, cheque, etc.">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Banco</label>
+                            <input type="text" class="form-control" name="banco" placeholder="Banco (opcional)">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Observaciones</label>
+                            <textarea class="form-control" name="observaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        Cancelar
-                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-success">
-                        <i class="fas fa-file-excel mr-1"></i>Descargar CSV
+                        <i class="fas fa-save me-1"></i>Registrar Pago
                     </button>
                 </div>
             </form>
@@ -545,38 +372,386 @@
     </div>
 </div>
 
+<!-- Modal para Ver Pagos -->
+<div class="modal fade" id="verPagosModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-list me-2"></i>Historial de Pagos
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenido-pagos">
+                <!-- Contenido se carga dinámicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Container para notificaciones toast -->
+<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
-function abrirModalPago(ventaId, saldoPendiente) {
-    document.getElementById('formPago').action = `/admin/ventas/${ventaId}/pago`;
-    document.getElementById('monto').max = saldoPendiente;
-    document.getElementById('monto').value = saldoPendiente;
-    document.getElementById('saldoPendiente').textContent = `S/ ${saldoPendiente.toFixed(2)}`;
-    $('#modalPago').modal('show');
-}
+$(document).ready(function() {
+    // Variables globales
+    let currentPage = 1;
+    let currentFilters = {};
+    let autoRefreshInterval = null;
+    let selectedVentaId = null;
 
-function abrirModalAnular(ventaId) {
-    document.getElementById('formAnular').action = `/admin/ventas/${ventaId}/anular`;
-    document.getElementById('motivo').value = '';
-    $('#modalAnular').modal('show');
-}
+    // Inicializar
+    initializePage();
 
-// Auto-submit de filtros con delay
-let timeoutId;
-document.getElementById('search').addEventListener('input', function() {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(function() {
-        document.getElementById('filtrosForm').submit();
-    }, 500);
-});
-
-// Confirmar antes de anular
-document.getElementById('formAnular').addEventListener('submit', function(e) {
-    if (!confirm('¿Estás seguro de que deseas anular esta venta? Esta acción no se puede deshacer.')) {
-        e.preventDefault();
+    function initializePage() {
+        // Establecer fecha por defecto (último mes)
+        const fechaHasta = new Date().toISOString().split('T')[0];
+        const fechaDesde = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        
+        $('#fecha-desde').val(fechaDesde);
+        $('#fecha-hasta').val(fechaHasta);
+        
+        // Cargar datos iniciales
+        cargarEstadisticas();
+        cargarVentas();
+        cargarClientes();
+        
+        // Configurar auto-refresh
+        $('#auto-refresh').on('change', function() {
+            if ($(this).is(':checked')) {
+                autoRefreshInterval = setInterval(() => {
+                    cargarEstadisticas();
+                    cargarVentas();
+                }, 30000);
+            } else {
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                }
+            }
+        });
     }
+
+    // Cargar estadísticas
+    function cargarEstadisticas() {
+        $.ajax({
+            url: '{{ route("admin.ventas.index") }}',
+            data: { ...currentFilters, estadisticas: true },
+            success: function(response) {
+                if (response.estadisticas) {
+                    $('#total-ventas').text(response.estadisticas.total);
+                    $('#ventas-pagadas').text(response.estadisticas.pagadas);
+                    $('#monto-pagadas').text(response.estadisticas.monto_pagadas);
+                    $('#ventas-pendientes').text(response.estadisticas.pendientes);
+                    $('#monto-pendientes').text(response.estadisticas.monto_pendientes);
+                    $('#ventas-vencidas').text(response.estadisticas.vencidas);
+                    $('#monto-vencidas').text(response.estadisticas.monto_vencidas);
+                }
+            }
+        });
+    }
+
+    // Cargar ventas
+    function cargarVentas(page = 1) {
+        $('#loading-spinner').removeClass('d-none');
+        
+        $.ajax({
+            url: '{{ route("admin.ventas.index") }}',
+            data: { ...currentFilters, page: page },
+            success: function(response) {
+                if (response.ventas) {
+                    renderVentas(response.ventas.data);
+                    renderPagination(response.ventas);
+                    $('#total-registros').text(`${response.ventas.total} registros encontrados`);
+                }
+            },
+            complete: function() {
+                $('#loading-spinner').addClass('d-none');
+            }
+        });
+    }
+
+    // Renderizar tabla de ventas
+    function renderVentas(ventas) {
+        const tbody = $('#tbody-ventas');
+        tbody.empty();
+
+        if (ventas.length === 0) {
+            tbody.append(`
+                <tr>
+                    <td colspan="8" class="text-center py-5">
+                        <div class="text-muted">
+                            <i class="fas fa-search fa-3x mb-3"></i>
+                            <div>No se encontraron ventas con los filtros aplicados</div>
+                        </div>
+                    </td>
+                </tr>
+            `);
+            return;
+        }
+
+        ventas.forEach(venta => {
+            const estadoClass = `estado-${venta.estado}`;
+            const prioridadClass = `priority-${venta.prioridad}`;
+            const esVencida = venta.esta_vencida ? 'vencido' : '';
+            
+            tbody.append(`
+                <tr class="${esVencida}">
+                    <td class="px-3 py-3">
+                        <div class="fw-bold">${venta.codigo}</div>
+                        ${venta.numero_factura ? `<small class="text-muted">F: ${venta.numero_factura}</small>` : ''}
+                    </td>
+                    <td class="px-3 py-3">
+                        <div>${venta.cliente.nombres} ${venta.cliente.apellido_paterno || ''}</div>
+                        <small class="text-muted">${venta.cliente.documento_identidad}</small>
+                    </td>
+                    <td class="px-3 py-3">
+                        <div>${new Date(venta.fecha).toLocaleDateString('es-PE')}</div>
+                        <small class="text-muted">${venta.usuario.name}</small>
+                    </td>
+                    <td class="px-3 py-3">
+                        <div class="fw-bold">${venta.moneda === 'Dólares' ? 'US$' : 'S/'} ${parseFloat(venta.total).toFixed(2)}</div>
+                        ${venta.tipo_cambio_usado ? `<small class="text-muted">TC: ${venta.tipo_cambio_usado}</small>` : ''}
+                    </td>
+                    <td class="px-3 py-3">
+                        <span class="estado-badge ${estadoClass}">${getEstadoLabel(venta.estado)}</span>
+                        <div class="mt-1">
+                            <span class="priority-badge ${prioridadClass}">${venta.prioridad}</span>
+                        </div>
+                    </td>
+                    <td class="px-3 py-3">
+                        ${renderInfoPagos(venta)}
+                    </td>
+                    <td class="px-3 py-3">
+                        ${renderInfoVencimiento(venta)}
+                    </td>
+                    <td class="px-3 py-3">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="verDetalleVenta(${venta.id})">
+                                    <i class="fas fa-eye me-2"></i>Ver Detalle
+                                </a></li>
+                                ${venta.saldo_pendiente > 0 ? `
+                                <li><a class="dropdown-item" href="#" onclick="registrarPago(${venta.id})">
+                                    <i class="fas fa-money-bill-wave me-2"></i>Registrar Pago
+                                </a></li>` : ''}
+                                <li><a class="dropdown-item" href="#" onclick="verPagos(${venta.id})">
+                                    <i class="fas fa-list me-2"></i>Ver Pagos
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="cambiarEstado(${venta.id})">
+                                    <i class="fas fa-edit me-2"></i>Cambiar Estado
+                                </a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+            `);
+        });
+    }
+
+    function renderInfoPagos(venta) {
+        if (venta.tipo_pago === 'Contado') {
+            return '<span class="badge bg-success">Contado</span>';
+        } else {
+            const porcentaje = venta.total > 0 ? ((venta.monto_abonado / venta.total) * 100).toFixed(1) : 0;
+            return `
+                <div class="small">
+                    <div class="d-flex justify-content-between">
+                        <span>Abonado:</span>
+                        <span class="fw-bold">${venta.moneda === 'Dólares' ? 'US$' : 'S/'} ${parseFloat(venta.monto_abonado).toFixed(2)}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Saldo:</span>
+                        <span class="fw-bold text-danger">${venta.moneda === 'Dólares' ? 'US$' : 'S/'} ${parseFloat(venta.saldo_pendiente).toFixed(2)}</span>
+                    </div>
+                    <div class="progress mt-1" style="height: 4px;">
+                        <div class="progress-bar" style="width: ${porcentaje}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function renderInfoVencimiento(venta) {
+        if (!venta.fecha_vencimiento) {
+            return '<span class="text-muted">Sin vencimiento</span>';
+        }
+
+        const fechaVenc = new Date(venta.fecha_vencimiento);
+        const hoy = new Date();
+        const diff = Math.ceil((fechaVenc - hoy) / (1000 * 60 * 60 * 24));
+
+        let clase = 'text-muted';
+        let texto = '';
+
+        if (diff < 0) {
+            clase = 'text-danger fw-bold';
+            texto = `Vencida hace ${Math.abs(diff)} días`;
+        } else if (diff <= 7) {
+            clase = 'text-warning fw-bold';
+            texto = `Vence en ${diff} días`;
+        } else {
+            texto = `Vence en ${diff} días`;
+        }
+
+        return `
+            <div class="${clase}">
+                <div>${fechaVenc.toLocaleDateString('es-PE')}</div>
+                <small>${texto}</small>
+            </div>
+        `;
+    }
+
+    function getEstadoLabel(estado) {
+        const labels = {
+            'pagado': 'Pagado',
+            'no_pagado': 'No Pagado',
+            'pendiente': 'Pendiente',
+            'despachado': 'Despachado',
+            'en_cotizacion': 'En Cotización',
+            'para_importacion': 'Para Importación',
+            'pedido_especial': 'Pedido Especial',
+            'cancelado': 'Cancelado'
+        };
+        return labels[estado] || estado;
+    }
+
+    // Aplicar filtros
+    window.aplicarFiltros = function() {
+        currentFilters = {
+            estado: $('#filtro-estado').val(),
+            cliente_id: $('#filtro-cliente').val(),
+            fecha_desde: $('#fecha-desde').val(),
+            fecha_hasta: $('#fecha-hasta').val(),
+            moneda: $('#filtro-moneda').val()
+        };
+        
+        currentPage = 1;
+        cargarEstadisticas();
+        cargarVentas();
+    };
+
+    // Limpiar filtros
+    window.limpiarFiltros = function() {
+        $('#filtro-estado').val('');
+        $('#filtro-cliente').val('');
+        $('#fecha-desde').val('');
+        $('#fecha-hasta').val('');
+        $('#filtro-moneda').val('');
+        
+        currentFilters = {};
+        currentPage = 1;
+        cargarEstadisticas();
+        cargarVentas();
+    };
+
+    // Registrar pago
+    window.registrarPago = function(ventaId) {
+        selectedVentaId = ventaId;
+        
+        // Cargar datos de la venta
+        $.ajax({
+            url: `/admin/ventas/${ventaId}/pagos`,
+            success: function(response) {
+                if (response.success) {
+                    const venta = response.venta;
+                    $('#pago-venta-codigo').text(venta.codigo);
+                    $('#pago-total').text(`${venta.moneda === 'Dólares' ? 'US$' : 'S/'} ${parseFloat(venta.total).toFixed(2)}`);
+                    $('#pago-saldo').text(`${venta.moneda === 'Dólares' ? 'US$' : 'S/'} ${parseFloat(venta.saldo_pendiente).toFixed(2)}`);
+                    
+                    // Establecer fecha actual
+                    $('input[name="fecha_pago"]').val(new Date().toISOString().split('T')[0]);
+                    
+                    // Establecer moneda por defecto
+                    $('select[name="moneda"]').val(venta.moneda === 'Dólares' ? 'USD' : 'PEN');
+                    
+                    $('#pagoModal').modal('show');
+                }
+            }
+        });
+    };
+
+    // Procesar formulario de pago
+    $('#form-pago').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+        
+        $.ajax({
+            url: `/admin/ventas/${selectedVentaId}/pagos`,
+            method: 'POST',
+            data: data,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#pagoModal').modal('hide');
+                    mostrarNotificacion('Pago registrado exitosamente', 'success');
+                    cargarEstadisticas();
+                    cargarVentas();
+                    $('#form-pago')[0].reset();
+                } else {
+                    mostrarNotificacion(response.message || 'Error al registrar el pago', 'error');
+                }
+            },
+            error: function(xhr) {
+                let message = 'Error al registrar el pago';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+                mostrarNotificacion(message, 'error');
+            }
+        });
+    });
+
+    // Funciones auxiliares
+    function mostrarNotificacion(mensaje, tipo) {
+        const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
+        const icon = tipo === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+        
+        const toast = $(`
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                <i class="${icon} me-2"></i>
+                ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `);
+        
+        $('#toast-container').append(toast);
+        
+        setTimeout(() => {
+            toast.alert('close');
+        }, 5000);
+    }
+
+    // Otras funciones (placeholder)
+    window.filtrarPorEstado = function(estado) {
+        $('#filtro-estado').val(estado);
+        aplicarFiltros();
+    };
+
+    window.mostrarVencidas = function() {
+        // Implementar filtro por vencidas
+        currentFilters.vencidas = '1';
+        cargarVentas();
+    };
+
+    window.mostrarCuentasPorCobrar = function() {
+        // Implementar modal de cuentas por cobrar
+        alert('Funcionalidad de cuentas por cobrar en desarrollo');
+    };
+
+    window.exportarVentas = function() {
+        // Implementar exportación
+        alert('Funcionalidad de exportación en desarrollo');
+    };
 });
 </script>
-@endsection
+@endpush

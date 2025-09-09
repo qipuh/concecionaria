@@ -4,6 +4,44 @@
 
 @section('header', 'Crear Nuevo Cliente')
 
+@push('styles')
+<style>
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-left: 0;
+    }
+    
+    #documento-loading .spinner-border {
+        width: 1rem;
+        height: 1rem;
+    }
+    
+    .form-text i {
+        margin-right: 4px;
+    }
+    
+    .document-status {
+        transition: all 0.3s ease;
+    }
+    
+    .input-group input:focus + .input-group-text {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .btn-primary.validating {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        opacity: 0.65;
+    }
+    
+    .form-control:read-only {
+        background-color: #e9ecef;
+        opacity: 1;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="row justify-content-center">
     <div class="col-12 col-lg-10">
@@ -30,11 +68,21 @@
                         </div>
                         <div class="col-md-4">
                             <label for="documento_identidad" class="form-label small text-muted mb-1">Número de Documento *</label>
-                            <input type="text" name="documento_identidad" id="documento_identidad" class="form-control form-control-sm shadow-sm @error('documento_identidad') is-invalid @enderror" value="{{ old('documento_identidad') }}" required>
+                            <div class="input-group">
+                                <input type="text" name="documento_identidad" id="documento_identidad" class="form-control form-control-sm shadow-sm @error('documento_identidad') is-invalid @enderror" value="{{ old('documento_identidad') }}" required maxlength="11" autocomplete="off">
+                                <div class="input-group-text" id="documento-loading" style="display: none;">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Cargando...</span>
+                                    </div>
+                                </div>
+                            </div>
                             @error('documento_identidad') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <div class="form-text text-muted small" id="documento-hint"></div>
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
-                            <button type="button" id="validar_documento" class="btn btn-sm btn-primary w-100 shadow-sm">Validar Datos</button>
+                            <button type="button" id="validar_documento" class="btn btn-sm btn-primary w-100 shadow-sm">
+                                <i class="fas fa-search me-1"></i>Validar Datos
+                            </button>
                         </div>
 
                         <!-- Campos para DNI -->
@@ -195,25 +243,105 @@
         const tipoCliente = document.getElementById('tipo_cliente').value;
         const dniFields = document.querySelectorAll('.dni-fields');
         const rucFields = document.querySelectorAll('.ruc-fields');
+        const documentoInput = document.getElementById('documento_identidad');
+        const documentoHint = document.getElementById('documento-hint');
+        
+        // Limpiar campos al cambiar tipo
+        limpiarCamposDocumento();
         
         if (tipoCliente === 'natural') {
             dniFields.forEach(field => field.style.display = 'block');
             rucFields.forEach(field => field.style.display = 'none');
+            documentoInput.maxLength = 8;
+            documentoInput.placeholder = 'Ej: 12345678';
+            documentoHint.textContent = 'Ingrese 8 dígitos del DNI';
         } else if (tipoCliente === 'juridica') {
             dniFields.forEach(field => field.style.display = 'none');
             rucFields.forEach(field => field.style.display = 'block');
+            documentoInput.maxLength = 11;
+            documentoInput.placeholder = 'Ej: 20123456789';
+            documentoHint.textContent = 'Ingrese 11 dígitos del RUC';
         } else {
             dniFields.forEach(field => field.style.display = 'none');
             rucFields.forEach(field => field.style.display = 'none');
+            documentoInput.maxLength = 11;
+            documentoInput.placeholder = '';
+            documentoHint.textContent = '';
         }
+    }
+
+    // Limpiar campos de documento
+    function limpiarCamposDocumento() {
+        document.getElementById('documento_identidad').value = '';
+        document.getElementById('apellido_paterno').value = '';
+        document.getElementById('apellido_materno').value = '';
+        document.getElementById('nombres').value = '';
+        document.getElementById('razon_social').value = '';
     }
     
     const tipoClienteSelect = document.getElementById('tipo_cliente');
+    const documentoInput = document.getElementById('documento_identidad');
+    
     tipoClienteSelect.addEventListener('change', mostrarCamposSegunTipoCliente);
     
     // Si ya hay un tipo seleccionado al cargar la página, mostrar los campos correspondientes
     if (tipoClienteSelect.value) {
         mostrarCamposSegunTipoCliente();
+    }
+
+    // Autocompletado automático mientras se escribe
+    let timeoutId = null;
+    let isValidating = false;
+
+    // Validación de formato en tiempo real
+    documentoInput.addEventListener('input', function(e) {
+        const valor = e.target.value.replace(/\D/g, ''); // Solo números
+        e.target.value = valor;
+        
+        const tipoCliente = document.getElementById('tipo_cliente').value;
+        const documentoHint = document.getElementById('documento-hint');
+        
+        // Limpiar timeout anterior
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+        
+        // Validar longitud según tipo
+        if (tipoCliente === 'natural' && valor.length === 8) {
+            documentoHint.innerHTML = '<i class="fas fa-check text-success"></i> DNI válido - Buscando datos...';
+            timeoutId = setTimeout(() => autoValidarDocumento(), 800);
+        } else if (tipoCliente === 'juridica' && valor.length === 11) {
+            documentoHint.innerHTML = '<i class="fas fa-check text-success"></i> RUC válido - Buscando datos...';
+            timeoutId = setTimeout(() => autoValidarDocumento(), 800);
+        } else if (valor.length > 0) {
+            const esperado = tipoCliente === 'natural' ? 8 : 11;
+            const tipo = tipoCliente === 'natural' ? 'DNI' : 'RUC';
+            documentoHint.innerHTML = `<i class="fas fa-info-circle text-info"></i> ${tipo}: ${valor.length}/${esperado} dígitos`;
+        } else {
+            documentoHint.textContent = tipoCliente === 'natural' ? 'Ingrese 8 dígitos del DNI' : 'Ingrese 11 dígitos del RUC';
+        }
+    });
+
+    // Solo permitir números
+    documentoInput.addEventListener('keypress', function(e) {
+        if (!/\d/.test(e.key) && !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    // Validación automática
+    function autoValidarDocumento() {
+        if (isValidating) return;
+        
+        const tipoCliente = document.getElementById('tipo_cliente').value;
+        const numeroDocumento = documentoInput.value;
+
+        if (!tipoCliente || !numeroDocumento) return;
+
+        const requiredLength = tipoCliente === 'natural' ? 8 : 11;
+        if (numeroDocumento.length !== requiredLength) return;
+
+        validarDocumentoAPI(tipoCliente === 'natural' ? 'DNI' : 'RUC', numeroDocumento, true);
     }
 
     // Función para resetear el formulario
@@ -348,25 +476,25 @@
         }
     });
 
-    // Validar documento con API Peru Dev
-    document.getElementById('validar_documento').addEventListener('click', function () {
-        const tipoCliente = document.getElementById('tipo_cliente').value;
-        const numeroDocumento = document.getElementById('documento_identidad').value;
+    // Función principal de validación de documento
+    function validarDocumentoAPI(tipoDocumento, numeroDocumento, esAutocompletado = false) {
+        if (isValidating) return;
+        isValidating = true;
 
-        if (!tipoCliente || !numeroDocumento) {
-            alert('Por favor, seleccione el tipo de cliente y proporcione el número de documento.');
-            return;
+        const validarBtn = document.getElementById('validar_documento');
+        const loadingIndicator = document.getElementById('documento-loading');
+        const documentoHint = document.getElementById('documento-hint');
+
+        // Mostrar indicadores de carga
+        if (esAutocompletado) {
+            loadingIndicator.style.display = 'flex';
+            documentoHint.innerHTML = '<i class="fas fa-spinner fa-spin text-primary"></i> Consultando APIs...';
+        } else {
+            validarBtn.disabled = true;
+            validarBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Validando...';
         }
 
-        // Determinar tipo de documento según tipo de cliente
-        const tipoDocumento = tipoCliente === 'natural' ? 'DNI' : 'RUC';
-        
-        // Mostrar indicador de carga
-        const validarBtn = document.getElementById('validar_documento');
-        validarBtn.disabled = true;
-        validarBtn.textContent = 'Validando...';
-
-        console.log('Enviando solicitud para validar documento:', { tipo_documento: tipoDocumento, numero_documento: numeroDocumento });
+        console.log('Validando documento:', { tipo_documento: tipoDocumento, numero_documento: numeroDocumento, auto: esAutocompletado });
 
         fetch('{{ route('admin.clientes.validar-documento') }}', {
             method: 'POST',
@@ -379,68 +507,122 @@
                 numero_documento: numeroDocumento,
             }),
         })
-        .then(response => {
-            console.log('Estado de la respuesta:', response.status);
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            console.log('Datos recibidos:', data);
+            console.log('Respuesta de la API:', data);
+            
             if (data.success) {
-                if (tipoDocumento === 'DNI') {
-                    document.querySelectorAll('.dni-fields').forEach(field => field.style.display = 'block');
-                    document.querySelectorAll('.ruc-fields').forEach(field => field.style.display = 'none');
-                    document.getElementById('apellido_paterno').value = data.data.apellido_paterno || '';
-                    document.getElementById('apellido_materno').value = data.data.apellido_materno || '';
-                    document.getElementById('nombres').value = data.data.nombres || '';
-                    document.getElementById('razon_social').value = '';
-                } else if (tipoDocumento === 'RUC') {
-                    document.querySelectorAll('.dni-fields').forEach(field => field.style.display = 'none');
-                    document.querySelectorAll('.ruc-fields').forEach(field => field.style.display = 'block');
-                    document.getElementById('razon_social').value = data.data.nombre_o_razon_social || '';
-                    document.getElementById('apellido_paterno').value = '';
-                    document.getElementById('apellido_materno').value = '';
-                    document.getElementById('nombres').value = '';
-
-                    // Si vienen datos de ubicación, actualizar selectores
-                    if (data.data.departamento) {
-                        document.getElementById('departamento').value = data.data.departamento;
-                        
-                        // Disparar evento de cambio para cargar provincias
-                        const departamentoEvent = new Event('change');
-                        document.getElementById('departamento').dispatchEvent(departamentoEvent);
-
-                        // Esperar a que carguen las provincias
-                        setTimeout(() => {
-                            if (data.data.provincia) {
-                                document.getElementById('provincia').value = data.data.provincia;
-                                
-                                // Disparar evento de cambio para cargar distritos
-                                const provinciaEvent = new Event('change');
-                                document.getElementById('provincia').dispatchEvent(provinciaEvent);
-
-                                // Esperar a que carguen los distritos
-                                setTimeout(() => {
-                                    if (data.data.distrito) {
-                                        document.getElementById('distrito').value = data.data.distrito;
-                                    }
-                                }, 500);
-                            }
-                        }, 500);
-                    }
+                procesarDatosValidacion(data.data, tipoDocumento, esAutocompletado);
+                
+                if (esAutocompletado) {
+                    documentoHint.innerHTML = `<i class="fas fa-check text-success"></i> Datos encontrados automáticamente`;
+                } else {
+                    documentoHint.innerHTML = `<i class="fas fa-check text-success"></i> Validación exitosa`;
                 }
             } else {
-                alert(data.message || 'No se encontraron datos para el documento ingresado.');
+                if (esAutocompletado) {
+                    documentoHint.innerHTML = `<i class="fas fa-exclamation-triangle text-warning"></i> ${data.message || 'Datos no encontrados'}`;
+                } else {
+                    alert(data.message || 'No se encontraron datos para el documento ingresado.');
+                }
             }
         })
         .catch(error => {
             console.error('Error en la solicitud:', error);
-            alert('Error al validar el documento. Intente nuevamente.');
+            if (esAutocompletado) {
+                documentoHint.innerHTML = `<i class="fas fa-times text-danger"></i> Error en la consulta`;
+            } else {
+                alert('Error al validar el documento. Intente nuevamente.');
+            }
         })
         .finally(() => {
-            // Restaurar botón
-            validarBtn.disabled = false;
-            validarBtn.textContent = 'Validar Datos';
+            isValidating = false;
+            loadingIndicator.style.display = 'none';
+            
+            if (!esAutocompletado) {
+                validarBtn.disabled = false;
+                validarBtn.innerHTML = '<i class="fas fa-search me-1"></i>Validar Datos';
+            }
         });
+    }
+
+    // Procesar datos de validación
+    function procesarDatosValidacion(data, tipoDocumento, esAutocompletado) {
+        if (tipoDocumento === 'DNI') {
+            document.querySelectorAll('.dni-fields').forEach(field => field.style.display = 'block');
+            document.querySelectorAll('.ruc-fields').forEach(field => field.style.display = 'none');
+            
+            document.getElementById('apellido_paterno').value = data.apellido_paterno || '';
+            document.getElementById('apellido_materno').value = data.apellido_materno || '';
+            document.getElementById('nombres').value = data.nombres || '';
+            document.getElementById('razon_social').value = '';
+            
+            // Hacer campos editables si es autocompletado (por si hay errores en la API)
+            if (esAutocompletado) {
+                document.getElementById('apellido_paterno').readOnly = false;
+                document.getElementById('apellido_materno').readOnly = false;
+                document.getElementById('nombres').readOnly = false;
+            }
+            
+        } else if (tipoDocumento === 'RUC') {
+            document.querySelectorAll('.dni-fields').forEach(field => field.style.display = 'none');
+            document.querySelectorAll('.ruc-fields').forEach(field => field.style.display = 'block');
+            
+            document.getElementById('razon_social').value = data.nombre_o_razon_social || '';
+            document.getElementById('apellido_paterno').value = '';
+            document.getElementById('apellido_materno').value = '';
+            document.getElementById('nombres').value = '';
+            
+            // Hacer campo editable si es autocompletado
+            if (esAutocompletado) {
+                document.getElementById('razon_social').readOnly = false;
+            }
+
+            // Procesar ubicación si está disponible
+            if (data.departamento) {
+                procesarUbicacion(data);
+            }
+        }
+    }
+
+    // Procesar datos de ubicación
+    function procesarUbicacion(data) {
+        const departamentoSelect = document.getElementById('departamento');
+        
+        if (data.departamento) {
+            departamentoSelect.value = data.departamento;
+            const departamentoEvent = new Event('change');
+            departamentoSelect.dispatchEvent(departamentoEvent);
+
+            setTimeout(() => {
+                if (data.provincia) {
+                    const provinciaSelect = document.getElementById('provincia');
+                    provinciaSelect.value = data.provincia;
+                    const provinciaEvent = new Event('change');
+                    provinciaSelect.dispatchEvent(provinciaEvent);
+
+                    setTimeout(() => {
+                        if (data.distrito) {
+                            document.getElementById('distrito').value = data.distrito;
+                        }
+                    }, 600);
+                }
+            }, 600);
+        }
+    }
+
+    // Event listener para botón manual de validación
+    document.getElementById('validar_documento').addEventListener('click', function () {
+        const tipoCliente = document.getElementById('tipo_cliente').value;
+        const numeroDocumento = document.getElementById('documento_identidad').value;
+
+        if (!tipoCliente || !numeroDocumento) {
+            alert('Por favor, seleccione el tipo de cliente y proporcione el número de documento.');
+            return;
+        }
+
+        const tipoDocumento = tipoCliente === 'natural' ? 'DNI' : 'RUC';
+        validarDocumentoAPI(tipoDocumento, numeroDocumento, false);
     });
 
     // Agregar y eliminar teléfonos dinámicamente

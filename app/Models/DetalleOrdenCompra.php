@@ -76,6 +76,23 @@ class DetalleOrdenCompra extends Model
         }
         $this->save();
     }
+    
+    /**
+     * Estados posibles para estado_recepcion:
+     * - pendiente: No se ha recibido nada
+     * - parcial: Se ha recibido una cantidad menor a la solicitada
+     * - completo: Se ha recibido la cantidad exacta solicitada
+     * - completo_con_faltantes: Se marcó como completo pero faltan items
+     */
+    public function getEstadosRecepcionAttribute()
+    {
+        return [
+            'pendiente' => 'Pendiente',
+            'parcial' => 'Parcial', 
+            'completo' => 'Completo',
+            'completo_con_faltantes' => 'Completo con faltantes'
+        ];
+    }
 
     public function devoluciones()
     {

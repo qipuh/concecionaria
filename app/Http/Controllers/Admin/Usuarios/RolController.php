@@ -33,6 +33,7 @@ class RolController extends Controller
 
     public function show(Role $rol)
     {
+        $rol->load('users');
         return view('admin.usuarios.roles.show', compact('rol'));
     }
 

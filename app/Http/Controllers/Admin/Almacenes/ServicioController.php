@@ -26,7 +26,7 @@ class ServicioController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|string|max:255|unique:servicios_tercerizados,nombre',
+            'nombre' => 'required|string|max:255|unique:servicios,nombre',
             'precio' => 'required|numeric|min:0',
             'moneda' => 'required|in:SOL,USD',
             'categoria_id' => 'required|exists:categorias_servicios_tercerizados,id',
@@ -47,7 +47,7 @@ class ServicioController extends Controller
     public function update(Request $request, Servicio $servicioTercerizado)
     {
         $request->validate([
-            'nombre' => 'required|string|max:255|unique:servicios_tercerizados,nombre,' . $servicioTercerizado->id,
+            'nombre' => 'required|string|max:255|unique:servicios,nombre,' . $servicioTercerizado->id,
             'precio' => 'required|numeric|min:0',
             'moneda' => 'required|in:SOL,USD',
             'categoria_id' => 'required|exists:categorias_servicios_tercerizados,id',

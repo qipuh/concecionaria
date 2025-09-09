@@ -7,6 +7,8 @@ use App\Models\SeguimientoCotizacion;
 use App\Models\Cotizacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SeguimientoCotizacionController extends Controller
 {
@@ -93,28 +95,23 @@ class SeguimientoCotizacionController extends Controller
         $request->validate([
             'tipo' => 'required|in:nota,llamada,reunion,email,otro',
             'contenido' => 'required|string',
-            'fecha_seguimiento_date' => 'required|date',
-            'fecha_seguimiento_time' => 'required|string',
-            'recordatorio' => 'nullable|boolean',
-            'fecha_recordatorio' => 'nullable|required_if:recordatorio,1|date',
-            'hora_recordatorio' => 'nullable|required_if:recordatorio,1|string',
-            'fecha_recordatorio_completa' => 'nullable|date',
+            'fecha_seguimiento' => 'required|date_format:Y-m-d\TH:i',
+            'recordatorio' => 'nullable|string|in:on',
+            'fecha_recordatorio' => 'nullable|date_format:Y-m-d\TH:i',
         ], [
             'contenido.required' => 'El campo comentarios es obligatorio.',
             'contenido.string' => 'El campo comentarios debe ser un texto válido.',
+            'fecha_seguimiento.required' => 'La fecha de seguimiento es obligatoria.',
+            'fecha_seguimiento.date_format' => 'El formato de fecha de seguimiento es inválido.',
         ]);
     
-        // Procesar fecha de seguimiento
-        $fecha_seguimiento = $request->fecha_seguimiento_date . ' ' . $request->fecha_seguimiento_time . ':00';
+        // Procesar fecha de seguimiento desde datetime-local format
+        $fecha_seguimiento = str_replace('T', ' ', $request->fecha_seguimiento) . ':00';
     
         // Procesar fecha de recordatorio
         $fecha_recordatorio = null;
-        if ($request->has('recordatorio') && $request->recordatorio) {
-            if ($request->filled('fecha_recordatorio_completa')) {
-                $fecha_recordatorio = $request->fecha_recordatorio_completa;
-            } elseif ($request->filled('fecha_recordatorio') && $request->filled('hora_recordatorio')) {
-                $fecha_recordatorio = $request->fecha_recordatorio . ' ' . $request->hora_recordatorio . ':00';
-            }
+        if ($request->has('recordatorio') && $request->recordatorio === 'on' && $request->filled('fecha_recordatorio')) {
+            $fecha_recordatorio = str_replace('T', ' ', $request->fecha_recordatorio) . ':00';
         }
     
         $seguimiento = SeguimientoCotizacion::create([
@@ -123,7 +120,7 @@ class SeguimientoCotizacionController extends Controller
             'tipo' => $request->tipo,
             'contenido' => $request->contenido,
             'fecha_seguimiento' => $fecha_seguimiento,
-            'recordatorio' => $request->has('recordatorio') && $request->recordatorio ? true : false,
+            'recordatorio' => $request->has('recordatorio') && $request->recordatorio === 'on' ? true : false,
             'fecha_recordatorio' => $fecha_recordatorio,
         ]);
     

@@ -75,7 +75,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="fecha_emision" class="form-label">Fecha de Emisión <span class="text-danger">*</span></label>
-                                    <input type="date" name="fecha_emision" id="fecha_emision" class="form-control @error('fecha_emision') is-invalid @enderror" value="{{ old('fecha_emision', $devolucion->fecha_emision->format('Y-m-d')) }}" required>
+                                    <input type="date" name="fecha_emision" id="fecha_emision" class="form-control @error('fecha_emision') is-invalid @enderror" value="{{ old('fecha_emision', $devolucion->fecha_emision ? $devolucion->fecha_emision->format('Y-m-d') : '') }}" required>
                                     @error('fecha_emision')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

@@ -14,6 +14,12 @@ class Almacen extends Model
         'es_vehiculos',
         'centro_costo_id',
         'parent_id',
+        'activo',
+    ];
+
+    protected $casts = [
+        'es_vehiculos' => 'boolean',
+        'activo' => 'boolean',
     ];
 
     public function centroCosto()

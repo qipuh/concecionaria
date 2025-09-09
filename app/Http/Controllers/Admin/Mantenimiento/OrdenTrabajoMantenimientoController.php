@@ -127,11 +127,7 @@ class OrdenTrabajoMantenimientoController extends Controller
             'descripcion' => $parte->nombre,
         ]);
         
-        return response()->json([
-            'success' => true,
-            'detalle' => $detalleRepuesto->load('parte'),
-            'message' => 'Repuesto agregado correctamente'
-        ]);
+        return back()->with('success', 'Repuesto agregado correctamente');
     }
     
     /**
@@ -141,7 +137,7 @@ class OrdenTrabajoMantenimientoController extends Controller
     {
         // Validación de datos
         $request->validate([
-            'servicio_id' => 'required|exists:servicios_tercerizados,id',
+            'servicio_id' => 'required|exists:servicios,id',
             'cantidad' => 'required|integer|min:1',
             'precio_unitario' => 'required|numeric|min:0',
         ]);
@@ -158,11 +154,7 @@ class OrdenTrabajoMantenimientoController extends Controller
             'descripcion' => $servicio->nombre,
         ]);
         
-        return response()->json([
-            'success' => true,
-            'detalle' => $detalleServicio->load('servicio'),
-            'message' => 'Servicio agregado correctamente'
-        ]);
+        return back()->with('success', 'Servicio agregado correctamente');
     }
     
     /**
@@ -362,5 +354,51 @@ class OrdenTrabajoMantenimientoController extends Controller
         ]);
         
         return view('admin.mantenimiento.ordenes.print', compact('orden'));
+    }
+
+    /**
+     * Eliminar repuesto de la orden de trabajo
+     */
+    public function eliminarRepuesto(DetalleOrdenTrabajoRepuesto $detalle)
+    {
+        try {
+            $orden = $detalle->ordenTrabajo;
+            
+            // Verificar que la orden esté en un estado que permita modificaciones
+            if (in_array($orden->estado, ['facturado', 'entregado'])) {
+                return back()->withErrors(['error' => 'No se puede eliminar repuestos de una orden ' . $orden->estado]);
+            }
+            
+            $detalle->delete();
+            
+            return back()->with('success', 'Repuesto eliminado correctamente');
+            
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar repuesto: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Error al eliminar el repuesto']);
+        }
+    }
+
+    /**
+     * Eliminar servicio de la orden de trabajo
+     */
+    public function eliminarServicio(DetalleOrdenTrabajoServicio $detalle)
+    {
+        try {
+            $orden = $detalle->ordenTrabajo;
+            
+            // Verificar que la orden esté en un estado que permita modificaciones
+            if (in_array($orden->estado, ['facturado', 'entregado'])) {
+                return back()->withErrors(['error' => 'No se puede eliminar servicios de una orden ' . $orden->estado]);
+            }
+            
+            $detalle->delete();
+            
+            return back()->with('success', 'Servicio eliminado correctamente');
+            
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar servicio: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Error al eliminar el servicio']);
+        }
     }
 }
