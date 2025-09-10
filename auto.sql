@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:3306
--- Tiempo de generación: 06-08-2025 a las 03:40:33
+-- Tiempo de generación: 09-09-2025 a las 20:02:33
 -- Versión del servidor: 8.4.3
 -- Versión de PHP: 8.2.29
 
@@ -103,6 +103,7 @@ CREATE TABLE `almacenes` (
   `es_vehiculos` tinyint(1) NOT NULL DEFAULT '0',
   `centro_costo_id` bigint UNSIGNED NOT NULL,
   `parent_id` bigint UNSIGNED DEFAULT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -111,9 +112,9 @@ CREATE TABLE `almacenes` (
 -- Volcado de datos para la tabla `almacenes`
 --
 
-INSERT INTO `almacenes` (`id`, `nombre`, `direccion`, `es_vehiculos`, `centro_costo_id`, `parent_id`, `created_at`, `updated_at`) VALUES
-(1, 'Almacen 1', 'Av. Atahualpa 152, Cajamarca', 1, 1, NULL, '2025-03-27 23:29:57', '2025-03-27 23:29:57'),
-(2, 'Subalmacen', 'Av. Heroes del Cenepa 556', 0, 1, 1, '2025-03-28 00:24:42', '2025-03-28 00:24:42');
+INSERT INTO `almacenes` (`id`, `nombre`, `direccion`, `es_vehiculos`, `centro_costo_id`, `parent_id`, `activo`, `created_at`, `updated_at`) VALUES
+(1, 'Almacen 1', 'Av. Atahualpa 152, Cajamarca', 1, 1, NULL, 1, '2025-03-27 23:29:57', '2025-03-27 23:29:57'),
+(2, 'Subalmacen', 'Av. Heroes del Cenepa 556', 0, 1, 1, 1, '2025-03-28 00:24:42', '2025-03-28 00:24:42');
 
 -- --------------------------------------------------------
 
@@ -190,14 +191,6 @@ CREATE TABLE `cache` (
   `value` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
   `expiration` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Volcado de datos para la tabla `cache`
---
-
-INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
-('msa_automotriz_cache_echavez@qipuh.com|127.0.0.1', 'i:3;', 1751003558),
-('msa_automotriz_cache_echavez@qipuh.com|127.0.0.1:timer', 'i:1751003558;', 1751003558);
 
 -- --------------------------------------------------------
 
@@ -280,7 +273,8 @@ CREATE TABLE `catalogos` (
 INSERT INTO `catalogos` (`id`, `marca_id`, `modelo_id`, `version_id`, `anio_modelo_id`, `created_at`, `updated_at`, `fotografia`) VALUES
 (1, 1, 1, 1, 1, '2025-03-28 03:20:45', '2025-04-25 04:13:59', 'C:\\xampp\\tmp\\phpC0B7.tmp'),
 (6, 2, 1, 1, 1, '2025-04-25 04:15:02', '2025-04-25 04:27:22', 'vehiculos/83WXnqN0eIjxISCP6OkK1C1buSMTPn7s5S1pdKFE.png'),
-(7, 3, 2, 1, 2, '2025-04-25 22:02:54', '2025-04-25 22:02:54', 'vehiculos/TBjnRAaNdiDMmtXqBxU4NbMAQbyqibNEnHOcSENU.png');
+(7, 3, 2, 1, 2, '2025-04-25 22:02:54', '2025-04-25 22:02:54', 'vehiculos/TBjnRAaNdiDMmtXqBxU4NbMAQbyqibNEnHOcSENU.png'),
+(8, 3, 1, 1, 1, '2025-08-19 04:11:12', '2025-08-19 04:11:12', NULL);
 
 -- --------------------------------------------------------
 
@@ -518,7 +512,13 @@ CREATE TABLE `comentarios_seguimiento` (
 --
 
 INSERT INTO `comentarios_seguimiento` (`id`, `seguimiento_id`, `user_id`, `contenido`, `archivo`, `created_at`, `updated_at`) VALUES
-(1, 2, 1, '111', NULL, '2025-04-25 21:54:31', '2025-04-25 21:54:31');
+(1, 2, 1, '111', NULL, '2025-04-25 21:54:31', '2025-04-25 21:54:31'),
+(2, 16, 1, 'dfgfdsgfdsgfdg', NULL, '2025-09-07 13:21:37', '2025-09-07 13:21:37'),
+(3, 16, 1, 'ggggggggg', 'comentarios/1757233305_Imagen de WhatsApp 2025-09-07 a las 02.04.22_b980969a.jpg', '2025-09-07 13:21:46', '2025-09-07 13:21:46'),
+(4, 17, 1, 'fdgdfgdfgdf', 'comentarios/1757233322_Imagen de WhatsApp 2025-09-07 a las 02.04.22_b980969a.jpg', '2025-09-07 13:22:02', '2025-09-07 13:22:02'),
+(5, 17, 1, 'sdfadasdsa', 'comentarios/1757233418_Imagen de WhatsApp 2025-09-07 a las 02.10.41_8311eacd.jpg', '2025-09-07 13:23:38', '2025-09-07 13:23:38'),
+(6, 17, 1, 'sss', NULL, '2025-09-07 13:23:54', '2025-09-07 13:23:54'),
+(7, 16, 1, '33', NULL, '2025-09-07 13:26:41', '2025-09-07 13:26:41');
 
 -- --------------------------------------------------------
 
@@ -543,7 +543,30 @@ CREATE TABLE `comentarios_seguimiento_orden` (
 INSERT INTO `comentarios_seguimiento_orden` (`id`, `seguimiento_id`, `user_id`, `contenido`, `archivo`, `created_at`, `updated_at`) VALUES
 (1, 9, 1, 'hola', NULL, '2025-04-30 09:22:31', '2025-04-30 09:22:31'),
 (2, 9, 1, 'hola', NULL, '2025-04-30 09:22:31', '2025-04-30 09:22:31'),
-(3, 11, 1, '333', NULL, '2025-04-30 09:30:05', '2025-04-30 09:30:05');
+(3, 11, 1, '333', NULL, '2025-04-30 09:30:05', '2025-04-30 09:30:05'),
+(4, 12, 1, 'aaaaaaaaaa', NULL, '2025-09-07 21:11:18', '2025-09-07 21:11:18');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `componente_plan_mantenimientos`
+--
+
+CREATE TABLE `componente_plan_mantenimientos` (
+  `id` bigint UNSIGNED NOT NULL,
+  `plan_mantenimiento_id` bigint UNSIGNED NOT NULL,
+  `parte_id` bigint UNSIGNED NOT NULL,
+  `cantidad` decimal(8,2) NOT NULL,
+  `unidad_medida` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `accion` enum('Reemplazar','Inspeccionar','Lubricar') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Reemplazar',
+  `proveedor_id` int UNSIGNED DEFAULT NULL,
+  `precio_base` decimal(10,2) DEFAULT NULL,
+  `moneda` enum('USD','PEN') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PEN',
+  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -572,7 +595,8 @@ CREATE TABLE `comprobantes` (
 --
 
 INSERT INTO `comprobantes` (`id`, `cotizacion_id`, `tipo`, `serie`, `numero`, `fecha_emision`, `monto`, `moneda`, `detalle`, `archivo`, `user_id`, `created_at`, `updated_at`) VALUES
-(1, 2, 'Boleta', 'B001', '654', '2025-04-25', 11800.00, 'Dólares', '11', 'comprobantes/QenHScXtpOR1EV2le9Nrq5alXN36KRfIRnW9OqT5.pdf', 1, '2025-04-25 21:55:03', '2025-04-25 21:55:03');
+(1, 2, 'Boleta', 'B001', '654', '2025-04-25', 11800.00, 'Dólares', '11', 'comprobantes/QenHScXtpOR1EV2le9Nrq5alXN36KRfIRnW9OqT5.pdf', 1, '2025-04-25 21:55:03', '2025-04-25 21:55:03'),
+(2, 49, 'Factura', 'B001', '234', '2025-09-07', 654.90, 'Soles', NULL, NULL, 1, '2025-09-07 13:27:29', '2025-09-07 13:27:29');
 
 -- --------------------------------------------------------
 
@@ -648,18 +672,26 @@ CREATE TABLE `cotizaciones` (
   `porcentaje_abono` decimal(5,2) DEFAULT '100.00',
   `abono` decimal(12,2) DEFAULT NULL,
   `saldo_pendiente` decimal(12,2) DEFAULT NULL,
-  `items_pendientes` text COLLATE utf8mb4_general_ci COMMENT 'Descripción de items sin stock'
+  `items_pendientes` text COLLATE utf8mb4_general_ci COMMENT 'Descripción de items sin stock',
+  `regla_vencimiento_id` bigint UNSIGNED DEFAULT NULL,
+  `fecha_ultimo_seguimiento` datetime DEFAULT NULL COMMENT 'Última fecha de seguimiento o actividad',
+  `fecha_vencimiento` datetime DEFAULT NULL COMMENT 'Fecha calculada de vencimiento',
+  `fecha_alerta` datetime DEFAULT NULL COMMENT 'Fecha para enviar alerta de vencimiento próximo',
+  `vencida` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Si la cotización está vencida',
+  `reasignable` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Si puede ser reasignada a otro asesor',
+  `historial_vencimiento` json DEFAULT NULL COMMENT 'Historial de cambios por vencimiento'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `cotizaciones`
 --
 
-INSERT INTO `cotizaciones` (`id`, `codigo`, `cliente_id`, `almacen_id`, `condicion`, `canal`, `moneda`, `forma_pago`, `datos_adicionales`, `subtotal`, `impuestos`, `total`, `estado_id`, `user_id`, `fecha_validez`, `created_at`, `updated_at`, `deleted_at`, `gestionado`, `porcentaje_abono`, `abono`, `saldo_pendiente`, `items_pendientes`) VALUES
-(2, 'COT-202504000001', 4, 1, 'Nuevo', 'Retail', 'Dólares', 'Contado', NULL, 10000.00, 1800.00, 11800.00, 1, 1, '2025-05-25', '2025-04-25 21:10:50', '2025-04-25 21:10:50', NULL, 0, 100.00, NULL, NULL, NULL),
-(3, 'COT-202504000002', 1, 1, 'Nuevo', 'Flota', 'Dólares', 'Contado', NULL, 455555.00, 81999.90, 537554.90, 1, 1, '2025-05-30', '2025-04-30 10:07:37', '2025-06-27 10:55:49', NULL, 0, 100.00, NULL, NULL, NULL),
-(4, 'COT-202504000003', 6, 1, 'Nuevo', 'Flota', 'Dólares', 'Contado', NULL, 30000.00, 5400.00, 35400.00, 4, 1, '2025-05-30', '2025-04-30 10:46:49', '2025-04-30 10:48:35', NULL, 0, 100.00, NULL, NULL, NULL),
-(5, 'COT-202504000004', 6, 1, 'Nuevo', 'Flota', 'Dólares', 'Contado', NULL, 50000.00, 9000.00, 59000.00, 1, 1, '2025-05-30', '2025-04-30 20:41:26', '2025-04-30 20:41:26', NULL, 0, 100.00, NULL, NULL, NULL);
+INSERT INTO `cotizaciones` (`id`, `codigo`, `cliente_id`, `almacen_id`, `condicion`, `canal`, `moneda`, `forma_pago`, `datos_adicionales`, `subtotal`, `impuestos`, `total`, `estado_id`, `user_id`, `fecha_validez`, `created_at`, `updated_at`, `deleted_at`, `gestionado`, `porcentaje_abono`, `abono`, `saldo_pendiente`, `items_pendientes`, `regla_vencimiento_id`, `fecha_ultimo_seguimiento`, `fecha_vencimiento`, `fecha_alerta`, `vencida`, `reasignable`, `historial_vencimiento`) VALUES
+(2, 'COT-202504000001', 4, 1, 'Nuevo', 'Retail', 'Dólares', 'Contado', NULL, 10000.00, 1800.00, 11800.00, 1, 1, '2025-05-25', '2025-04-25 21:10:50', '2025-04-25 21:10:50', NULL, 0, 100.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL),
+(3, 'COT-202504000002', 1, 1, 'Nuevo', 'Flota', 'Dólares', 'Contado', NULL, 455555.00, 81999.90, 537554.90, 1, 1, '2025-05-30', '2025-04-30 10:07:37', '2025-06-27 10:55:49', NULL, 0, 100.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL),
+(4, 'COT-202504000003', 6, 1, 'Nuevo', 'Flota', 'Dólares', 'Contado', NULL, 30000.00, 5400.00, 35400.00, 4, 1, '2025-05-30', '2025-04-30 10:46:49', '2025-04-30 10:48:35', NULL, 0, 100.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL),
+(5, 'COT-202504000004', 6, 1, 'Nuevo', 'Flota', 'Dólares', 'Contado', NULL, 50000.00, 9000.00, 59000.00, 1, 1, '2025-05-30', '2025-04-30 20:41:26', '2025-04-30 20:41:26', NULL, 0, 100.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL),
+(49, 'COT-20250005', 6, 1, 'Nuevo', 'Retail', 'Soles', 'Contado', 'Venta generada desde POS\nTipo de documento: Boleta\n\nITEMS SIN STOCK:\nParrillas (Solicitados: 1, Disponibles: 0)', 555.00, 99.90, 654.90, 3, 1, '2025-10-07', '2025-09-07 05:13:47', '2025-09-07 12:50:40', NULL, 0, 100.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -762,7 +794,9 @@ INSERT INTO `detalles_cotizacion` (`id`, `cotizacion_id`, `vehiculo_catalogo_id`
 (2, 2, 1, 1, NULL, NULL, 1, 10000.00, 0.00, 10000.00, 10000.00, '2025-04-25 21:10:50', '2025-04-25 21:10:50', NULL),
 (3, 3, 1, 2, NULL, NULL, 1, 455555.00, 0.00, 455555.00, 455555.00, '2025-04-30 10:07:37', '2025-04-30 10:07:37', NULL),
 (4, 4, 1, 2, NULL, NULL, 1, 30000.00, 0.00, 30000.00, 30000.00, '2025-04-30 10:46:49', '2025-04-30 10:46:49', NULL),
-(5, 5, 1, 2, NULL, NULL, 1, 50000.00, 0.00, 50000.00, 50000.00, '2025-04-30 20:41:26', '2025-04-30 20:41:26', NULL);
+(5, 5, 1, 2, NULL, NULL, 1, 50000.00, 0.00, 50000.00, 50000.00, '2025-04-30 20:41:26', '2025-04-30 20:41:26', NULL),
+(9, 49, NULL, NULL, 4, NULL, 1, 55.00, 0.00, 55.00, 55.00, '2025-09-07 05:13:47', '2025-09-07 05:13:47', NULL),
+(10, 49, NULL, NULL, 1, NULL, 1, 500.00, 0.00, 500.00, 500.00, '2025-09-07 05:13:47', '2025-09-07 05:13:47', NULL);
 
 -- --------------------------------------------------------
 
@@ -780,6 +814,14 @@ CREATE TABLE `detalles_devolucion_proveedor` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `detalles_devolucion_proveedor`
+--
+
+INSERT INTO `detalles_devolucion_proveedor` (`id`, `devolucion_proveedor_id`, `item_id`, `tipo_item`, `cantidad`, `motivo_detalle`, `created_at`, `updated_at`) VALUES
+(8, 14, 1, 'parte', 1.00, '321321', '2025-09-07 21:44:41', '2025-09-07 21:44:41'),
+(9, 15, 1, 'parte', 1.00, NULL, '2025-09-07 21:47:24', '2025-09-07 21:47:24');
 
 -- --------------------------------------------------------
 
@@ -862,6 +904,28 @@ CREATE TABLE `detalles_venta_pos` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `detalle_guias_entrega`
+--
+
+CREATE TABLE `detalle_guias_entrega` (
+  `id` bigint UNSIGNED NOT NULL,
+  `guia_entrega_id` bigint UNSIGNED NOT NULL,
+  `producto_id` bigint UNSIGNED NOT NULL,
+  `tipo_producto` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `codigo_producto` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre_producto` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cantidad_enviada` decimal(8,2) NOT NULL,
+  `cantidad_recibida` decimal(8,2) NOT NULL DEFAULT '0.00',
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `observaciones_detalle` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `detalle_orden_compras`
 --
 
@@ -876,7 +940,7 @@ CREATE TABLE `detalle_orden_compras` (
   `cantidad_en_compra` decimal(10,2) NOT NULL,
   `cantidad_recibida` decimal(10,2) DEFAULT '0.00',
   `cantidad_pendiente` decimal(10,2) DEFAULT '0.00',
-  `estado_recepcion` enum('pendiente','parcial','completo') COLLATE utf8mb4_general_ci DEFAULT 'pendiente',
+  `estado_recepcion` varchar(30) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `unidad` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `precio_compra` decimal(10,2) NOT NULL DEFAULT '0.00',
   `descuento` decimal(10,2) NOT NULL DEFAULT '0.00',
@@ -898,7 +962,9 @@ INSERT INTO `detalle_orden_compras` (`id`, `orden_compra_id`, `item_id`, `tipo_i
 (4, 5, 1, 'vehiculo', 'V1', 'Volvo V-100 5000 2023', 50.00, 50.00, 3.00, 0.00, 'completo', 'UND', 5000.00, 0.00, 250000.00, 1, '2025-04-25 22:56:59', '2025-05-26 21:18:12', NULL),
 (5, 6, 1, 'vehiculo', 'V1', 'Volvo V-100 5000 2023', 1.00, 1.00, 1.00, 0.00, 'completo', 'UND', 30.00, 0.00, 30.00, 1, '2025-05-26 19:18:25', '2025-05-26 21:44:13', NULL),
 (6, 7, 1, 'parte', '000001', 'Reten A', 25.00, 25.00, 25.00, 0.00, 'completo', 'UND', 35.00, 0.00, 875.00, 1, '2025-05-27 01:32:07', '2025-05-27 01:35:29', NULL),
-(7, 7, 4, 'parte', '000004', 'Parrillas', 30.00, 30.00, 30.00, 0.00, 'completo', 'UND', 26.00, 0.00, 780.00, 1, '2025-05-27 01:32:07', '2025-05-27 01:35:29', NULL);
+(7, 7, 4, 'parte', '000004', 'Parrillas', 30.00, 30.00, 30.00, 0.00, 'completo', 'UND', 26.00, 0.00, 780.00, 1, '2025-05-27 01:32:07', '2025-05-27 01:35:29', NULL),
+(8, 8, 1, 'parte', '000001', 'Reten A', 25.00, 25.00, 1.00, 0.00, 'parcial', 'UND', 0.00, 0.00, 0.00, 1, '2025-09-07 22:13:34', '2025-09-07 22:20:12', NULL),
+(9, 8, 4, 'parte', '000004', 'Parrillas', 30.00, 30.00, 1.00, 0.00, 'completo_con_faltantes', 'UND', 0.00, 0.00, 0.00, 1, '2025-09-07 22:13:34', '2025-09-07 22:19:34', NULL);
 
 -- --------------------------------------------------------
 
@@ -926,7 +992,11 @@ CREATE TABLE `detalle_orden_trabajo_repuestos` (
 INSERT INTO `detalle_orden_trabajo_repuestos` (`id`, `orden_trabajo_id`, `parte_id`, `descripcion`, `cantidad`, `precio_unitario`, `subtotal`, `notas`, `created_at`, `updated_at`) VALUES
 (1, 1, 2, 'producto 2', 1, 321.00, NULL, NULL, '2025-04-29 21:23:05', '2025-04-29 21:23:05'),
 (2, 1, 2, 'producto 2', 1, 321.00, NULL, NULL, '2025-04-29 21:35:53', '2025-04-29 21:35:53'),
-(3, 2, 4, 'Parrillas', 1, 50.00, NULL, NULL, '2025-04-30 04:49:35', '2025-04-30 04:49:35');
+(4, 2, 4, 'Parrillas', 1, 55.00, NULL, NULL, '2025-09-07 21:13:00', '2025-09-07 21:13:00'),
+(6, 2, 2, 'producto 2', 1, 321.00, 321.00, NULL, '2025-09-07 21:16:52', '2025-09-07 21:16:52'),
+(7, 2, 4, 'Parrillas', 1, 55.00, 55.00, NULL, '2025-09-07 21:18:42', '2025-09-07 21:18:42'),
+(8, 2, 4, 'Parrillas', 1, 55.00, 55.00, NULL, '2025-09-07 21:21:00', '2025-09-07 21:21:00'),
+(9, 2, 4, 'Parrillas', 1, 55.00, 55.00, NULL, '2025-09-07 21:21:10', '2025-09-07 21:21:10');
 
 -- --------------------------------------------------------
 
@@ -949,6 +1019,37 @@ CREATE TABLE `detalle_orden_trabajo_servicios` (
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Volcado de datos para la tabla `detalle_orden_trabajo_servicios`
+--
+
+INSERT INTO `detalle_orden_trabajo_servicios` (`id`, `orden_trabajo_id`, `servicio_id`, `descripcion`, `cantidad`, `precio_unitario`, `subtotal`, `tiempo_estimado`, `tiempo_real`, `notas`, `created_at`, `updated_at`) VALUES
+(1, 2, 2, 'Colocación Videro Liquido', 1, 200.00, 200.00, NULL, NULL, NULL, '2025-09-07 21:15:29', '2025-09-07 21:15:29'),
+(2, 2, 1, 'Inyección', 1, 300.00, 300.00, NULL, NULL, NULL, '2025-09-07 21:15:40', '2025-09-07 21:15:40'),
+(3, 2, 1, 'Inyección', 1, 300.00, 300.00, NULL, NULL, NULL, '2025-09-07 21:21:06', '2025-09-07 21:21:06');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `detalle_vales_devolucion`
+--
+
+CREATE TABLE `detalle_vales_devolucion` (
+  `id` bigint UNSIGNED NOT NULL,
+  `vale_devolucion_id` bigint UNSIGNED NOT NULL,
+  `producto_id` bigint UNSIGNED NOT NULL,
+  `tipo_producto` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `codigo_producto` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nombre_producto` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cantidad` decimal(8,2) NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `motivo_detalle` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `observaciones_detalle` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- --------------------------------------------------------
 
 --
@@ -965,6 +1066,13 @@ CREATE TABLE `devoluciones_orden_compra` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `devoluciones_orden_compra`
+--
+
+INSERT INTO `devoluciones_orden_compra` (`id`, `detalle_orden_compra_id`, `cantidad_devuelta`, `motivo`, `fecha_devolucion`, `devuelto_por`, `created_at`, `updated_at`) VALUES
+(1, 8, 1, 'sssssssssssssssssssssssssssss', '2025-09-07', 1, '2025-09-07 22:20:12', '2025-09-07 22:20:12');
 
 -- --------------------------------------------------------
 
@@ -985,6 +1093,14 @@ CREATE TABLE `devoluciones_proveedor` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `devoluciones_proveedor`
+--
+
+INSERT INTO `devoluciones_proveedor` (`id`, `codigo`, `proveedor_id`, `motivo`, `fecha_emision`, `observaciones`, `estado`, `usuario_id`, `almacen_id`, `created_at`, `updated_at`) VALUES
+(14, 'DEV-202509000001', 2, 'DOMINIO Y HOSTING PERIODO JULIO 2025 A 2026', '2025-09-07', 'dsadsa', 'PENDIENTE', 1, 1, '2025-09-07 21:44:41', '2025-09-07 21:44:41'),
+(15, 'DEV-202509000002', 2, 'IMPLEMENTACIÓN DE SISTEMA DE GESTIÓN, AULA VIRTUAL, PÁGINA WEB Y FACTURACIÓN ELECTRÓNICA, PARA EL COLEGIO DE ECONOMISTAS DE HUANUCO', '2025-09-07', NULL, 'PROCESADA', 1, 2, '2025-09-07 21:47:24', '2025-09-07 21:53:05');
 
 -- --------------------------------------------------------
 
@@ -2516,7 +2632,8 @@ CREATE TABLE `documentos_sunarp` (
 --
 
 INSERT INTO `documentos_sunarp` (`id`, `cotizacion_id`, `nombre`, `tipo`, `fecha`, `archivo`, `observaciones`, `user_id`, `created_at`, `updated_at`) VALUES
-(1, 2, '01', 'Contrato de Compra-Venta', '2025-04-25', 'documentos_sunarp/d8CQe6MIWADRi2VSOXgMOPsoYxHBLyNlnqb3o6Q7.pdf', '000', 1, '2025-04-25 21:55:35', '2025-04-25 21:55:35');
+(1, 2, '01', 'Contrato de Compra-Venta', '2025-04-25', 'documentos_sunarp/d8CQe6MIWADRi2VSOXgMOPsoYxHBLyNlnqb3o6Q7.pdf', '000', 1, '2025-04-25 21:55:35', '2025-04-25 21:55:35'),
+(2, 2, 'OPERACIÓN A', 'Contrato de Compra-Venta', '2025-09-07', 'documentos_sunarp/0erqgE9yAcR3ovy1GyqnRDAtVqfC2WVROnGEfeBn.pdf', NULL, 1, '2025-09-07 13:31:57', '2025-09-07 13:31:57');
 
 -- --------------------------------------------------------
 
@@ -2718,6 +2835,31 @@ CREATE TABLE `failed_jobs` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `guias_entrega`
+--
+
+CREATE TABLE `guias_entrega` (
+  `id` bigint UNSIGNED NOT NULL,
+  `numero` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fecha` date NOT NULL,
+  `proveedor_id` bigint UNSIGNED NOT NULL,
+  `transportista` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `placa_vehiculo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `conductor` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dni_conductor` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `estado` enum('pendiente','en_transito','recibida','cancelada') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendiente',
+  `usuario_id` bigint UNSIGNED NOT NULL,
+  `recibido_por` bigint UNSIGNED DEFAULT NULL,
+  `fecha_recepcion` timestamp NULL DEFAULT NULL,
+  `total` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `historial_cotizaciones`
 --
 
@@ -2750,7 +2892,8 @@ INSERT INTO `historial_cotizaciones` (`id`, `cotizacion_id`, `estado_anterior_id
 (11, 4, 1, 4, 1, '12', '2025-04-30 10:48:35', '2025-04-30 10:48:35'),
 (12, 4, 4, 4, 1, 'Se generó requerimiento de compra #5', '2025-04-30 20:37:48', '2025-04-30 20:37:48'),
 (13, 5, NULL, 1, 1, 'Cotización creada inicialmente en estado Interesado', '2025-04-30 20:41:26', '2025-04-30 20:41:26'),
-(14, 3, 3, 1, 1, 'xasx', '2025-06-27 10:55:49', '2025-06-27 10:55:49');
+(14, 3, 3, 1, 1, 'xasx', '2025-06-27 10:55:49', '2025-06-27 10:55:49'),
+(15, 49, 24, 3, 1, '32132132', '2025-09-07 12:50:40', '2025-09-07 12:50:40');
 
 -- --------------------------------------------------------
 
@@ -2769,6 +2912,27 @@ CREATE TABLE `historial_requerimiento_compras` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `intervalo_plan_mantenimientos`
+--
+
+CREATE TABLE `intervalo_plan_mantenimientos` (
+  `id` bigint UNSIGNED NOT NULL,
+  `plan_mantenimiento_id` bigint UNSIGNED NOT NULL,
+  `componente_plan_id` bigint UNSIGNED NOT NULL,
+  `kilometraje` int NOT NULL,
+  `horas` int DEFAULT NULL,
+  `cantidad_especifica` decimal(8,2) DEFAULT NULL,
+  `precio_especifico` decimal(10,2) DEFAULT NULL,
+  `moneda_precio` enum('USD','PEN') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PEN',
+  `aplica` tinyint(1) NOT NULL DEFAULT '0',
+  `notas` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -2796,9 +2960,9 @@ CREATE TABLE `inventarios` (
 --
 
 INSERT INTO `inventarios` (`id`, `parte_id`, `vehiculo_id`, `almacen_id`, `centro_costo_id`, `stock_disponible`, `stock_reservado`, `stock_minimo`, `stock_maximo`, `ubicacion`, `created_at`, `updated_at`) VALUES
-(7, 1, NULL, 1, 1, 97.000, 0.000, 10.000, 500.000, NULL, '2025-04-25 18:02:39', '2025-06-26 11:01:26'),
-(8, 1, NULL, 2, NULL, 25.000, 0.000, 0.000, 0.000, NULL, '2025-05-27 01:35:29', '2025-05-27 01:35:29'),
-(9, 4, NULL, 2, NULL, 30.000, 0.000, 0.000, 0.000, NULL, '2025-05-27 01:35:29', '2025-05-27 01:35:29');
+(7, 1, NULL, 1, 1, 95.000, 0.000, 10.000, 500.000, NULL, '2025-04-25 18:02:39', '2025-09-07 21:44:41'),
+(8, 1, NULL, 2, NULL, 25.000, 0.000, 0.000, 0.000, NULL, '2025-05-27 01:35:29', '2025-09-07 22:20:12'),
+(9, 4, NULL, 2, NULL, 31.000, 0.000, 0.000, 0.000, NULL, '2025-05-27 01:35:29', '2025-09-07 22:19:34');
 
 -- --------------------------------------------------------
 
@@ -2897,7 +3061,10 @@ CREATE TABLE `kardex` (
 
 INSERT INTO `kardex` (`id`, `parte_id`, `vehiculo_id`, `almacen_id`, `tipo_movimiento`, `concepto`, `numero_documento`, `cantidad_entrada`, `cantidad_salida`, `stock_anterior`, `stock_actual`, `costo_unitario`, `valor_total`, `fecha_movimiento`, `usuario_id`, `referencia_id`, `referencia_tipo`, `observaciones`, `created_at`, `updated_at`) VALUES
 (1, 1, NULL, 2, 'ENTRADA', 'COMPRA', 'OC-6', 25.00, 0.00, 0.00, 25.00, 35.0000, 875.00, '2025-05-26 00:00:00', 1, 7, 'App\\Models\\RecepcionOrdenCompra', NULL, '2025-05-27 01:35:29', '2025-05-27 01:35:29'),
-(2, 4, NULL, 2, 'ENTRADA', 'COMPRA', 'OC-6', 30.00, 0.00, 0.00, 30.00, 26.0000, 780.00, '2025-05-26 00:00:00', 1, 8, 'App\\Models\\RecepcionOrdenCompra', NULL, '2025-05-27 01:35:29', '2025-05-27 01:35:29');
+(2, 4, NULL, 2, 'ENTRADA', 'COMPRA', 'OC-6', 30.00, 0.00, 0.00, 30.00, 26.0000, 780.00, '2025-05-26 00:00:00', 1, 8, 'App\\Models\\RecepcionOrdenCompra', NULL, '2025-05-27 01:35:29', '2025-05-27 01:35:29'),
+(5, 1, NULL, 2, 'ENTRADA', 'COMPRA', 'OC-7', 2.00, 0.00, 24.00, 26.00, 0.0000, 0.00, '2025-09-07 00:00:00', 1, 11, 'App\\Models\\RecepcionOrdenCompra', NULL, '2025-09-07 22:19:34', '2025-09-07 22:19:34'),
+(6, 4, NULL, 2, 'ENTRADA', 'COMPRA', 'OC-7', 1.00, 0.00, 30.00, 31.00, 0.0000, 0.00, '2025-09-07 00:00:00', 1, 12, 'App\\Models\\RecepcionOrdenCompra', NULL, '2025-09-07 22:19:34', '2025-09-07 22:19:34'),
+(7, 1, NULL, 2, 'SALIDA', 'DEVOLUCION_COMPRA', 'OC-7', 0.00, 1.00, 26.00, 25.00, 0.0000, 0.00, '2025-09-07 00:00:00', 1, 1, 'App\\Models\\DevolucionOrdenCompra', 'sssssssssssssssssssssssssssss', '2025-09-07 22:20:12', '2025-09-07 22:20:12');
 
 -- --------------------------------------------------------
 
@@ -2941,7 +3108,24 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '0001_01_01_000000_create_users_table', 1),
 (2, '0001_01_01_000001_create_cache_table', 1),
 (3, '0001_01_01_000002_create_jobs_table', 1),
-(4, '2025_03_12_165455_add_two_factor_columns_to_users_table', 1);
+(4, '2025_03_12_165455_add_two_factor_columns_to_users_table', 1),
+(5, '2025_09_06_231154_add_activo_column_to_almacenes_table', 2),
+(6, '2025_09_06_232049_create_tipos_cambio_table', 3),
+(7, '2025_09_07_002424_update_ventas_table_add_estados_and_pagos', 4),
+(8, '2025_09_07_002953_create_pagos_ventas_table', 5),
+(9, '2025_09_07_083531_create_reglas_vencimiento_cotizaciones_table', 6),
+(10, '2025_09_07_083607_add_vencimiento_fields_to_cotizaciones_table', 7),
+(11, '2025_09_07_164013_add_updated_at_to_tipos_movimiento_table', 8),
+(12, '2025_09_07_164247_add_documento_columns_to_movimientos_table', 9),
+(13, '2025_09_07_171809_update_detalle_orden_compras_estado_recepcion_column', 10),
+(14, '2025_09_07_234933_create_vale_devolucions_table', 11),
+(15, '2025_09_07_235010_create_detalle_vales_devolucion_table', 12),
+(16, '2025_09_07_235620_fix_vale_devolucion_foreign_keys', 13),
+(17, '2025_09_08_022329_create_guias_entrega_table', 14),
+(18, '2025_09_08_022529_create_detalle_guias_entrega_table', 15),
+(19, '2025_09_08_024536_create_plan_mantenimientos_table', 16),
+(20, '2025_09_08_024738_create_componente_plan_mantenimientos_table', 17),
+(21, '2025_09_08_024740_create_intervalo_plan_mantenimientos_table', 18);
 
 -- --------------------------------------------------------
 
@@ -2983,6 +3167,8 @@ CREATE TABLE `movimientos` (
   `cantidad` int NOT NULL,
   `stock_anterior` int DEFAULT '0',
   `stock_resultante` int DEFAULT '0',
+  `documento_tipo` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `documento_id` bigint UNSIGNED DEFAULT NULL,
   `documento_referencia` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `fecha_movimiento` datetime NOT NULL,
   `usuario_id` bigint UNSIGNED NOT NULL,
@@ -2995,12 +3181,15 @@ CREATE TABLE `movimientos` (
 -- Volcado de datos para la tabla `movimientos`
 --
 
-INSERT INTO `movimientos` (`id`, `tipo_movimiento_id`, `parte_id`, `almacen_id`, `centro_costo_id`, `cantidad`, `stock_anterior`, `stock_resultante`, `documento_referencia`, `fecha_movimiento`, `usuario_id`, `observaciones`, `created_at`, `updated_at`) VALUES
-(1, 1, 3, 1, 1, 321, 0, 0, '222', '2025-04-25 17:40:00', 1, '111', '2025-04-25 22:40:50', '2025-04-25 22:40:50'),
-(2, 3, 1, 2, 1, 10, 0, 0, '222', '2025-04-26 00:18:00', 1, '1111111111', '2025-04-26 05:18:44', '2025-04-26 05:18:44'),
-(10, 4, 1, 1, NULL, 1, 100, 99, 'COT-20250005', '2025-05-28 05:24:11', 1, 'Venta generada desde POS. Cotización: COT-20250005', '2025-05-28 10:24:11', '2025-05-28 10:24:11'),
-(11, 4, 1, 1, NULL, 1, 99, 98, 'COT-20250528073019', '2025-05-28 07:30:19', 1, 'Venta generada desde POS. Cotización: COT-20250528073019', '2025-05-28 12:30:19', '2025-05-28 12:30:19'),
-(12, 4, 1, 1, NULL, 1, 98, 97, 'COT-20253020', '2025-06-26 06:01:26', 1, 'Venta generada desde POS. Cotización: COT-20253020', '2025-06-26 11:01:26', '2025-06-26 11:01:26');
+INSERT INTO `movimientos` (`id`, `tipo_movimiento_id`, `parte_id`, `almacen_id`, `centro_costo_id`, `cantidad`, `stock_anterior`, `stock_resultante`, `documento_tipo`, `documento_id`, `documento_referencia`, `fecha_movimiento`, `usuario_id`, `observaciones`, `created_at`, `updated_at`) VALUES
+(1, 1, 3, 1, 1, 321, 0, 0, NULL, NULL, '222', '2025-04-25 17:40:00', 1, '111', '2025-04-25 22:40:50', '2025-04-25 22:40:50'),
+(2, 3, 1, 2, 1, 10, 0, 0, NULL, NULL, '222', '2025-04-26 00:18:00', 1, '1111111111', '2025-04-26 05:18:44', '2025-04-26 05:18:44'),
+(10, 4, 1, 1, NULL, 1, 100, 99, NULL, NULL, 'COT-20250005', '2025-05-28 05:24:11', 1, 'Venta generada desde POS. Cotización: COT-20250005', '2025-05-28 10:24:11', '2025-05-28 10:24:11'),
+(11, 4, 1, 1, NULL, 1, 99, 98, NULL, NULL, 'COT-20250528073019', '2025-05-28 07:30:19', 1, 'Venta generada desde POS. Cotización: COT-20250528073019', '2025-05-28 12:30:19', '2025-05-28 12:30:19'),
+(12, 4, 1, 1, NULL, 1, 98, 97, NULL, NULL, 'COT-20253020', '2025-06-26 06:01:26', 1, 'Venta generada desde POS. Cotización: COT-20253020', '2025-06-26 11:01:26', '2025-06-26 11:01:26'),
+(13, 4, 1, 1, NULL, 1, 97, 96, NULL, NULL, 'COT-20250005', '2025-09-07 00:13:47', 1, 'Venta generada desde POS. Cotización: COT-20250005', '2025-09-07 05:13:47', '2025-09-07 05:13:47'),
+(14, 6, 1, 1, NULL, 1, 96, 95, 'devolucion_proveedor', 14, 'DEV-202509000001', '2025-09-07 16:44:41', 1, 'Devolución al proveedor: QIPU S.A.C.S', '2025-09-07 21:44:41', '2025-09-07 21:44:41'),
+(15, 6, 1, 2, NULL, 1, 25, 24, 'devolucion_proveedor', 15, 'DEV-202509000002', '2025-09-07 16:47:24', 1, 'Devolución al proveedor: QIPU S.A.C.S', '2025-09-07 21:47:24', '2025-09-07 21:47:24');
 
 -- --------------------------------------------------------
 
@@ -3026,7 +3215,8 @@ CREATE TABLE `notas_pedido` (
 
 INSERT INTO `notas_pedido` (`id`, `cotizacion_id`, `codigo`, `fecha_emision`, `estado`, `observaciones`, `user_id`, `created_at`, `updated_at`) VALUES
 (1, 2, 'NP-202504000001', '2025-04-25', 'Pendiente', NULL, 1, '2025-04-25 21:55:14', '2025-04-25 21:55:14'),
-(2, 5, 'NP-202506000001', '2025-06-03', 'Pendiente', NULL, 1, '2025-06-03 10:21:53', '2025-06-03 10:21:53');
+(2, 5, 'NP-202506000001', '2025-06-03', 'Pendiente', NULL, 1, '2025-06-03 10:21:53', '2025-06-03 10:21:53'),
+(3, 49, 'NP-202509000001', '2025-09-07', 'Pendiente', NULL, 1, '2025-09-07 13:27:39', '2025-09-07 13:27:39');
 
 -- --------------------------------------------------------
 
@@ -3054,7 +3244,10 @@ CREATE TABLE `nota_pedido_items` (
 --
 
 INSERT INTO `nota_pedido_items` (`id`, `nota_pedido_id`, `item_id`, `item_type`, `tipo`, `descripcion`, `cantidad`, `precio_unitario`, `detalles`, `subtipo`, `created_at`, `updated_at`) VALUES
-(1, 1, 3, 'App\\Models\\Servicio', 'servicio', 'Camara pantalla - Propios', 1.00, 0.00, NULL, NULL, '2025-04-25 21:55:14', '2025-04-25 21:55:14');
+(1, 1, 3, 'App\\Models\\Servicio', 'servicio', 'Camara pantalla - Propios', 1.00, 0.00, NULL, NULL, '2025-04-25 21:55:14', '2025-04-25 21:55:14'),
+(2, 3, 2, 'App\\Models\\Servicio', 'servicio', 'Colocación Videro Liquido - Terceros', 1.00, 200.00, NULL, NULL, '2025-09-07 13:30:20', '2025-09-07 13:30:20'),
+(3, 3, 2, 'App\\Models\\Parte', 'parte', '000002 - producto 2 ()', 1.00, 1219.80, NULL, NULL, '2025-09-07 13:30:28', '2025-09-07 13:30:28'),
+(4, 3, 3, 'App\\Models\\Servicio', 'servicio', 'Camara pantalla - Propios', 1.00, 321.00, NULL, NULL, '2025-09-07 13:30:40', '2025-09-07 13:30:40');
 
 -- --------------------------------------------------------
 
@@ -3116,7 +3309,7 @@ CREATE TABLE `ordenes_trabajo_mantenimiento` (
 
 INSERT INTO `ordenes_trabajo_mantenimiento` (`id`, `codigo_orden`, `vehiculo_id`, `cliente_id`, `cita_id`, `fecha_ingreso`, `fecha_diagnostico`, `fecha_aprobacion_cliente`, `fecha_inicio_trabajo`, `fecha_fin_trabajo`, `fecha_entrega`, `kilometraje_ingreso`, `kilometraje_salida`, `descripcion_problema`, `diagnostico`, `recomendaciones`, `tecnico_asignado_id`, `box`, `estado`, `aprobado_por_cliente`, `metodo_aprobacion`, `fecha_proxima_revision`, `created_at`, `updated_at`) VALUES
 (1, 'OT-20250429155020-1', 1, 1, 1, '2025-04-29 15:50:20', NULL, NULL, NULL, NULL, NULL, 32132.00, NULL, 'SSSS', NULL, NULL, 2, '1', 'completado', 0, NULL, NULL, '2025-04-29 20:50:20', '2025-04-30 09:49:58'),
-(2, 'OT-20250429234656-2', 2, 1, 2, '2025-04-29 23:46:56', NULL, NULL, NULL, NULL, NULL, 5000.00, NULL, 'sasasasasasasasasasasasa', NULL, NULL, 2, '2', 'en_progreso', 0, NULL, NULL, '2025-04-30 04:46:56', '2025-04-30 04:51:52');
+(2, 'OT-20250429234656-2', 2, 1, 2, '2025-04-29 23:46:56', NULL, NULL, NULL, NULL, NULL, 5000.00, NULL, 'sasasasasasasasasasasasa', NULL, NULL, 2, '2', 'completado', 0, NULL, NULL, '2025-04-30 04:46:56', '2025-09-07 21:21:21');
 
 -- --------------------------------------------------------
 
@@ -3155,7 +3348,8 @@ INSERT INTO `orden_compras` (`id`, `codigo`, `requerimiento_compra_id`, `tipo`, 
 (3, 'OC-3', 2, 'inventario', 'aprobada', 'completo', 2, 1, 1, 2, 'S/', '4234234', '2025-04-25', 432340.00, '2025-04-25 22:41:41', '2025-05-26 21:18:35', NULL, NULL),
 (5, 'OC-4', 3, 'inventario', 'aprobada', 'completo', 2, 1, 1, 2, 'S/', NULL, '2025-04-25', 250000.00, '2025-04-25 22:56:59', '2025-05-26 21:18:12', NULL, NULL),
 (6, 'OC-5', 5, 'inventario', 'aprobada', 'completo', 1, 1, 1, 2, 'S/', NULL, '2025-05-26', 30.00, '2025-05-26 19:18:25', '2025-05-26 21:44:13', NULL, NULL),
-(7, 'OC-6', 8, 'inventario', 'aprobada', 'completo', 2, 1, 1, 2, 'S/', NULL, '2025-05-26', 1655.00, '2025-05-27 01:32:07', '2025-05-27 01:35:29', NULL, NULL);
+(7, 'OC-6', 8, 'inventario', 'aprobada', 'completo', 2, 1, 1, 2, 'S/', NULL, '2025-05-26', 1655.00, '2025-05-27 01:32:07', '2025-05-27 01:35:29', NULL, NULL),
+(8, 'OC-7', 8, 'inventario', 'aprobada', 'parcial', 2, 1, 1, 2, 'S/', NULL, '2025-09-07', 0.00, '2025-09-07 22:13:34', '2025-09-07 22:20:12', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -3230,7 +3424,36 @@ CREATE TABLE `pagos` (
 --
 
 INSERT INTO `pagos` (`id`, `cotizacion_id`, `concepto`, `monto`, `moneda`, `fecha_pago`, `tipo`, `medio_pago`, `comprobante`, `observaciones`, `user_id`, `created_at`, `updated_at`) VALUES
-(1, 2, '111', 111.00, 'Dólares', '2025-04-25', 'Inicial', 'Transferencia', 'pagos/iCf71OmcQakCMNljJa04rsrYDS7bgIGQF8YGxFOH.jpg', NULL, 1, '2025-04-25 21:54:47', '2025-04-25 21:54:47');
+(1, 2, '111', 111.00, 'Dólares', '2025-04-25', 'Inicial', 'Transferencia', 'pagos/iCf71OmcQakCMNljJa04rsrYDS7bgIGQF8YGxFOH.jpg', NULL, 1, '2025-04-25 21:54:47', '2025-04-25 21:54:47'),
+(2, 5, 'Pago 01', 1500.00, 'Dólares', '2025-08-18', 'Inicial', 'Transferencia', 'pagos/UXLC9xk5L99jx3xPg8WVBuTF3OZVht5THo2a1yty.png', NULL, 1, '2025-08-19 04:25:26', '2025-08-19 04:25:26'),
+(3, 49, 'Combustible motos', 5435.00, 'Soles', '2025-09-07', 'Inicial', 'Efectivo', NULL, NULL, 1, '2025-09-07 13:27:14', '2025-09-07 13:27:14');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `pagos_ventas`
+--
+
+CREATE TABLE `pagos_ventas` (
+  `id` bigint UNSIGNED NOT NULL,
+  `venta_id` bigint UNSIGNED NOT NULL,
+  `numero_pago` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fecha_pago` date NOT NULL,
+  `monto` decimal(10,2) NOT NULL,
+  `moneda` enum('PEN','USD') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PEN',
+  `tipo_cambio` decimal(8,4) DEFAULT NULL,
+  `monto_convertido` decimal(10,2) DEFAULT NULL,
+  `metodo_pago` enum('efectivo','transferencia','cheque','tarjeta_credito','tarjeta_debito','deposito','otro') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'efectivo',
+  `referencia_pago` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `banco` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `usuario_id` bigint UNSIGNED NOT NULL,
+  `validado` tinyint(1) NOT NULL DEFAULT '0',
+  `validado_por` bigint UNSIGNED DEFAULT NULL,
+  `fecha_validacion` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -3323,6 +3546,35 @@ CREATE TABLE `placa_comentarios` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `plan_mantenimientos`
+--
+
+CREATE TABLE `plan_mantenimientos` (
+  `id` bigint UNSIGNED NOT NULL,
+  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `descripcion` text COLLATE utf8mb4_unicode_ci,
+  `modelo_vehiculo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `ano_modelo` year NOT NULL,
+  `tipo_transmision` enum('MT','AT','CVT') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tono_vehiculo` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `intervalo_base` int NOT NULL,
+  `kilometraje_maximo` int NOT NULL,
+  `relacion_horas_km` int NOT NULL DEFAULT '250',
+  `tarifa_mano_obra` decimal(8,2) NOT NULL DEFAULT '0.00',
+  `impuestos` decimal(5,2) NOT NULL DEFAULT '18.00',
+  `margen_beneficio` decimal(5,2) NOT NULL DEFAULT '0.00',
+  `moneda_principal` enum('USD','PEN') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PEN',
+  `proveedor_predeterminado_id` int UNSIGNED DEFAULT NULL,
+  `mostrar_precios` tinyint(1) NOT NULL DEFAULT '1',
+  `activo` tinyint(1) NOT NULL DEFAULT '1',
+  `user_id` bigint UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -3599,7 +3851,41 @@ INSERT INTO `recepciones_orden_compra` (`id`, `detalle_orden_compra_id`, `cantid
 (5, 2, 9, '2025-05-26', NULL, 1, '2025-05-26 21:26:08', '2025-05-26 21:26:08'),
 (6, 5, 1, '2025-05-26', NULL, 1, '2025-05-26 21:44:13', '2025-05-26 21:44:13'),
 (7, 6, 25, '2025-05-26', NULL, 1, '2025-05-27 01:35:29', '2025-05-27 01:35:29'),
-(8, 7, 30, '2025-05-26', NULL, 1, '2025-05-27 01:35:29', '2025-05-27 01:35:29');
+(8, 7, 30, '2025-05-26', NULL, 1, '2025-05-27 01:35:29', '2025-05-27 01:35:29'),
+(11, 8, 2, '2025-09-07', NULL, 1, '2025-09-07 22:19:34', '2025-09-07 22:19:34'),
+(12, 9, 1, '2025-09-07', NULL, 1, '2025-09-07 22:19:34', '2025-09-07 22:19:34');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `reglas_vencimiento_cotizaciones`
+--
+
+CREATE TABLE `reglas_vencimiento_cotizaciones` (
+  `id` bigint UNSIGNED NOT NULL,
+  `nombre` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Nombre descriptivo de la regla',
+  `descripcion` text COLLATE utf8mb4_unicode_ci COMMENT 'Descripción detallada de la regla',
+  `dias_vencimiento` int NOT NULL COMMENT 'Días después de los cuales la cotización vence si no hay seguimiento',
+  `dias_alerta` int NOT NULL DEFAULT '0' COMMENT 'Días antes del vencimiento para enviar alerta',
+  `estado_vencido_id` bigint UNSIGNED NOT NULL,
+  `permite_reasignacion` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Si permite que otro asesor tome la cotización vencida',
+  `requiere_aprobacion` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Si requiere aprobación para reasignar',
+  `notificar_vencimiento` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Si envía notificaciones de vencimiento',
+  `activo` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Si la regla está activa',
+  `condiciones` json DEFAULT NULL COMMENT 'Condiciones adicionales (usuarios, roles, canales, etc.)',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `reglas_vencimiento_cotizaciones`
+--
+
+INSERT INTO `reglas_vencimiento_cotizaciones` (`id`, `nombre`, `descripcion`, `dias_vencimiento`, `dias_alerta`, `estado_vencido_id`, `permite_reasignacion`, `requiere_aprobacion`, `notificar_vencimiento`, `activo`, `condiciones`, `created_at`, `updated_at`) VALUES
+(1, 'Vendedores Junior', 'Regla para vendedores con poca experiencia. Cotizaciones vencen rápidamente para evitar pérdida de oportunidades.', 7, 2, 1, 1, 0, 1, 1, NULL, '2025-09-07 20:46:23', '2025-09-07 20:46:23'),
+(2, 'Vendedores Senior', 'Regla para vendedores experimentados. Más tiempo para gestionar cotizaciones complejas.', 15, 3, 1, 1, 1, 1, 1, NULL, '2025-09-07 20:46:23', '2025-09-07 20:46:23'),
+(3, 'Cotizaciones de Alto Valor', 'Para cotizaciones importantes que requieren más tiempo de negociación.', 30, 5, 1, 1, 1, 1, 0, NULL, '2025-09-07 20:46:23', '2025-09-07 20:46:23'),
+(4, 'Regla Estándar', 'Regla por defecto para la mayoría de cotizaciones.', 10, 2, 1, 1, 0, 1, 1, NULL, '2025-09-07 20:46:23', '2025-09-07 20:46:23');
 
 -- --------------------------------------------------------
 
@@ -3717,7 +4003,10 @@ INSERT INTO `seguimientos_cotizacion` (`id`, `cotizacion_id`, `user_id`, `tipo`,
 (11, 5, 1, 'nota', '333333333333', '2025-05-23 17:32:00', 1, '2025-05-26 10:00:00', '2025-05-23 22:35:14', '2025-05-27 03:13:53', 1, NULL),
 (12, 5, 1, 'llamada', 'efdfdsf', '2025-06-03 05:21:00', 1, '2025-06-06 10:00:00', '2025-06-03 10:21:24', '2025-06-03 10:21:36', 1, NULL),
 (13, 3, 1, 'llamada', 'wrewarew', '2025-06-28 05:53:00', 1, '2025-06-27 10:00:00', '2025-06-27 10:54:43', '2025-06-27 10:55:16', 1, NULL),
-(14, 3, 1, 'nota', 'Cambio de estado: Aceptada → Interesado\nComentario: xasx', '2025-06-27 05:55:49', 0, NULL, '2025-06-27 10:55:49', '2025-06-27 10:55:49', 0, '{\"cotizacion_enviada\":\"si\",\"metodo_pago\":\"Cr\\u00e9dito\",\"solicitud_credito\":\"si\",\"estado_credito\":\"En Proceso\"}');
+(14, 3, 1, 'nota', 'Cambio de estado: Aceptada → Interesado\nComentario: xasx', '2025-06-27 05:55:49', 0, NULL, '2025-06-27 10:55:49', '2025-06-27 10:55:49', 0, '{\"cotizacion_enviada\":\"si\",\"metodo_pago\":\"Cr\\u00e9dito\",\"solicitud_credito\":\"si\",\"estado_credito\":\"En Proceso\"}'),
+(15, 5, 1, 'llamada', 'kjhgkjhgjhgjh', '2025-08-19 13:23:00', 0, NULL, '2025-08-19 04:24:02', '2025-08-19 04:24:02', 0, NULL),
+(16, 49, 1, 'nota', 'adasdasd', '2025-09-07 07:49:00', 1, '2025-09-10 10:00:00', '2025-09-07 12:49:34', '2025-09-07 12:49:34', 0, NULL),
+(17, 49, 1, 'nota', 'Cambio de estado: Nueva → Aceptada\nComentario: 32132132', '2025-09-07 07:50:40', 0, NULL, '2025-09-07 12:50:40', '2025-09-07 12:50:40', 0, '{\"fecha_aceptacion\":\"2025-09-07\"}');
 
 -- --------------------------------------------------------
 
@@ -3773,7 +4062,8 @@ INSERT INTO `seguimientos_orden_trabajo` (`id`, `orden_trabajo_id`, `user_id`, `
 (8, 1, 1, 'nota', 'ppp', '2025-04-30 07:51:56', 0, NULL, 0, '2025-04-30 07:51:57', '2025-04-30 07:51:57'),
 (9, 1, 1, 'nota', 'ppp', '2025-04-30 07:51:57', 0, NULL, 0, '2025-04-30 07:51:57', '2025-04-30 07:51:57'),
 (10, 1, 1, 'nota', '6666', '2025-04-30 09:27:13', 0, NULL, 0, '2025-04-30 09:27:13', '2025-04-30 09:27:13'),
-(11, 1, 1, 'nota', '333', '2025-04-30 09:29:56', 0, NULL, 0, '2025-04-30 09:29:56', '2025-04-30 09:29:56');
+(11, 1, 1, 'nota', '333', '2025-04-30 09:29:56', 0, NULL, 0, '2025-04-30 09:29:56', '2025-04-30 09:29:56'),
+(12, 2, 1, 'llamada', 'ssss', '2025-09-07 21:11:12', 1, '2025-09-09 16:11:00', 1, '2025-09-07 21:11:12', '2025-09-07 21:11:24');
 
 -- --------------------------------------------------------
 
@@ -3844,8 +4134,10 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('YAfkB8QRJOEijbsfL6qG4yHUDz7gJ0STBOVMH7cS', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 OPR/119.0.0.0', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiRUtpQjRmdUg1R1FIT3hJUUl6TDU4T1ZRQzlXM0EyZ2pzaHI0NDFRMSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDI6Imh0dHBzOi8vbXNhLnRlc3QvYWRtaW4vdmVudGFzL2NvdGl6YWNpb25lcyI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7czo0OiJhdXRoIjthOjE6e3M6MjE6InBhc3N3b3JkX2NvbmZpcm1lZF9hdCI7aToxNzUyNjI5Mjc4O319', 1752629294),
-('ZSM8YytJ7zLgstBtIw8lUhnOrDJ2iOFZteqoSfL7', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 OPR/119.0.0.0', 'YTo1OntzOjY6Il90b2tlbiI7czo0MDoiSEdKdUhEQ0dRVThTVGgwbHo1TG5FVEFmVDcyTnZiMW9ac2wzb3daYiI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NjI6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9jb25maWd1cmFjaW9uL21hZXN0cm9zL2ZhYnJpY2FudGVzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjQ6ImF1dGgiO2E6MTp7czoyMToicGFzc3dvcmRfY29uZmlybWVkX2F0IjtpOjE3NTEwMDM1NDk7fX0=', 1751003990);
+('aXpaMKECZsTuzasiQ1IGTerDZcGJD5T9joyxSee5', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiU2ZZNDR1czJEcUlmaGxMYjA5YTltWkFHVlk3VHFaNFNDUGRKWFVObiI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjUwOiJodHRwczovL21zYS50ZXN0L2FkbWluL3BsYW5lcy1tYW50ZW5pbWllbnRvL2NyZWF0ZSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7czo0OiJhdXRoIjthOjE6e3M6MjE6InBhc3N3b3JkX2NvbmZpcm1lZF9hdCI7aToxNzU3MzQyMzcwO319', 1757342537),
+('ejaxu2bH8Rr4L7vOE5Wt6Xca3Pu0WDLgH6FLfMR8', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiWmtiZXJxbkRVYTNrTFZnN0FQMW9mdkZtdm1kTHExeXJlZVQ0TzJKRCI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjUwOiJodHRwczovL21zYS50ZXN0L2FkbWluL3BsYW5lcy1tYW50ZW5pbWllbnRvL2NyZWF0ZSI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7czo0OiJhdXRoIjthOjE6e3M6MjE6InBhc3N3b3JkX2NvbmZpcm1lZF9hdCI7aToxNzU3Mjk4MDU5O319', 1757302915),
+('GpXLu9NTKMYPgxLHRgA8i1A7eVicoqxRP4CQJcrH', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoiQUFHbXU2cUNtamdPSTA0MWl3a1lsRUFGakpvZTlaQUZBQzhRVkJFUiI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjQ5OiJodHRwczovL21zYS50ZXN0L2FkbWluL2NvbmZpZ3VyYWNpb24vdGlwb3MtY2FtYmlvIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjQ6ImF1dGgiO2E6MTp7czoyMToicGFzc3dvcmRfY29uZmlybWVkX2F0IjtpOjE3NTcyNTk5MzA7fX0=', 1757267335),
+('ZEWLfD4kfazREmf8MmeR3Cex49ZMAVDLKR0OstXh', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0', 'YTo2OntzOjY6Il90b2tlbiI7czo0MDoicE5FRzBQdFQzeDZvM0toT0VqQk8xd0NFNTJTbURYRzgyVTdoNUdOayI7czozOiJ1cmwiO2E6MDp7fXM6OToiX3ByZXZpb3VzIjthOjE6e3M6MzoidXJsIjtzOjQzOiJodHRwczovL21zYS50ZXN0L2FkbWluL2NvbXByYXMvZGV2b2x1Y2lvbmVzIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTtzOjQ6ImF1dGgiO2E6MTp7czoyMToicGFzc3dvcmRfY29uZmlybWVkX2F0IjtpOjE3NTcyODgyMTQ7fX0=', 1757290141);
 
 -- --------------------------------------------------------
 
@@ -3914,6 +4206,34 @@ INSERT INTO `telefonos` (`id`, `cliente_id`, `numero`, `tipo`, `created_at`, `up
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `tipos_cambio`
+--
+
+CREATE TABLE `tipos_cambio` (
+  `id` bigint UNSIGNED NOT NULL,
+  `fecha` date NOT NULL,
+  `compra` decimal(8,4) NOT NULL COMMENT 'Tipo de cambio compra',
+  `venta` decimal(8,4) NOT NULL COMMENT 'Tipo de cambio venta',
+  `fecha_inicio` date NOT NULL COMMENT 'Fecha desde cuando es válido',
+  `fecha_fin` date DEFAULT NULL COMMENT 'Fecha hasta cuando es válido',
+  `origen` enum('sunat','manual') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'sunat' COMMENT 'Origen del tipo de cambio',
+  `activo` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Si está activo para usar',
+  `observaciones` text COLLATE utf8mb4_unicode_ci COMMENT 'Observaciones adicionales',
+  `user_id` bigint UNSIGNED NOT NULL COMMENT 'Usuario que registró/modificó',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Volcado de datos para la tabla `tipos_cambio`
+--
+
+INSERT INTO `tipos_cambio` (`id`, `fecha`, `compra`, `venta`, `fecha_inicio`, `fecha_fin`, `origen`, `activo`, `observaciones`, `user_id`, `created_at`, `updated_at`) VALUES
+(3, '2025-09-07', 3.5190, 3.5270, '2025-09-07', NULL, 'sunat', 1, NULL, 1, '2025-09-07 12:39:17', '2025-09-07 12:39:17');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `tipos_movimiento`
 --
 
@@ -3923,18 +4243,20 @@ CREATE TABLE `tipos_movimiento` (
   `operacion` enum('entrada','salida') COLLATE utf8mb4_general_ci NOT NULL,
   `afecta_stock` tinyint(1) DEFAULT '1',
   `descripcion` text COLLATE utf8mb4_general_ci,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `tipos_movimiento`
 --
 
-INSERT INTO `tipos_movimiento` (`id`, `nombre`, `operacion`, `afecta_stock`, `descripcion`, `created_at`) VALUES
-(1, 'Entrada general', 'entrada', 1, 'Movimiento de entrada estándar', '2025-04-17 14:19:06'),
-(2, 'Salida a producción', 'salida', 1, 'Movimiento de salid', '2025-04-17 14:19:06'),
-(3, 'Ajuste inventario', 'entrada', 0, 'Corrección manual del inventario', '2025-04-17 14:19:06'),
-(4, 'Venta POS', 'salida', 1, 'Venta generada desde el Punto de Venta', '2025-05-19 14:01:29');
+INSERT INTO `tipos_movimiento` (`id`, `nombre`, `operacion`, `afecta_stock`, `descripcion`, `created_at`, `updated_at`) VALUES
+(1, 'Entrada general', 'entrada', 1, 'Movimiento de entrada estándar', '2025-04-17 14:19:06', NULL),
+(2, 'Salida a producción', 'salida', 1, 'Movimiento de salid', '2025-04-17 14:19:06', NULL),
+(3, 'Ajuste inventario', 'entrada', 0, 'Corrección manual del inventario', '2025-04-17 14:19:06', NULL),
+(4, 'Venta POS', 'salida', 1, 'Venta generada desde el Punto de Venta', '2025-05-19 14:01:29', NULL),
+(6, 'Devolución a Proveedor', 'entrada', -1, NULL, '2025-09-07 21:44:41', '2025-09-07 21:44:41');
 
 -- --------------------------------------------------------
 
@@ -4026,6 +4348,28 @@ INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `tw
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `vales_devolucion`
+--
+
+CREATE TABLE `vales_devolucion` (
+  `id` bigint UNSIGNED NOT NULL,
+  `numero` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `fecha` date NOT NULL,
+  `proveedor_id` bigint UNSIGNED NOT NULL,
+  `motivo` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `observaciones` text COLLATE utf8mb4_unicode_ci,
+  `estado` enum('pendiente','aprobado','rechazado','procesado') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pendiente',
+  `usuario_id` bigint UNSIGNED NOT NULL,
+  `aprobado_por` bigint UNSIGNED DEFAULT NULL,
+  `fecha_aprobacion` timestamp NULL DEFAULT NULL,
+  `total` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `vehiculos`
 --
 
@@ -4095,7 +4439,10 @@ INSERT INTO `vehiculos_mantenimiento` (`id`, `created_at`, `updated_at`, `vehicu
 CREATE TABLE `ventas` (
   `id` bigint UNSIGNED NOT NULL,
   `codigo` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `numero_factura` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `fecha` datetime NOT NULL,
+  `fecha_vencimiento` date DEFAULT NULL,
+  `fecha_despacho` date DEFAULT NULL,
   `cliente_id` bigint UNSIGNED NOT NULL,
   `usuario_id` bigint UNSIGNED NOT NULL,
   `almacen_id` bigint UNSIGNED NOT NULL,
@@ -4105,9 +4452,14 @@ CREATE TABLE `ventas` (
   `monto_abonado` decimal(10,2) NOT NULL DEFAULT '0.00',
   `saldo_pendiente` decimal(10,2) NOT NULL DEFAULT '0.00',
   `moneda` varchar(10) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Soles',
+  `tipo_cambio_usado` decimal(8,4) DEFAULT NULL,
   `tipo_pago` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Contado',
-  `estado` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pendiente',
+  `estado` enum('pendiente','pagado','no_pagado','en_cotizacion','despachado','para_importacion','pedido_especial','cancelado') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pendiente',
+  `prioridad` enum('baja','media','alta','urgente') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'media',
+  `requiere_importacion` tinyint(1) NOT NULL DEFAULT '0',
   `observaciones` text COLLATE utf8mb4_general_ci,
+  `notas_internas` text COLLATE utf8mb4_general_ci,
+  `detalle_estados` json DEFAULT NULL,
   `cotizacion_id` bigint UNSIGNED DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
@@ -4311,6 +4663,15 @@ ALTER TABLE `comentarios_seguimiento_orden`
   ADD KEY `comentarios_seguimiento_orden_user_id_foreign` (`user_id`);
 
 --
+-- Indices de la tabla `componente_plan_mantenimientos`
+--
+ALTER TABLE `componente_plan_mantenimientos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `componente_plan_mantenimientos_parte_id_foreign` (`parte_id`),
+  ADD KEY `comp_plan_mant_plan_parte_idx` (`plan_mantenimiento_id`,`parte_id`),
+  ADD KEY `componente_plan_mantenimientos_activo_index` (`activo`);
+
+--
 -- Indices de la tabla `comprobantes`
 --
 ALTER TABLE `comprobantes`
@@ -4342,7 +4703,8 @@ ALTER TABLE `cotizaciones`
   ADD KEY `cliente_id` (`cliente_id`),
   ADD KEY `almacen_id` (`almacen_id`),
   ADD KEY `estado_id` (`estado_id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `cotizaciones_regla_vencimiento_id_foreign` (`regla_vencimiento_id`);
 
 --
 -- Indices de la tabla `cuentas_proveedores`
@@ -4406,6 +4768,14 @@ ALTER TABLE `detalles_venta_pos`
   ADD KEY `idx_codigo_parte` (`codigo_parte`);
 
 --
+-- Indices de la tabla `detalle_guias_entrega`
+--
+ALTER TABLE `detalle_guias_entrega`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `detalle_guias_entrega_guia_entrega_id_index` (`guia_entrega_id`),
+  ADD KEY `detalle_guias_entrega_tipo_producto_producto_id_index` (`tipo_producto`,`producto_id`);
+
+--
 -- Indices de la tabla `detalle_orden_compras`
 --
 ALTER TABLE `detalle_orden_compras`
@@ -4427,6 +4797,14 @@ ALTER TABLE `detalle_orden_trabajo_servicios`
   ADD PRIMARY KEY (`id`),
   ADD KEY `detalle_orden_trabajo_servicios_orden_trabajo_id_foreign` (`orden_trabajo_id`),
   ADD KEY `detalle_orden_trabajo_servicios_servicio_id_foreign` (`servicio_id`);
+
+--
+-- Indices de la tabla `detalle_vales_devolucion`
+--
+ALTER TABLE `detalle_vales_devolucion`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `detalle_vales_devolucion_vale_devolucion_id_index` (`vale_devolucion_id`),
+  ADD KEY `detalle_vales_devolucion_tipo_producto_producto_id_index` (`tipo_producto`,`producto_id`);
 
 --
 -- Indices de la tabla `devoluciones_orden_compra`
@@ -4537,6 +4915,17 @@ ALTER TABLE `failed_jobs`
   ADD UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`);
 
 --
+-- Indices de la tabla `guias_entrega`
+--
+ALTER TABLE `guias_entrega`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `guias_entrega_numero_unique` (`numero`),
+  ADD KEY `guias_entrega_numero_index` (`numero`),
+  ADD KEY `guias_entrega_fecha_index` (`fecha`),
+  ADD KEY `guias_entrega_estado_index` (`estado`),
+  ADD KEY `guias_entrega_proveedor_id_fecha_index` (`proveedor_id`,`fecha`);
+
+--
 -- Indices de la tabla `historial_cotizaciones`
 --
 ALTER TABLE `historial_cotizaciones`
@@ -4554,6 +4943,14 @@ ALTER TABLE `historial_requerimiento_compras`
   ADD KEY `historial_req_compra_id_foreign` (`requerimiento_compra_id`),
   ADD KEY `historial_user_id_foreign` (`user_id`),
   ADD KEY `historial_estado_id_foreign` (`estado_id`);
+
+--
+-- Indices de la tabla `intervalo_plan_mantenimientos`
+--
+ALTER TABLE `intervalo_plan_mantenimientos`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `int_plan_comp_km_unique` (`componente_plan_id`,`kilometraje`),
+  ADD KEY `int_plan_plan_km_idx` (`plan_mantenimiento_id`,`kilometraje`);
 
 --
 -- Indices de la tabla `inventarios`
@@ -4688,6 +5085,18 @@ ALTER TABLE `pagos`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indices de la tabla `pagos_ventas`
+--
+ALTER TABLE `pagos_ventas`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `pagos_ventas_numero_pago_unique` (`numero_pago`),
+  ADD KEY `pagos_ventas_usuario_id_foreign` (`usuario_id`),
+  ADD KEY `pagos_ventas_validado_por_foreign` (`validado_por`),
+  ADD KEY `pagos_ventas_venta_id_fecha_pago_index` (`venta_id`,`fecha_pago`),
+  ADD KEY `pagos_ventas_numero_pago_index` (`numero_pago`),
+  ADD KEY `pagos_ventas_metodo_pago_index` (`metodo_pago`);
+
+--
 -- Indices de la tabla `partes`
 --
 ALTER TABLE `partes`
@@ -4722,6 +5131,15 @@ ALTER TABLE `placa_comentarios`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indices de la tabla `plan_mantenimientos`
+--
+ALTER TABLE `plan_mantenimientos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `plan_mantenimientos_user_id_foreign` (`user_id`),
+  ADD KEY `plan_mantenimientos_modelo_vehiculo_ano_modelo_index` (`modelo_vehiculo`,`ano_modelo`),
+  ADD KEY `plan_mantenimientos_activo_index` (`activo`);
+
+--
 -- Indices de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
@@ -4743,6 +5161,13 @@ ALTER TABLE `recepciones_orden_compra`
   ADD PRIMARY KEY (`id`),
   ADD KEY `recepciones_orden_compra_detalle_orden_compra_id_foreign` (`detalle_orden_compra_id`),
   ADD KEY `recepciones_orden_compra_recibido_por_foreign` (`recibido_por`);
+
+--
+-- Indices de la tabla `reglas_vencimiento_cotizaciones`
+--
+ALTER TABLE `reglas_vencimiento_cotizaciones`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `reglas_vencimiento_cotizaciones_estado_vencido_id_foreign` (`estado_vencido_id`);
 
 --
 -- Indices de la tabla `requerimientos_compra`
@@ -4831,6 +5256,16 @@ ALTER TABLE `telefonos`
   ADD KEY `cliente_id` (`cliente_id`);
 
 --
+-- Indices de la tabla `tipos_cambio`
+--
+ALTER TABLE `tipos_cambio`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_fecha_activa` (`fecha`,`activo`),
+  ADD KEY `tipos_cambio_fecha_activo_index` (`fecha`,`activo`),
+  ADD KEY `tipos_cambio_fecha_inicio_fecha_fin_index` (`fecha_inicio`,`fecha_fin`),
+  ADD KEY `tipos_cambio_user_id_foreign` (`user_id`);
+
+--
 -- Indices de la tabla `tipos_movimiento`
 --
 ALTER TABLE `tipos_movimiento`
@@ -4861,6 +5296,16 @@ ALTER TABLE `unidades`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `users_email_unique` (`email`);
+
+--
+-- Indices de la tabla `vales_devolucion`
+--
+ALTER TABLE `vales_devolucion`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `vales_devolucion_numero_unique` (`numero`),
+  ADD KEY `vales_devolucion_numero_index` (`numero`),
+  ADD KEY `vales_devolucion_fecha_index` (`fecha`),
+  ADD KEY `vales_devolucion_estado_index` (`estado`);
 
 --
 -- Indices de la tabla `vehiculos`
@@ -4961,7 +5406,7 @@ ALTER TABLE `cargos`
 -- AUTO_INCREMENT de la tabla `catalogos`
 --
 ALTER TABLE `catalogos`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `categorias_partes`
@@ -5021,19 +5466,25 @@ ALTER TABLE `combustibles`
 -- AUTO_INCREMENT de la tabla `comentarios_seguimiento`
 --
 ALTER TABLE `comentarios_seguimiento`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `comentarios_seguimiento_orden`
 --
 ALTER TABLE `comentarios_seguimiento_orden`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `componente_plan_mantenimientos`
+--
+ALTER TABLE `componente_plan_mantenimientos`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `comprobantes`
 --
 ALTER TABLE `comprobantes`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `contactos_proveedores`
@@ -5051,7 +5502,7 @@ ALTER TABLE `correos_proveedores`
 -- AUTO_INCREMENT de la tabla `cotizaciones`
 --
 ALTER TABLE `cotizaciones`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT de la tabla `cuentas_proveedores`
@@ -5069,13 +5520,13 @@ ALTER TABLE `departamentos`
 -- AUTO_INCREMENT de la tabla `detalles_cotizacion`
 --
 ALTER TABLE `detalles_cotizacion`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `detalles_devolucion_proveedor`
 --
 ALTER TABLE `detalles_devolucion_proveedor`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `detalles_requerimientos_compra`
@@ -5096,34 +5547,46 @@ ALTER TABLE `detalles_venta_pos`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `detalle_guias_entrega`
+--
+ALTER TABLE `detalle_guias_entrega`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `detalle_orden_compras`
 --
 ALTER TABLE `detalle_orden_compras`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_orden_trabajo_repuestos`
 --
 ALTER TABLE `detalle_orden_trabajo_repuestos`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_orden_trabajo_servicios`
 --
 ALTER TABLE `detalle_orden_trabajo_servicios`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `detalle_vales_devolucion`
+--
+ALTER TABLE `detalle_vales_devolucion`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `devoluciones_orden_compra`
 --
 ALTER TABLE `devoluciones_orden_compra`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `devoluciones_proveedor`
 --
 ALTER TABLE `devoluciones_proveedor`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `distritos`
@@ -5147,7 +5610,7 @@ ALTER TABLE `documentos_placa`
 -- AUTO_INCREMENT de la tabla `documentos_sunarp`
 --
 ALTER TABLE `documentos_sunarp`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `establecimientos`
@@ -5204,10 +5667,16 @@ ALTER TABLE `failed_jobs`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `guias_entrega`
+--
+ALTER TABLE `guias_entrega`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `historial_cotizaciones`
 --
 ALTER TABLE `historial_cotizaciones`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `historial_requerimiento_compras`
@@ -5216,10 +5685,16 @@ ALTER TABLE `historial_requerimiento_compras`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `intervalo_plan_mantenimientos`
+--
+ALTER TABLE `intervalo_plan_mantenimientos`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `inventarios`
 --
 ALTER TABLE `inventarios`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `jobs`
@@ -5231,7 +5706,7 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT de la tabla `kardex`
 --
 ALTER TABLE `kardex`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT de la tabla `marcas`
@@ -5243,7 +5718,7 @@ ALTER TABLE `marcas`
 -- AUTO_INCREMENT de la tabla `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT de la tabla `modelos`
@@ -5255,19 +5730,19 @@ ALTER TABLE `modelos`
 -- AUTO_INCREMENT de la tabla `movimientos`
 --
 ALTER TABLE `movimientos`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT de la tabla `notas_pedido`
 --
 ALTER TABLE `notas_pedido`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de la tabla `nota_pedido_items`
 --
 ALTER TABLE `nota_pedido_items`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `oportunidades`
@@ -5285,7 +5760,7 @@ ALTER TABLE `ordenes_trabajo_mantenimiento`
 -- AUTO_INCREMENT de la tabla `orden_compras`
 --
 ALTER TABLE `orden_compras`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `orden_trabajos`
@@ -5303,7 +5778,13 @@ ALTER TABLE `orden_trabajo_historial`
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT de la tabla `pagos_ventas`
+--
+ALTER TABLE `pagos_ventas`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `partes`
@@ -5324,6 +5805,12 @@ ALTER TABLE `placa_comentarios`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `plan_mantenimientos`
+--
+ALTER TABLE `plan_mantenimientos`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `proveedores`
 --
 ALTER TABLE `proveedores`
@@ -5339,7 +5826,13 @@ ALTER TABLE `provincias`
 -- AUTO_INCREMENT de la tabla `recepciones_orden_compra`
 --
 ALTER TABLE `recepciones_orden_compra`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT de la tabla `reglas_vencimiento_cotizaciones`
+--
+ALTER TABLE `reglas_vencimiento_cotizaciones`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `requerimientos_compra`
@@ -5369,7 +5862,7 @@ ALTER TABLE `seguimientos_oportunidades`
 -- AUTO_INCREMENT de la tabla `seguimientos_orden_trabajo`
 --
 ALTER TABLE `seguimientos_orden_trabajo`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `servicios`
@@ -5396,10 +5889,16 @@ ALTER TABLE `telefonos`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
+-- AUTO_INCREMENT de la tabla `tipos_cambio`
+--
+ALTER TABLE `tipos_cambio`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT de la tabla `tipos_movimiento`
 --
 ALTER TABLE `tipos_movimiento`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `traslados`
@@ -5424,6 +5923,12 @@ ALTER TABLE `unidades`
 --
 ALTER TABLE `users`
   MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `vales_devolucion`
+--
+ALTER TABLE `vales_devolucion`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `vehiculos`
@@ -5527,6 +6032,13 @@ ALTER TABLE `comentarios_seguimiento_orden`
   ADD CONSTRAINT `comentarios_seguimiento_orden_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
+-- Filtros para la tabla `componente_plan_mantenimientos`
+--
+ALTER TABLE `componente_plan_mantenimientos`
+  ADD CONSTRAINT `componente_plan_mantenimientos_parte_id_foreign` FOREIGN KEY (`parte_id`) REFERENCES `partes` (`id`),
+  ADD CONSTRAINT `componente_plan_mantenimientos_plan_mantenimiento_id_foreign` FOREIGN KEY (`plan_mantenimiento_id`) REFERENCES `plan_mantenimientos` (`id`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `comprobantes`
 --
 ALTER TABLE `comprobantes`
@@ -5552,7 +6064,8 @@ ALTER TABLE `cotizaciones`
   ADD CONSTRAINT `cotizaciones_ibfk_1` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`id`),
   ADD CONSTRAINT `cotizaciones_ibfk_2` FOREIGN KEY (`almacen_id`) REFERENCES `almacenes` (`id`),
   ADD CONSTRAINT `cotizaciones_ibfk_3` FOREIGN KEY (`estado_id`) REFERENCES `estados_cotizacion` (`id`),
-  ADD CONSTRAINT `cotizaciones_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `cotizaciones_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `cotizaciones_regla_vencimiento_id_foreign` FOREIGN KEY (`regla_vencimiento_id`) REFERENCES `reglas_vencimiento_cotizaciones` (`id`);
 
 --
 -- Filtros para la tabla `cuentas_proveedores`
@@ -5600,6 +6113,12 @@ ALTER TABLE `detalles_venta_pos`
   ADD CONSTRAINT `fk_venta` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`) ON DELETE CASCADE;
 
 --
+-- Filtros para la tabla `detalle_guias_entrega`
+--
+ALTER TABLE `detalle_guias_entrega`
+  ADD CONSTRAINT `detalle_guias_entrega_guia_entrega_id_foreign` FOREIGN KEY (`guia_entrega_id`) REFERENCES `guias_entrega` (`id`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `detalle_orden_trabajo_repuestos`
 --
 ALTER TABLE `detalle_orden_trabajo_repuestos`
@@ -5612,6 +6131,12 @@ ALTER TABLE `detalle_orden_trabajo_repuestos`
 ALTER TABLE `detalle_orden_trabajo_servicios`
   ADD CONSTRAINT `detalle_orden_trabajo_servicios_orden_trabajo_id_foreign` FOREIGN KEY (`orden_trabajo_id`) REFERENCES `ordenes_trabajo_mantenimiento` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `detalle_orden_trabajo_servicios_servicio_id_foreign` FOREIGN KEY (`servicio_id`) REFERENCES `servicios` (`id`) ON DELETE SET NULL;
+
+--
+-- Filtros para la tabla `detalle_vales_devolucion`
+--
+ALTER TABLE `detalle_vales_devolucion`
+  ADD CONSTRAINT `detalle_vales_devolucion_vale_devolucion_id_foreign` FOREIGN KEY (`vale_devolucion_id`) REFERENCES `vales_devolucion` (`id`) ON DELETE CASCADE;
 
 --
 -- Filtros para la tabla `devoluciones_orden_compra`
@@ -5659,6 +6184,39 @@ ALTER TABLE `facturas_orden_trabajo`
 --
 ALTER TABLE `factura_orden_trabajos`
   ADD CONSTRAINT `factura_orden_trabajos_orden_trabajo_id_foreign` FOREIGN KEY (`orden_trabajo_id`) REFERENCES `ordenes_trabajo_mantenimiento` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `intervalo_plan_mantenimientos`
+--
+ALTER TABLE `intervalo_plan_mantenimientos`
+  ADD CONSTRAINT `intervalo_plan_mantenimientos_componente_plan_id_foreign` FOREIGN KEY (`componente_plan_id`) REFERENCES `componente_plan_mantenimientos` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `intervalo_plan_mantenimientos_plan_mantenimiento_id_foreign` FOREIGN KEY (`plan_mantenimiento_id`) REFERENCES `plan_mantenimientos` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `pagos_ventas`
+--
+ALTER TABLE `pagos_ventas`
+  ADD CONSTRAINT `pagos_ventas_usuario_id_foreign` FOREIGN KEY (`usuario_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `pagos_ventas_validado_por_foreign` FOREIGN KEY (`validado_por`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `pagos_ventas_venta_id_foreign` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `plan_mantenimientos`
+--
+ALTER TABLE `plan_mantenimientos`
+  ADD CONSTRAINT `plan_mantenimientos_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+--
+-- Filtros para la tabla `reglas_vencimiento_cotizaciones`
+--
+ALTER TABLE `reglas_vencimiento_cotizaciones`
+  ADD CONSTRAINT `reglas_vencimiento_cotizaciones_estado_vencido_id_foreign` FOREIGN KEY (`estado_vencido_id`) REFERENCES `estados_cotizacion` (`id`);
+
+--
+-- Filtros para la tabla `tipos_cambio`
+--
+ALTER TABLE `tipos_cambio`
+  ADD CONSTRAINT `tipos_cambio_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
