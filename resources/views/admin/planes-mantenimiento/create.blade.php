@@ -7,6 +7,31 @@
     <form id="planMantenimientoForm" action="{{ route('admin.planes-mantenimiento.store') }}" method="POST">
         @csrf
         
+        <!-- Mostrar todos los errores de validación -->
+        @if($errors->any())
+            <div class="alert alert-danger">
+                <h5><i class="fas fa-exclamation-triangle mr-2"></i>Errores de validación:</h5>
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
+        <!-- Mostrar mensajes de success/error -->
+        @if(session('success'))
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+            </div>
+        @endif
+        
+        @if(session('error'))
+            <div class="alert alert-danger">
+                <i class="fas fa-times-circle mr-2"></i>{{ session('error') }}
+            </div>
+        @endif
+        
         <!-- Header -->
         <div class="row mb-3">
             <div class="col-12">
@@ -182,10 +207,339 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title">3. Componentes de Mantenimiento</h4>
-                        <button type="button" id="btnAgregarComponente" class="btn btn-primary btn-sm">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="agregarComponenteAhora()">
                             <i class="fas fa-plus mr-1"></i>
                             Agregar Componente
                         </button>
+                        
+                        <!-- SCRIPT DIRECTO AQUÍ PARA GARANTIZAR QUE SE CARGUE -->
+                        <script>
+                        // Variables globales simples
+                        var componenteIndex = 0;
+                        var partes = @json($partes);
+                        var proveedores = @json($proveedores);
+
+                        // Función ULTRA SIMPLE para agregar componente
+                        function agregarComponenteAhora() {
+                            
+                            var opcionesPartes = '<option value="">-- Seleccionar Parte --</option>';
+                            if (partes && partes.length > 0) {
+                                for (var i = 0; i < partes.length; i++) {
+                                    opcionesPartes += '<option value="' + partes[i].id + '">' + partes[i].nombre + '</option>';
+                                }
+                            }
+                            
+                            var opcionesProveedores = '<option value="">-- Seleccionar Proveedor (Opcional) --</option>';
+                            if (proveedores && proveedores.length > 0) {
+                                for (var i = 0; i < proveedores.length; i++) {
+                                    opcionesProveedores += '<option value="' + proveedores[i].id + '">' + proveedores[i].nombre_completo + '</option>';
+                                }
+                            }
+                            
+                            var componente = document.createElement('div');
+                            componente.className = 'border p-3 mb-3 bg-light';
+                            componente.id = 'componente_' + componenteIndex;
+                            
+                            componente.innerHTML = 
+                                '<div class="d-flex justify-content-between mb-2">' +
+                                    '<h5>🔧 Componente ' + (componenteIndex + 1) + '</h5>' +
+                                    '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarComponenteAhora(' + componenteIndex + ')">❌ Eliminar</button>' +
+                                '</div>' +
+                                '<div class="row">' +
+                                    '<div class="col-md-6">' +
+                                        '<label><strong>Parte:</strong></label>' +
+                                        '<select name="componentes[' + componenteIndex + '][parte_id]" class="form-control" required>' +
+                                            opcionesPartes +
+                                        '</select>' +
+                                    '</div>' +
+                                    '<div class="col-md-3">' +
+                                        '<label><strong>Cantidad:</strong></label>' +
+                                        '<input type="number" name="componentes[' + componenteIndex + '][cantidad]" class="form-control" value="1" required>' +
+                                    '</div>' +
+                                    '<div class="col-md-3">' +
+                                        '<label><strong>Unidad:</strong></label>' +
+                                        '<select name="componentes[' + componenteIndex + '][unidad_medida]" class="form-control" required>' +
+                                            '<option value="Unidades">Unidades</option>' +
+                                            '<option value="Litros">Litros</option>' +
+                                            '<option value="Kg">Kg</option>' +
+                                        '</select>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="row mt-2">' +
+                                    '<div class="col-md-4">' +
+                                        '<label><strong>Acción:</strong></label>' +
+                                        '<select name="componentes[' + componenteIndex + '][accion]" class="form-control" required>' +
+                                            '<option value="Reemplazar">Reemplazar</option>' +
+                                            '<option value="Inspeccionar">Inspeccionar</option>' +
+                                            '<option value="Lubricar">Lubricar</option>' +
+                                        '</select>' +
+                                    '</div>' +
+                                    '<div class="col-md-4">' +
+                                        '<label><strong>Proveedor:</strong></label>' +
+                                        '<select name="componentes[' + componenteIndex + '][proveedor_id]" class="form-control">' +
+                                            opcionesProveedores +
+                                        '</select>' +
+                                    '</div>' +
+                                    '<div class="col-md-4">' +
+                                        '<label><strong>Moneda:</strong></label>' +
+                                        '<select name="componentes[' + componenteIndex + '][moneda]" class="form-control" required>' +
+                                            '<option value="PEN">PEN</option>' +
+                                            '<option value="USD">USD</option>' +
+                                        '</select>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="row mt-2">' +
+                                    '<div class="col-md-6">' +
+                                        '<label><strong>Precio Base:</strong></label>' +
+                                        '<input type="number" name="componentes[' + componenteIndex + '][precio_base]" class="form-control" step="0.01" min="0">' +
+                                    '</div>' +
+                                    '<div class="col-md-6">' +
+                                        '<label><strong>Observaciones:</strong></label>' +
+                                        '<input type="text" name="componentes[' + componenteIndex + '][observaciones]" class="form-control" placeholder="Observaciones opcionales">' +
+                                    '</div>' +
+                                '</div>';
+                            
+                            document.getElementById('componentesContainer').appendChild(componente);
+                            componenteIndex++;
+                            
+                            // Regenerar tabla de intervalos
+                            generarTablaIntervalos();
+                        }
+
+                        // Función para eliminar
+                        function eliminarComponenteAhora(index) {
+                            var elemento = document.getElementById('componente_' + index);
+                            if (elemento) {
+                                elemento.remove();
+                                reindexarComponentes();
+                                generarTablaIntervalos();
+                            }
+                        }
+                        
+                        // Función para reindexar componentes después de eliminar
+                        function reindexarComponentes() {
+                            var componentes = document.querySelectorAll('#componentesContainer > div');
+                            componenteIndex = 0;
+                            
+                            for (var i = 0; i < componentes.length; i++) {
+                                var componente = componentes[i];
+                                
+                                // Actualizar ID del div
+                                componente.id = 'componente_' + i;
+                                
+                                // Actualizar título
+                                var titulo = componente.querySelector('h5');
+                                if (titulo) {
+                                    titulo.textContent = '🔧 Componente ' + (i + 1);
+                                }
+                                
+                                // Actualizar botón eliminar
+                                var botonEliminar = componente.querySelector('button[onclick*="eliminarComponenteAhora"]');
+                                if (botonEliminar) {
+                                    botonEliminar.setAttribute('onclick', 'eliminarComponenteAhora(' + i + ')');
+                                }
+                                
+                                // Actualizar names de inputs
+                                var inputs = componente.querySelectorAll('input, select');
+                                for (var j = 0; j < inputs.length; j++) {
+                                    var input = inputs[j];
+                                    var name = input.name;
+                                    if (name && name.includes('componentes[')) {
+                                        input.name = name.replace(/componentes\[\d+\]/, 'componentes[' + i + ']');
+                                    }
+                                }
+                                
+                                componenteIndex = i + 1;
+                            }
+                        }
+                        
+                        // Función para generar la tabla de intervalos
+                        function generarTablaIntervalos() {
+                            var intervalBase = parseInt(document.getElementById('intervalo_base').value) || 5000;
+                            var kmMaximo = parseInt(document.getElementById('kilometraje_maximo').value) || 100000;
+                            var componentesActuales = document.querySelectorAll('#componentesContainer > div');
+                            var intervalosOld = @json(old('intervalos', []));
+                            
+                            if (componentesActuales.length === 0) {
+                                document.getElementById('intervalosContainer').innerHTML = '<p class="text-muted">Agregue componentes para ver la programación de intervalos</p>';
+                                return;
+                            }
+                            
+                            // GUARDAR SELECCIONES ACTUALES ANTES DE REGENERAR
+                            var seleccionesActuales = {};
+                            var checkboxesExistentes = document.querySelectorAll('#intervalosContainer input[type="checkbox"]');
+                            for (var i = 0; i < checkboxesExistentes.length; i++) {
+                                var checkbox = checkboxesExistentes[i];
+                                if (checkbox.name && checkbox.checked) {
+                                    seleccionesActuales[checkbox.name] = true;
+                                }
+                            }
+                            
+                            // Generar intervalos (cada intervalo_base km hasta km_maximo)
+                            var intervalos = [];
+                            for (var km = intervalBase; km <= kmMaximo; km += intervalBase) {
+                                intervalos.push(km);
+                            }
+                            
+                            // Crear tabla
+                            var tabla = '<table class="table table-bordered table-sm">';
+                            tabla += '<thead class="thead-light">';
+                            tabla += '<tr><th>Componente</th>';
+                            
+                            // Headers de intervalos
+                            for (var i = 0; i < intervalos.length; i++) {
+                                tabla += '<th class="text-center">' + intervalos[i].toLocaleString() + ' km</th>';
+                            }
+                            tabla += '</tr></thead><tbody>';
+                            
+                            // Filas por cada componente
+                            for (var c = 0; c < componentesActuales.length; c++) {
+                                var componenteDiv = componentesActuales[c];
+                                var parteSelect = componenteDiv.querySelector('select[name*="[parte_id]"]');
+                                var parteTexto = parteSelect.options[parteSelect.selectedIndex]?.text || 'Componente ' + (c + 1);
+                                
+                                tabla += '<tr><td><strong>' + parteTexto + '</strong></td>';
+                                
+                                // Checkboxes para cada intervalo
+                                for (var i = 0; i < intervalos.length; i++) {
+                                    var km = intervalos[i];
+                                    var checked = '';
+                                    var checkboxName = 'intervalos[' + c + '][' + km + '][aplica]';
+                                    
+                                    // PRIORIDAD 1: Verificar si hay datos old() para este checkbox
+                                    if (intervalosOld[c] && intervalosOld[c][km] && intervalosOld[c][km].aplica == '1') {
+                                        checked = ' checked';
+                                    }
+                                    // PRIORIDAD 2: Verificar selecciones actuales del usuario
+                                    else if (seleccionesActuales[checkboxName]) {
+                                        checked = ' checked';
+                                    }
+                                    // NO PRE-MARCAR NADA - Dejar que el usuario decida
+                                    
+                                    tabla += '<td class="text-center">';
+                                    tabla += '<input type="hidden" name="intervalos[' + c + '][' + km + '][aplica]" value="0">';
+                                    tabla += '<input type="checkbox" name="intervalos[' + c + '][' + km + '][aplica]" value="1" class="form-check-input"' + checked + '>';
+                                    tabla += '</td>';
+                                }
+                                tabla += '</tr>';
+                            }
+                            
+                            tabla += '</tbody></table>';
+                            document.getElementById('intervalosContainer').innerHTML = tabla;
+                        }
+                        
+                        // Regenerar tabla cuando cambie intervalo base o km máximo
+                        document.addEventListener('DOMContentLoaded', function() {
+                            var intervaloBase = document.getElementById('intervalo_base');
+                            var kmMaximo = document.getElementById('kilometraje_maximo');
+                            
+                            if (intervaloBase) {
+                                intervaloBase.addEventListener('change', generarTablaIntervalos);
+                            }
+                            if (kmMaximo) {
+                                kmMaximo.addEventListener('change', generarTablaIntervalos);
+                            }
+                            
+                            // Restaurar componentes si hay datos old() (errores de validación)
+                            var componentesOld = @json(old('componentes', []));
+                            var intervalosOld = @json(old('intervalos', []));
+                            
+                            console.log('Datos old() encontrados:');
+                            console.log('Componentes:', componentesOld);
+                            console.log('Intervalos:', intervalosOld);
+                            console.log('Errores:', @json($errors->any()));
+                            
+                            if (componentesOld && componentesOld.length > 0) {
+                                for (var i = 0; i < componentesOld.length; i++) {
+                                    var comp = componentesOld[i];
+                                    componenteIndex = i;
+                                    
+                                    var opcionesPartes = '<option value="">-- Seleccionar Parte --</option>';
+                                    if (partes && partes.length > 0) {
+                                        for (var j = 0; j < partes.length; j++) {
+                                            var selected = partes[j].id == comp.parte_id ? 'selected' : '';
+                                            opcionesPartes += '<option value="' + partes[j].id + '" ' + selected + '>' + partes[j].nombre + '</option>';
+                                        }
+                                    }
+                                    
+                                    var opcionesProveedores = '<option value="">-- Seleccionar Proveedor (Opcional) --</option>';
+                                    if (proveedores && proveedores.length > 0) {
+                                        for (var j = 0; j < proveedores.length; j++) {
+                                            var selected = proveedores[j].id == comp.proveedor_id ? 'selected' : '';
+                                            opcionesProveedores += '<option value="' + proveedores[j].id + '" ' + selected + '>' + proveedores[j].nombre_completo + '</option>';
+                                        }
+                                    }
+                                    
+                                    var componente = document.createElement('div');
+                                    componente.className = 'border p-3 mb-3 bg-light';
+                                    componente.id = 'componente_' + i;
+                                    
+                                    componente.innerHTML = 
+                                        '<div class="d-flex justify-content-between mb-2">' +
+                                            '<h5>🔧 Componente ' + (i + 1) + '</h5>' +
+                                            '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarComponenteAhora(' + i + ')">❌ Eliminar</button>' +
+                                        '</div>' +
+                                        '<div class="row">' +
+                                            '<div class="col-md-6">' +
+                                                '<label><strong>Parte:</strong></label>' +
+                                                '<select name="componentes[' + i + '][parte_id]" class="form-control" required>' +
+                                                    opcionesPartes +
+                                                '</select>' +
+                                            '</div>' +
+                                            '<div class="col-md-3">' +
+                                                '<label><strong>Cantidad:</strong></label>' +
+                                                '<input type="number" name="componentes[' + i + '][cantidad]" class="form-control" value="' + (comp.cantidad || 1) + '" required>' +
+                                            '</div>' +
+                                            '<div class="col-md-3">' +
+                                                '<label><strong>Unidad:</strong></label>' +
+                                                '<select name="componentes[' + i + '][unidad_medida]" class="form-control" required>' +
+                                                    '<option value="Unidades"' + (comp.unidad_medida == 'Unidades' ? ' selected' : '') + '>Unidades</option>' +
+                                                    '<option value="Litros"' + (comp.unidad_medida == 'Litros' ? ' selected' : '') + '>Litros</option>' +
+                                                    '<option value="Kg"' + (comp.unidad_medida == 'Kg' ? ' selected' : '') + '>Kg</option>' +
+                                                '</select>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class="row mt-2">' +
+                                            '<div class="col-md-4">' +
+                                                '<label><strong>Acción:</strong></label>' +
+                                                '<select name="componentes[' + i + '][accion]" class="form-control" required>' +
+                                                    '<option value="Reemplazar"' + (comp.accion == 'Reemplazar' ? ' selected' : '') + '>Reemplazar</option>' +
+                                                    '<option value="Inspeccionar"' + (comp.accion == 'Inspeccionar' ? ' selected' : '') + '>Inspeccionar</option>' +
+                                                    '<option value="Lubricar"' + (comp.accion == 'Lubricar' ? ' selected' : '') + '>Lubricar</option>' +
+                                                '</select>' +
+                                            '</div>' +
+                                            '<div class="col-md-4">' +
+                                                '<label><strong>Proveedor:</strong></label>' +
+                                                '<select name="componentes[' + i + '][proveedor_id]" class="form-control">' +
+                                                    opcionesProveedores +
+                                                '</select>' +
+                                            '</div>' +
+                                            '<div class="col-md-4">' +
+                                                '<label><strong>Moneda:</strong></label>' +
+                                                '<select name="componentes[' + i + '][moneda]" class="form-control" required>' +
+                                                    '<option value="PEN"' + (comp.moneda == 'PEN' ? ' selected' : '') + '>PEN</option>' +
+                                                    '<option value="USD"' + (comp.moneda == 'USD' ? ' selected' : '') + '>USD</option>' +
+                                                '</select>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class="row mt-2">' +
+                                            '<div class="col-md-6">' +
+                                                '<label><strong>Precio Base:</strong></label>' +
+                                                '<input type="number" name="componentes[' + i + '][precio_base]" class="form-control" step="0.01" min="0" value="' + (comp.precio_base || '') + '">' +
+                                            '</div>' +
+                                            '<div class="col-md-6">' +
+                                                '<label><strong>Observaciones:</strong></label>' +
+                                                '<input type="text" name="componentes[' + i + '][observaciones]" class="form-control" placeholder="Observaciones opcionales" value="' + (comp.observaciones || '') + '">' +
+                                            '</div>' +
+                                        '</div>';
+                                    
+                                    document.getElementById('componentesContainer').appendChild(componente);
+                                }
+                                componenteIndex = componentesOld.length;
+                                generarTablaIntervalos();
+                            }
+                        });
+                        </script>
                     </div>
                     <div class="card-body">
                         <div id="componentesContainer">
@@ -202,7 +556,10 @@
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title">4. Programación por Intervalos</h4>
-                        <small class="text-muted">Configure qué componentes aplican en cada intervalo de kilometraje</small>
+                        <small class="text-muted">
+                            <i class="fas fa-exclamation-triangle text-warning mr-1"></i>
+                            <strong>IMPORTANTE:</strong> Marque los checkboxes para indicar qué componentes aplican en cada intervalo de kilometraje
+                        </small>
                     </div>
                     <div class="card-body">
                         <div id="intervalosContainer" class="table-responsive">
@@ -351,10 +708,43 @@
                         <i class="fas fa-times mr-1"></i>
                         Cancelar
                     </a>
-                    <button type="submit" class="btn btn-primary btn-lg">
+                    <button type="submit" class="btn btn-primary btn-lg" onclick="validarAnteEnvio(event)">
                         <i class="fas fa-save mr-1"></i>
                         Guardar Plan de Mantenimiento
                     </button>
+                    
+                    <script>
+                    function validarAnteEnvio(event) {
+                        var componentes = document.querySelectorAll('#componentesContainer > div');
+                        if (componentes.length === 0) {
+                            event.preventDefault();
+                            alert('Debe agregar al menos un componente antes de guardar el plan.');
+                            return false;
+                        }
+                        
+                        // Reindexar componentes antes de enviar para asegurar índices consecutivos
+                        reindexarComponentes();
+                        generarTablaIntervalos();
+                        
+                        console.log('Enviando formulario con', componentes.length, 'componentes');
+                        return true;
+                    }
+                    
+                    // Refrescar token CSRF cada 10 minutos para evitar error 419
+                    setInterval(function() {
+                        fetch('/admin/refresh-csrf-token')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.token) {
+                                document.querySelector('input[name="_token"]').value = data.token;
+                                console.log('CSRF token actualizado');
+                            }
+                        })
+                        .catch(error => {
+                            console.warn('No se pudo actualizar CSRF token:', error);
+                        });
+                    }, 600000); // 10 minutos
+                    </script>
                 </div>
             </div>
         </div>
@@ -364,214 +754,8 @@
 
 @section('scripts')
 <script>
-    // Variables globales
-    let componenteIndex = 0;
-    let partes = @json($partes);
-    let proveedores = @json($proveedores);
-    let tipoCambio = @json($tipoCambio);
-    
-    $(document).ready(function() {
-        console.log('Partes disponibles:', partes.length);
-        console.log('Proveedores disponibles:', proveedores.length);
-        initPlanMantenimiento();
-    });
-
-    function initPlanMantenimiento() {
-        // Event listeners
-        $('#btnAgregarComponente').on('click', function(e) {
-            e.preventDefault();
-            agregarComponente();
-        });
-        
-        $('#intervalo_base, #kilometraje_maximo').on('change', generarTablaIntervalos);
-        
-        // Generar tabla inicial
-        generarTablaIntervalos();
-    }
-
-    function agregarComponente() {
-        let componenteHtml = `
-            <div class="componente-item" id="componente_${componenteIndex}">
-                <div class="componente-header d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="componente-nombre">Componente ${componenteIndex + 1}</h5>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="eliminarComponente(${componenteIndex})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="required">Componente/Parte</label>
-                            <select name="componentes[${componenteIndex}][parte_id]" id="componente_${componenteIndex}_parte_id" 
-                                    class="form-control" required onchange="actualizarComponenteNombre(${componenteIndex})">
-                                <option value="">Seleccionar componente</option>`;
-        
-        // Agregar opciones de partes
-        partes.forEach(parte => {
-            componenteHtml += `<option value="${parte.id}">${parte.nombre}`;
-            if (parte.marca) {
-                componenteHtml += ` - ${parte.marca}`;
-            }
-            componenteHtml += `</option>`;
-        });
-        
-        componenteHtml += `
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label class="required">Cantidad</label>
-                            <input type="number" name="componentes[${componenteIndex}][cantidad]" 
-                                   class="form-control" min="0.01" step="0.01" value="1" required>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label class="required">Unidad</label>
-                            <select name="componentes[${componenteIndex}][unidad_medida]" class="form-control" required>
-                                <option value="Unidades">Unidades</option>
-                                <option value="Litros">Litros</option>
-                                <option value="Galones">Galones</option>
-                                <option value="Lb">Libras</option>
-                                <option value="Kg">Kilogramos</option>
-                                <option value="Metros">Metros</option>
-                                <option value="Pies">Pies</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label class="required">Acción</label>
-                            <select name="componentes[${componenteIndex}][accion]" class="form-control" required>
-                                <option value="Reemplazar">Reemplazar (R)</option>
-                                <option value="Inspeccionar">Inspeccionar (I)</option>
-                                <option value="Lubricar">Lubricar (L)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label class="required">Moneda</label>
-                            <select name="componentes[${componenteIndex}][moneda]" class="form-control" required>
-                                <option value="PEN">Soles (PEN)</option>
-                                <option value="USD">Dólares (USD)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label>Proveedor</label>
-                            <select name="componentes[${componenteIndex}][proveedor_id]" id="componente_${componenteIndex}_proveedor_id" 
-                                    class="form-control">
-                                <option value="">Usar proveedor predeterminado</option>`;
-        
-        // Agregar opciones de proveedores
-        proveedores.forEach(proveedor => {
-            componenteHtml += `<option value="${proveedor.id}">${proveedor.nombre_completo}</option>`;
-        });
-        
-        componenteHtml += `
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label>Precio Base</label>
-                            <input type="number" name="componentes[${componenteIndex}][precio_base]" 
-                                   class="form-control" min="0" step="0.01" placeholder="0.00">
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="form-group">
-                            <label>Observaciones</label>
-                            <textarea name="componentes[${componenteIndex}][observaciones]" class="form-control" rows="2" 
-                                      placeholder="Notas adicionales sobre este componente"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        $('#componentesContainer').append(componenteHtml);
-        
-        console.log('Componente agregado:', componenteIndex);
-        
-        componenteIndex++;
-        generarTablaIntervalos();
-    }
-
-    function eliminarComponente(index) {
-        $(`#componente_${index}`).remove();
-        generarTablaIntervalos();
-    }
-
-    function generarTablaIntervalos() {
-        const intervaloBase = parseInt($('#intervalo_base').val()) || 5000;
-        const kmMaximo = parseInt($('#kilometraje_maximo').val()) || 100000;
-        
-        if (intervaloBase <= 0 || kmMaximo <= 0 || intervaloBase >= kmMaximo) {
-            $('#intervalosContainer').html('<div class="alert alert-warning">Configure correctamente los intervalos base y máximo</div>');
-            return;
-        }
-        
-        // Generar intervalos
-        let intervalos = [];
-        for (let km = intervaloBase; km <= kmMaximo; km += intervaloBase) {
-            intervalos.push(km);
-        }
-        
-        // Construir tabla
-        let tablaHtml = '<table class="table table-bordered table-sm">';
-        tablaHtml += '<thead><tr>';
-        tablaHtml += '<th>Componente</th>';
-        
-        intervalos.forEach(km => {
-            tablaHtml += `<th class="text-center">${km.toLocaleString()} km</th>`;
-        });
-        
-        tablaHtml += '</tr></thead><tbody>';
-        
-        // Obtener componentes actuales
-        $('#componentesContainer .componente-item').each(function(index) {
-            const componenteNombre = $(this).find('.componente-nombre').text() || `Componente ${index + 1}`;
-            
-            tablaHtml += '<tr>';
-            tablaHtml += `<td><strong>${componenteNombre}</strong></td>`;
-            
-            intervalos.forEach(km => {
-                tablaHtml += '<td class="text-center">';
-                tablaHtml += `<div class="form-check">`;
-                tablaHtml += `<input type="checkbox" name="intervalos[${index}][${km}][aplica]" value="1" class="form-check-input">`;
-                tablaHtml += `</div>`;
-                tablaHtml += `<input type="number" name="intervalos[${index}][${km}][cantidad_especifica]" placeholder="Cant." class="form-control form-control-sm mt-1" style="font-size: 10px;">`;
-                tablaHtml += `<input type="number" name="intervalos[${index}][${km}][precio_especifico]" placeholder="Precio" class="form-control form-control-sm mt-1" style="font-size: 10px;" step="0.01">`;
-                tablaHtml += '</td>';
-            });
-            
-            tablaHtml += '</tr>';
-        });
-        
-        tablaHtml += '</tbody></table>';
-        
-        $('#intervalosContainer').html(tablaHtml);
-    }
-
-    function actualizarComponenteNombre(index) {
-        const parteId = $(`#componente_${index}_parte_id`).val();
-        const parte = partes.find(p => p.id == parteId);
-        const nombreParte = parte ? parte.nombre : `Componente ${index + 1}`;
-        
-        $(`#componente_${index} .componente-nombre`).text(nombreParte);
-        generarTablaIntervalos();
-    }
-    
-    // Hacer las funciones globales para que puedan ser llamadas desde el HTML
-    window.eliminarComponente = eliminarComponente;
-    window.actualizarComponenteNombre = actualizarComponenteNombre;
+// Este script ya no es necesario porque está inline arriba
+console.log('Script de backup cargado');
 </script>
 @endsection
 

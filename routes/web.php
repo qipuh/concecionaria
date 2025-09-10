@@ -63,7 +63,7 @@ use App\Http\Controllers\Admin\PlanMantenimientoController;
 
 ### Rutas públicas
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
@@ -540,6 +540,11 @@ Route::middleware(['auth'])->prefix('admin/planes-mantenimiento')->name('admin.p
 
     #Módulo Talleres
     Route::prefix('admin')->name('admin.')->group(function () {
+        // Ruta para refrescar token CSRF
+        Route::get('/refresh-csrf-token', function() {
+            return response()->json(['token' => csrf_token()]);
+        })->middleware('auth');
+        
         Route::prefix('talleres')->name('talleres.')->group(function () {
             Route::get('/', [TallerController::class, 'index'])->name('index');
             Route::get('/create', [TallerController::class, 'create'])->name('create');

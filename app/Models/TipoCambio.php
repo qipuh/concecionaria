@@ -25,7 +25,7 @@ class TipoCambio extends Model
     protected $casts = [
         'fecha' => 'date',
         'fecha_inicio' => 'date', 
-        'fecha_fin' => 'date',2
+        'fecha_fin' => 'date',
         'compra' => 'decimal:4',
         'venta' => 'decimal:4',
         'activo' => 'boolean',
