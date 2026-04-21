@@ -1,56 +1,78 @@
 <!-- resources/views/admin/ventas/clientes/partials/table.blade.php -->
 <div class="table-responsive">
-    <table class="table table-hover align-middle" :class="darkMode ? 'table-dark' : ''">
-        <thead class="table-light" :class="darkMode ? 'table-dark' : ''">
+    <table class="table table-borderless table-hover align-middle mb-0" :class="darkMode ? 'table-dark' : ''">
+        <thead class="bg-light bg-opacity-75" style="border-bottom: 1px solid #f1f5f9;">
             <tr>
-                <th scope="col" class="text-uppercase small">#</th>
-                <th scope="col" class="text-uppercase small">Documento</th>
-                <th scope="col" class="text-uppercase small">Nombre / Razón Social</th>
-                <th scope="col" class="text-uppercase small">Tipo</th>
-                <th scope="col" class="text-uppercase small">Categoría</th>
-                <th scope="col" class="text-uppercase small">Canal</th>
-                <th scope="col" class="text-uppercase small text-end">Acciones</th>
+                <th scope="col" class="text-muted small fw-bold text-uppercase px-4 py-3">#</th>
+                <th scope="col" class="text-muted small fw-bold text-uppercase py-3">Cliente</th>
+                <th scope="col" class="text-muted small fw-bold text-uppercase py-3">Tipo / Doc</th>
+                <th scope="col" class="text-muted small fw-bold text-uppercase py-3">Clasificación</th>
+                <th scope="col" class="text-muted small fw-bold text-uppercase py-3 text-end px-4">Opciones</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($clientes as $index => $cliente)
-                <tr>
-                    <td>{{ $clientes->firstItem() + $index }}</td>
-                    <td>{{ $cliente->documento_identidad }}</td>
-                    <td class="fw-medium">
-                        @if ($cliente->tipo_cliente == 'natural')
-                            {{ $cliente->nombres }} {{ $cliente->apellido_paterno }} {{ $cliente->apellido_materno }}
-                        @else
-                            {{ $cliente->razon_social ?? $cliente->documento_identidad }}
-                        @endif
+                <tr style="border-bottom: 1px solid #f8fafc;">
+                    <td class="px-4 py-3 text-muted fw-semibold">{{ $clientes->firstItem() + $index }}</td>
+                    <td class="py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas {{ $cliente->tipo_cliente == 'natural' ? 'fa-user' : 'fa-building' }}"></i>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-dark">
+                                    @if ($cliente->tipo_cliente == 'natural')
+                                        {{ $cliente->nombres }} {{ $cliente->apellido_paterno }} {{ $cliente->apellido_materno }}
+                                    @else
+                                        {{ $cliente->razon_social ?? $cliente->documento_identidad }}
+                                    @endif
+                                </span>
+                                <small class="text-muted fw-semibold">
+                                    @if($cliente->correo)
+                                        <i class="fas fa-envelope me-1" style="font-size:0.7rem;"></i>{{ $cliente->correo }}
+                                    @else
+                                        Sin correo
+                                    @endif
+                                </small>
+                            </div>
+                        </div>
                     </td>
-                    <td>
-                        <span class="badge {{ $cliente->tipo_cliente == 'natural' ? 'bg-success' : 'bg-primary' }} rounded-pill small">
-                            {{ ucfirst($cliente->tipo_cliente) }}
-                        </span>
+                    <td class="py-3">
+                        <div class="d-flex flex-column">
+                            <span class="badge {{ $cliente->tipo_cliente == 'natural' ? 'bg-success bg-opacity-10 text-success' : 'bg-primary bg-opacity-10 text-primary' }} rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center" style="width: fit-content;">
+                                <span class="d-inline-block rounded-circle {{ $cliente->tipo_cliente == 'natural' ? 'bg-success' : 'bg-primary' }} me-2" style="width: 6px; height: 6px;"></span>
+                                {{ ucfirst($cliente->tipo_cliente) }}
+                            </span>
+                            <small class="text-muted mt-1 fw-bold">{{ $cliente->documento_identidad }}</small>
+                        </div>
                     </td>
-                    <td>{{ $cliente->categoria->nombre }}</td>
-                    <td>{{ $cliente->canalCaptacion->nombre }}</td>
-                    <td class="text-end">
-                        <div class="btn-group btn-group-sm">
-                            <!--a href="{{ route('admin.clientes.show', $cliente) }}" class="btn btn-outline-primary" title="Ver detalles">
-                                <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                            </a-->
-                            <a href="{{ route('admin.clientes.edit', $cliente) }}" class="btn btn-outline-warning" title="Editar">
-                                <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
+                    <td class="py-3">
+                        <div class="d-flex flex-column">
+                            <span class="fw-semibold text-dark">{{ $cliente->categoria->nombre }}</span>
+                            <small class="text-muted d-flex align-items-center">
+                                <i class="fas fa-bullhorn me-1" style="font-size:0.7rem;"></i> {{ $cliente->canalCaptacion->nombre }}
+                            </small>
+                        </div>
+                    </td>
+                    <td class="text-end px-4 py-3">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <a href="{{ route('admin.clientes.edit', $cliente) }}" 
+                               class="btn btn-sm btn-light rounded-circle shadow-sm me-2 text-primary" 
+                               data-bs-toggle="tooltip" 
+                               title="Editar Cliente"
+                               style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;">
+                                <i class="fas fa-edit"></i>
                             </a>
                             <form action="{{ route('admin.clientes.destroy', $cliente) }}" method="POST" class="d-inline">
                                 @csrf 
                                 @method('DELETE')
-                                <button type="submit" onclick="return confirm('¿Estás seguro de eliminar este cliente?')" class="btn btn-outline-danger" title="Eliminar">
-                                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
+                                <button type="submit" 
+                                        onclick="return confirm('¿Estás seguro de eliminar este cliente?')" 
+                                        class="btn btn-sm btn-light rounded-circle shadow-sm text-danger" 
+                                        data-bs-toggle="tooltip" 
+                                        title="Eliminar Cliente"
+                                        style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;">
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </form>
                         </div>
@@ -58,16 +80,15 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="py-5 text-center">
-                        <div class="d-flex flex-column align-items-center justify-content-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" style="height: 3rem; width: 3rem;" class="text-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p class="text-muted mb-2">No hay clientes que coincidan con los filtros</p>
-                            <a href="{{ route('admin.clientes.create') }}" class="btn btn-sm btn-link text-decoration-none">
-                                Agregar un nuevo cliente
-                            </a>
+                    <td colspan="7" class="text-center py-5">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-users-slash fa-2x text-muted opacity-50"></i>
                         </div>
+                        <h6 class="fw-bold text-dark">No hay clientes encontrados</h6>
+                        <p class="text-muted small mb-3">Intenta ajustar los filtros de búsqueda o agrega un nuevo registro.</p>
+                        <a href="{{ route('admin.clientes.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="fas fa-plus me-2"></i> Agregar un nuevo cliente
+                        </a>
                     </td>
                 </tr>
             @endforelse

@@ -1,12 +1,50 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Detalles del Requerimiento de Compra')
-@section('header', 'Detalles del Requerimiento de Compra #' . $requerimiento->id)
+@section('title', 'Detalles del Requerimiento')
 
 @section('content')
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-info-circle text-info me-2"></i> Detalle de Requerimiento
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Requerimiento #{{ $requerimiento->id }}
+                </h2>
+                <div class="d-flex align-items-center mt-2">
+                    @if(isset($requerimiento->estado))
+                        <span class="badge rounded-pill bg-{{ $requerimiento->estado->color ?? 'secondary' }} px-3 py-2 fw-bold shadow-sm">
+                            <i class="fas fa-circle me-1 small"></i> {{ strtoupper($requerimiento->estado->nombre ?? 'SIN ESTADO') }}
+                        </span>
+                    @else
+                        <span class="badge rounded-pill bg-secondary px-3 py-2 fw-bold shadow-sm">
+                            SIN ESTADO
+                        </span>
+                    @endif
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.compras.ordenes.create', ['requerimiento_id' => $requerimiento->id]) }}" class="btn bg-success text-white rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-shopping-cart me-2"></i> Crear OC
+                </a>
+                <a href="{{ route('admin.compras.requerimientos.edit', $requerimiento) }}" class="btn bg-warning text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-edit me-2"></i> Editar
+                </a>
+                <a href="{{ route('admin.compras.requerimientos.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
 <div class="row">
     <div class="col-12">
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
                 <!-- Información General -->
                 <div class="row">
@@ -184,21 +222,8 @@
                 </div>
                 @endif
 
-                <!-- Botones de Acción -->
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.compras.requerimientos.index') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
-                    <a href="{{ route('admin.compras.ordenes.create', ['requerimiento_id' => $requerimiento->id]) }}" class="btn btn-primary btn-sm">
-                        Crear OC
-                    </a>
-                    <a href="{{ route('admin.compras.requerimientos.edit', $requerimiento) }}" class="btn btn-warning btn-sm">Editar</a>
-                    <form action="{{ route('admin.compras.requerimientos.destroy', $requerimiento) }}" method="POST" class="d-inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar este requerimiento?')">Eliminar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
+</div>
+</div>
 </div>
 @endsection

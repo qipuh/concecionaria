@@ -1,32 +1,52 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 
 @section('title', 'Ventas POS')
 
+@push('styles')
+<style>
+/* ELIMINACIÓN TOTAL DE BACKDROP EN POS */
+.modal-backdrop,
+.modal-backdrop.fade,
+.modal-backdrop.show,
+div[class*="backdrop"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    z-index: -9999 !important;
+}
+
+body.modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+}
+</style>
+@endpush
+
 @section('content')
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title mb-0">
-                        <i class="fas fa-cash-register mr-2"></i>
-                        Ventas del Punto de Venta
-                    </h3>
-                    <div class="btn-group">
-                        <a href="{{ route('admin.ventas.pos.index') }}" class="btn btn-primary">
-                            <i class="fas fa-plus mr-1"></i>
-                            Nueva Venta
-                        </a>
-                        <button type="button" class="btn btn-outline-secondary" onclick="exportarVentas()">
-                            <i class="fas fa-download mr-1"></i>
-                            Exportar
-                        </button>
-                    </div>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-cash-register text-info me-2"></i> Ventas del Punto de Venta
                 </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm">Historial de Ventas</h2>
+                <p class="text-white-50 mb-0">Gestión, cobro y consulta de ventas realizadas en mostrador.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.ventas.pos.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-plus text-primary me-2"></i> Nueva Venta
+                </a>
+                <button type="button" class="btn bg-white bg-opacity-25 text-white rounded-pill px-4 py-2 fw-bold shadow-sm backdrop-blur transition hover:bg-opacity-30 border border-white border-opacity-25" onclick="exportarVentas()">
+                    <i class="fas fa-download me-2"></i> Exportar
+                </button>
             </div>
         </div>
     </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
 
     <!-- Filtros -->
     <div class="row mb-3">
@@ -198,7 +218,7 @@
 </div>
 
 <!-- Modal Ver Detalle -->
-<div class="modal fade" id="modalDetalle" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true">
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-labelledby="modalDetalleLabel" aria-hidden="true" data-bs-backdrop="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -220,7 +240,7 @@
 </div>
 
 <!-- Modal Registrar Pago -->
-<div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true">
+<div class="modal fade" id="modalPago" tabindex="-1" aria-labelledby="modalPagoLabel" aria-hidden="true" data-bs-backdrop="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -261,14 +281,28 @@
 
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
+console.log('🔍 FRONTEND: Script cargado, verificando jQuery...');
+
+if (typeof jQuery === 'undefined') {
+    console.error('🔍 FRONTEND: ERROR - jQuery no está disponible!');
+    alert('Error: jQuery no está cargado');
+} else {
+    console.log('🔍 FRONTEND: jQuery disponible, versión:', jQuery.fn.jquery);
+}
+
 let currentPage = 1;
 let ventaActual = null;
 
 $(document).ready(function() {
+    console.log('🔍 FRONTEND: DOM ready, iniciando carga de ventas...');
+    console.log('🔍 FRONTEND: Verificando elementos del DOM...');
+    console.log('🔍 FRONTEND: #ventas-tbody existe?', $('#ventas-tbody').length > 0);
+    console.log('🔍 FRONTEND: #fecha_desde existe?', $('#fecha_desde').length > 0);
+
     cargarVentas();
-    
+
     // Eventos
     $('#filtros-form').on('submit', function(e) {
         e.preventDefault();
@@ -283,8 +317,9 @@ $(document).ready(function() {
 });
 
 function cargarVentas(page = 1) {
+    console.log('🔍 FRONTEND: cargarVentas iniciado, página:', page);
     currentPage = page;
-    
+
     const filtros = {
         page: page,
         fecha_desde: $('#fecha_desde').val(),
@@ -294,33 +329,41 @@ function cargarVentas(page = 1) {
         buscar: $('#buscar').val(),
         moneda: $('#moneda').val()
     };
-    
+
+    console.log('🔍 FRONTEND: Filtros enviados:', filtros);
+
     $.ajax({
-        url: '{{ route("admin.ventas.pos.ventas.list") }}',
+        url: '{{ route("admin.ventas.pos.ventas") }}',
         method: 'GET',
         data: filtros,
         beforeSend: function() {
+            console.log('🔍 FRONTEND: Enviando petición AJAX...');
             $('#ventas-tbody').html('<tr><td colspan="10" class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</td></tr>');
         },
         success: function(response) {
+            console.log('🔍 FRONTEND: Respuesta recibida exitosamente:', response);
             renderizarVentas(response.ventas);
             renderizarPaginacion(response.pagination);
             actualizarResumen(response.resumen);
             actualizarInfoPaginacion(response.pagination);
         },
-        error: function(xhr) {
+        error: function(xhr, status, error) {
+            console.error('🔍 FRONTEND: Error en petición AJAX:', {xhr, status, error});
+            console.error('🔍 FRONTEND: Response text:', xhr.responseText);
             $('#ventas-tbody').html('<tr><td colspan="10" class="text-center text-danger">Error al cargar las ventas</td></tr>');
-            console.error('Error:', xhr);
         }
     });
 }
 
 function renderizarVentas(ventas) {
+    console.log('🔍 FRONTEND: renderizarVentas iniciado, ventas recibidas:', ventas);
     let html = '';
-    
-    if (ventas.length === 0) {
+
+    if (!ventas || ventas.length === 0) {
+        console.log('🔍 FRONTEND: No hay ventas para mostrar');
         html = '<tr><td colspan="10" class="text-center">No se encontraron ventas</td></tr>';
     } else {
+        console.log('🔍 FRONTEND: Renderizando', ventas.length, 'ventas');
         ventas.forEach(function(venta) {
             const estadoClass = getEstadoClass(venta.estado);
             const monedaSymbol = venta.moneda === 'Dólares' ? '$' : 'S/.';
@@ -357,15 +400,15 @@ function renderizarVentas(ventas) {
                     <td><span class="badge ${estadoClass}">${venta.estado}</span></td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <button type="button" class="btn btn-outline-primary" onclick="verDetalle(${venta.id})" title="Ver detalle">
+                            <a href="{{ route('admin.ventas.pos.ventas.show', '') }}/${venta.id}" class="btn btn-outline-primary" title="Ver detalle" target="_blank">
                                 <i class="fas fa-eye"></i>
-                            </button>
-                            ${parseFloat(venta.saldo_pendiente) > 0 ? 
+                            </a>
+                            ${parseFloat(venta.saldo_pendiente) > 0 ?
                                 `<button type="button" class="btn btn-outline-success" onclick="registrarPagoModal(${venta.id})" title="Registrar pago">
                                     <i class="fas fa-money-bill-wave"></i>
                                 </button>` : ''
                             }
-                            <button type="button" class="btn btn-outline-info" onclick="imprimirVenta(${venta.id})" title="Imprimir">
+                            <button type="button" class="btn btn-outline-info" title="Imprimir" onclick="imprimirVentaDirecta(${venta.id})">
                                 <i class="fas fa-print"></i>
                             </button>
                         </div>
@@ -479,8 +522,14 @@ function registrarPago() {
 function imprimirVenta(ventaId = null) {
     const id = ventaId || ventaActual;
     if (id) {
-        window.open(`{{ route('admin.ventas.pos.ventas.imprimir', '') }}/${id}`, '_blank');
+        const baseUrl = '{{ route("admin.ventas.pos.ventas") }}';
+        window.open(`${baseUrl}/imprimir/${id}`, '_blank');
     }
+}
+
+function imprimirVentaDirecta(ventaId) {
+    const baseUrl = '{{ route("admin.ventas.pos.ventas") }}';
+    window.open(`${baseUrl}/imprimir/${ventaId}`, '_blank');
 }
 
 function exportarVentas() {
@@ -523,4 +572,4 @@ function formatearHora(fecha) {
     return new Date(fecha).toLocaleTimeString('es-PE', {hour: '2-digit', minute: '2-digit'});
 }
 </script>
-@endsection
+@endpush

@@ -2,97 +2,98 @@
 
 @section('title', 'Clientes')
 
-@section('header', 'Gestión de Clientes')
-
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <!-- Panel principal -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <!-- Header con botón de acción -->
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
-                    <div class="mb-3 mb-sm-0">
-                        <h2 class="h4 fw-bold mb-1" :class="darkMode ? 'text-light' : 'text-dark'">
-                            Total de Clientes: <span id="total-clientes">{{ $totalClientes }}</span>
-                        </h2>
-                        <p class="text-muted small mb-0">Gestiona la información de tus clientes desde aquí</p>
-                    </div>
-                    <div>
-                        <a href="{{ route('admin.clientes.create') }}" class="btn btn-primary d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="me-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Agregar Cliente
-                        </a>
-                    </div>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-users text-info me-2"></i> Módulo de Clientes (CRM)
                 </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6">Directorio de Clientes</h2>
+                <p class="text-white-50 mb-0">Total documentados: <span id="total-clientes" class="fw-bold text-white fs-5 ms-1">{{ $totalClientes }}</span></p>
+            </div>
+            <div>
+                <a href="{{ route('admin.clientes.create') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105" style="border: 1px solid rgba(255,255,255,0.8);">
+                    <i class="fas fa-plus me-2 text-primary"></i> Agregar Cliente
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <!-- Filtros con diseño mejorado -->
-                <div class="card mb-4 border-0 bg-light" :class="darkMode ? 'bg-dark-subtle text-light' : ''">
-                    <div class="card-body p-3">
-                        <h6 class="fw-semibold mb-3 small" :class="darkMode ? 'text-light' : 'text-dark'">
-                            Filtros de búsqueda
-                        </h6>
-                        <div id="filtros-form">
-                            <div class="row g-3">
-                                <div class="col-md-6 col-lg-3">
-                                    <label for="tipo_cliente" class="form-label small text-muted mb-1">Tipo de Cliente</label>
-                                    <select id="tipo_cliente" name="tipo_cliente" class="form-select form-select-sm filtro-campo" :class="darkMode ? 'bg-dark-subtle text-light border-secondary' : ''">
-                                        <option value="">Todos</option>
-                                        <option value="natural" {{ request('tipo_cliente') == 'natural' ? 'selected' : '' }}>Persona Natural</option>
-                                        <option value="juridica" {{ request('tipo_cliente') == 'juridica' ? 'selected' : '' }}>Persona Jurídica</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 col-lg-3">
-                                    <label for="categoria_cliente_id" class="form-label small text-muted mb-1">Categoría</label>
-                                    <select id="categoria_cliente_id" name="categoria_cliente_id" class="form-select form-select-sm filtro-campo" :class="darkMode ? 'bg-dark-subtle text-light border-secondary' : ''">
-                                        <option value="">Todas</option>
-                                        @foreach ($categorias as $categoria)
-                                            <option value="{{ $categoria->id }}" {{ request('categoria_cliente_id') == $categoria->id ? 'selected' : '' }}>
-                                                {{ $categoria->nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 col-lg-3">
-                                    <label for="canal_captacion_id" class="form-label small text-muted mb-1">Canal de Captación</label>
-                                    <select id="canal_captacion_id" name="canal_captacion_id" class="form-select form-select-sm filtro-campo" :class="darkMode ? 'bg-dark-subtle text-light border-secondary' : ''">
-                                        <option value="">Todos</option>
-                                        @foreach ($canales as $canal)
-                                            <option value="{{ $canal->id }}" {{ request('canal_captacion_id') == $canal->id ? 'selected' : '' }}>
-                                                {{ $canal->nombre }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 col-lg-3">
-                                    <label for="query" class="form-label small text-muted mb-1">Buscar</label>
-                                    <input type="text" id="query" name="query" class="form-control form-control-sm filtro-campo" :class="darkMode ? 'bg-dark-subtle text-light border-secondary' : ''" placeholder="Documento, nombre..." value="{{ request('query') }}">
-                                </div>
-                            </div>
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+    
+    <!-- Mensaje de éxito (si existe) -->
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm border-0 rounded-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <!-- Panel principal flotante (Filtros) -->
+    <div class="card dashboard-card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-filter text-primary me-2"></i>
+                <h6 class="mb-0 fw-bold text-dark">Filtros de búsqueda</h6>
+            </div>
+            <div id="filtros-form">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6 col-lg-3">
+                        <select id="tipo_cliente" name="tipo_cliente" class="form-select bg-light border-light shadow-none filtro-campo">
+                            <option value="">Tipo de Cliente</option>
+                            <option value="natural" {{ request('tipo_cliente') == 'natural' ? 'selected' : '' }}>Persona Natural</option>
+                            <option value="juridica" {{ request('tipo_cliente') == 'juridica' ? 'selected' : '' }}>Persona Jurídica</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <select id="categoria_cliente_id" name="categoria_cliente_id" class="form-select bg-light border-light shadow-none filtro-campo">
+                            <option value="">Todas las Categorías</option>
+                            @foreach ($categorias as $categoria)
+                                <option value="{{ $categoria->id }}" {{ request('categoria_cliente_id') == $categoria->id ? 'selected' : '' }}>
+                                    {{ $categoria->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <select id="canal_captacion_id" name="canal_captacion_id" class="form-select bg-light border-light shadow-none filtro-campo">
+                            <option value="">Canal de Captación</option>
+                            @foreach ($canales as $canal)
+                                <option value="{{ $canal->id }}" {{ request('canal_captacion_id') == $canal->id ? 'selected' : '' }}>
+                                    {{ $canal->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 border-light text-muted"><i class="fas fa-search"></i></span>
+                            <input type="text" id="query" name="query" class="form-control bg-light border-start-0 border-light shadow-none filtro-campo" placeholder="Buscar por documento, nombre..." value="{{ request('query') }}">
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Mensaje de éxito (si existe) -->
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                <!-- Tabla de clientes con diseño mejorado -->
-                <div id="resultados-container">
+    <!-- Contenedor Resultados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card dashboard-card border-0 shadow-sm">
+                <!-- Tabla de clientes -->
+                <div id="resultados-container" class="p-0">
                     @include('admin.clientes.partials.table', ['clientes' => $clientes])
                 </div>
 
                 <!-- Paginación -->
-                <div id="pagination-container">
+                <div id="pagination-container" class="card-footer bg-white border-top-0 d-flex justify-content-center mt-3 pb-4">
                     @include('admin.clientes.partials.pagination', ['clientes' => $clientes])
                 </div>
             </div>

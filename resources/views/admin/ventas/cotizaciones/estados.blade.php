@@ -1,46 +1,6 @@
-@php
-// Función para convertir colores Bootstrap a códigos hexadecimales
-function getBootstrapColorHex($color) {
-    $colorMap = [
-        'primary' => '0d6efd',
-        'secondary' => '6c757d',
-        'success' => '198754',
-        'danger' => 'dc3545',
-        'warning' => 'ffc107',
-        'info' => '0dcaf0',
-        'light' => 'f8f9fa',
-        'dark' => '212529'
-    ];
-    
-    return $colorMap[$color] ?? '6c757d'; // Por defecto, devolver secondary
-}
-@endphp
 
-<div class="card border-0 shadow-sm rounded-3 mb-3">
-    <div class="card-body py-2">
-        <div class="d-flex justify-content-between align-items-center flex-nowrap">
-            <div class="d-flex flex-column me-3">
-                <h1 class="h3 mb-1 text-dark fw-semibold">Cotización #{{ $cotizacion->codigo }}</h1>
-                <p class="text-muted mb-0 d-flex align-items-center">
-                    <i class="far fa-calendar-alt me-1"></i> {{ $cotizacion->created_at->format('d M, Y H:i') }}
-                    <span class="mx-2">|</span>
-                    <i class="far fa-user me-1"></i> {{ $cotizacion->usuario ? $cotizacion->usuario->name : 'No asignado' }}
-                </p>
-            </div>
-            <div class="d-flex align-items-center">
-                <div class="d-flex flex-column">
-                    <small class="text-muted mb-1">Estado:</small>
-                    <span class="d-flex align-items-center py-1 px-2" data-color="{{ getBootstrapColorHex($cotizacion->estado->color ?? 'secondary') }}" style="border-left: 4px solid #{{ getBootstrapColorHex($cotizacion->estado->color ?? 'secondary') }};">
-                        {{ $cotizacion->estado->nombre ?? 'Sin estado' }}
-                        <button type="button" class="btn btn-sm btn-link text-primary p-0 ms-1" id="btnEditarCotizacion">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
+<!-- Estado card removed in favor of global Dashboard Hero header -->
 
 <!-- Overlay común -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>

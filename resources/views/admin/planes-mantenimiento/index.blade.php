@@ -96,18 +96,18 @@
                                         <small class="text-muted">{{ $plan->tipo_transmision }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge badge-info">
+                                        <span class="badge" style="padding: 5px 10px; background-color: #17a2b8; color: #000;">
                                             {{ number_format($plan->intervalo_base) }} km
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge badge-secondary">
+                                        <span class="badge badge-secondary" style="padding: 5px 10px; background-color: #17a2b8; color: #000;">
                                             {{ $plan->componentesPlan->count() }} items
                                         </span>
                                     </td>
                                     <td>
                                         @if($plan->activo)
-                                            <span class="badge badge-success">Activo</span>
+                                            <span class="badge badge-success" style="padding: 5px 10px; background-color: #17a2b8; color: #000;">Activo</span>
                                         @else
                                             <span class="badge badge-danger">Inactivo</span>
                                         @endif

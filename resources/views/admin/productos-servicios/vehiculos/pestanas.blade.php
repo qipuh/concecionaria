@@ -2,122 +2,176 @@
 
 @section('title', 'Catálogo de Vehículos')
 
-@section('header', 'Catálogo de Vehículos')
-
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <h2 class="h4 fw-bold mb-4" :class="darkMode ? 'text-light' : 'text-dark'">
-                    Gestión del Catálogo de Vehículos
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-car text-info me-2"></i> Gestión de Productos
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Catálogo de Vehículos
                 </h2>
+                <p class="text-white-50 mb-0">Administra marcas, modelos, versiones y características técnicas</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.productos-servicios.vehiculos.import.form') }}" class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border border-white border-opacity-25 backdrop-blur me-2">
+                    <i class="fas fa-file-excel me-2"></i> Importar Datos
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <!-- Pestañas -->
-                <ul class="nav nav-tabs mb-4" id="vehiculosTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active" id="vehiculoscat-tab" data-bs-toggle="tab" data-bs-target="#vehiculoscat" 
-                           href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.vehiculo.index') }}" type="button" role="tab" 
-                           aria-controls="vehiculoscat" aria-selected="true">Vehículos Catálogo</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="marcas-tab" data-bs-toggle="tab" data-bs-target="#marcas" 
-                           href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.marcas.index') }}" type="button" role="tab" 
-                           aria-controls="marcas" aria-selected="false">Marcas</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="modelos-tab" data-bs-toggle="tab" data-bs-target="#modelos" 
-                           href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.modelos.index') }}" type="button" role="tab" 
-                           aria-controls="modelos" aria-selected="false">Modelos</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="versiones-tab" data-bs-toggle="tab" data-bs-target="#versiones" 
-                           href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.versiones.index') }}" type="button" role="tab" 
-                           aria-controls="versiones" aria-selected="false">Versiones</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="anios-modelo-tab" data-bs-toggle="tab" data-bs-target="#anios-modelo" 
-                           href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.anios-modelo.index') }}" type="button" role="tab" 
-                           aria-controls="anios-modelo" aria-selected="false">Años de Modelo</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="colores-tab" data-bs-toggle="tab" data-bs-target="#colores" 
-                           href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.colores.index') }}" type="button" role="tab" 
-                           aria-controls="colores" aria-selected="false">Colores</a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link" id="importar-tab" data-bs-toggle="tab" data-bs-target="#importar" 
-                           href="{{ route('admin.productos-servicios.vehiculos.import.form') }}" type="button" role="tab" 
-                           aria-controls="importar" aria-selected="false">Importar Excel</a>
-                    </li>
-                </ul>
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+    <div class="card dashboard-card border-0 shadow-sm mb-4">
+        <div class="card-body p-0">
+            <!-- Pestañas Modernas -->
+            <ul class="nav nav-tabs nav-fill border-0 premium-tabs" id="vehiculosTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active fw-bold py-3" id="vehiculoscat-tab" data-bs-toggle="tab" data-bs-target="#vehiculoscat" 
+                       href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.vehiculo.index') }}" type="button" role="tab">
+                       <i class="fas fa-car-side me-2"></i> Catálogo
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link fw-bold py-3" id="marcas-tab" data-bs-toggle="tab" data-bs-target="#marcas" 
+                       href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.marcas.index') }}" type="button" role="tab">
+                       <i class="fas fa-copyright me-2"></i> Marcas
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link fw-bold py-3" id="modelos-tab" data-bs-toggle="tab" data-bs-target="#modelos" 
+                       href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.modelos.index') }}" type="button" role="tab">
+                       <i class="fas fa-tags me-2"></i> Modelos
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link fw-bold py-3" id="versiones-tab" data-bs-toggle="tab" data-bs-target="#versiones" 
+                       href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.versiones.index') }}" type="button" role="tab">
+                       <i class="fas fa-code-branch me-2"></i> Versiones
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link fw-bold py-3" id="anios-modelo-tab" data-bs-toggle="tab" data-bs-target="#anios-modelo" 
+                       href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.anios-modelo.index') }}" type="button" role="tab">
+                       <i class="fas fa-calendar-alt me-2"></i> Años
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link fw-bold py-3" id="colores-tab" data-bs-toggle="tab" data-bs-target="#colores" 
+                       href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.colores.index') }}" type="button" role="tab">
+                       <i class="fas fa-palette me-2"></i> Colores
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link fw-bold py-3" id="importar-tab" data-bs-toggle="tab" data-bs-target="#importar" 
+                       href="{{ route('admin.productos-servicios.vehiculos.import.form') }}" type="button" role="tab">
+                       <i class="fas fa-file-import me-2"></i> Importar
+                    </a>
+                </li>
+            </ul>
 
+            <div class="p-4">
                 <!-- Contenido de las Pestañas -->
                 <div class="tab-content" id="vehiculosTabContent">
                     <!-- Vehículos Catálogo -->
-                    <div class="tab-pane fade show active" id="vehiculoscat" role="tabpanel" aria-labelledby="vehiculoscat-tab">
-                        <div id="vehiculoscat-content"></div>
+                    <div class="tab-pane fade show active" id="vehiculoscat" role="tabpanel">
+                        <div id="vehiculoscat-content">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary mb-3" role="status"></div>
+                                <p class="text-muted">Cargando catálogo...</p>
+                            </div>
+                        </div>
                     </div>
                     <!-- Marcas -->
-                    <div class="tab-pane fade" id="marcas" role="tabpanel" aria-labelledby="marcas-tab">
+                    <div class="tab-pane fade" id="marcas" role="tabpanel">
                         <div id="marcas-content"></div>
                     </div>
                     <!-- Modelos -->
-                    <div class="tab-pane fade" id="modelos" role="tabpanel" aria-labelledby="modelos-tab">
+                    <div class="tab-pane fade" id="modelos" role="tabpanel">
                         <div id="modelos-content"></div>
                     </div>
                     <!-- Versiones -->
-                    <div class="tab-pane fade" id="versiones" role="tabpanel" aria-labelledby="versiones-tab">
+                    <div class="tab-pane fade" id="versiones" role="tabpanel">
                         <div id="versiones-content"></div>
                     </div>
                     <!-- Años de Modelo -->
-                    <div class="tab-pane fade" id="anios-modelo" role="tabpanel" aria-labelledby="anios-modelo-tab">
+                    <div class="tab-pane fade" id="anios-modelo" role="tabpanel">
                         <div id="anios-modelo-content"></div>
                     </div>
                     <!-- Colores -->
-                    <div class="tab-pane fade" id="colores" role="tabpanel" aria-labelledby="colores-tab">
+                    <div class="tab-pane fade" id="colores" role="tabpanel">
                         <div id="colores-content"></div>
                     </div>
                     <!-- Importar Excel -->
-                    <div class="tab-pane fade" id="importar" role="tabpanel" aria-labelledby="importar-tab">
+                    <div class="tab-pane fade" id="importar" role="tabpanel">
                         <div id="importar-content">
                             @if (session('success'))
-                                <div class="alert alert-success" role="alert">
-                                    {{ session('success') }}
+                                <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+                                    <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
                                 </div>
                             @endif
                             @if (session('error'))
-                                <div class="alert alert-danger" role="alert">
-                                    {{ session('error') }}
+                                <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+                                    <i class="fas fa-exclamation-triangle me-2"></i> {{ session('error') }}
                                 </div>
                             @endif
-                            <form action="{{ route('admin.productos-servicios.vehiculos.import') }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
-                                @csrf
-                                <div class="mb-4">
-                                    <label for="file" class="block text-sm font-medium text-gray-700">Seleccionar archivo Excel</label>
-                                    <input type="file" name="file" id="file" accept=".xlsx,.xls" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                    @error('file')
-                                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                                    @enderror
+                            
+                            <div class="row">
+                                <div class="col-lg-5">
+                                    <div class="card bg-light border-0 rounded-4 h-100">
+                                        <div class="card-body p-4">
+                                            <h5 class="fw-bold mb-3 d-flex align-items-center text-primary">
+                                                <i class="fas fa-cloud-upload-alt me-2"></i> Subida de Archivo
+                                            </h5>
+                                            <form action="{{ route('admin.productos-servicios.vehiculos.import') }}" method="POST" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="mb-4">
+                                                    <label for="file" class="form-label small text-muted text-uppercase fw-bold mb-2">Seleccionar archivo Excel (.xlsx, .xls)</label>
+                                                    <input type="file" name="file" id="file" accept=".xlsx,.xls" class="form-control rounded-pill px-3 shadow-sm border-0 @error('file') is-invalid @enderror">
+                                                    @error('file')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                                <button type="submit" class="btn btn-primary rounded-pill w-100 fw-bold py-2 shadow-sm transition hover:scale-105 border-0">
+                                                    <i class="fas fa-file-import me-2"></i> Procesar Importación
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                    Importar
-                                </button>
-                            </form>
-                            <div class="mt-6">
-                                <h2 class="text-lg font-semibold">Formato del archivo Excel</h2>
-                                <p class="text-gray-600">El archivo Excel debe tener las siguientes columnas:</p>
-                                <ul class="list-disc pl-5 mt-2">
-                                    <li><strong>Fecha de compra</strong>: Formato YYYY-MM-DD (ej. 2025-05-21)</li>
-                                    <li><strong>Precio compra</strong>: Número (ej. 25000.50)</li>
-                                    <li><strong>Nro de factura</strong>: Texto (ej. INV-12345)</li>
-                                    <li><strong>Marca</strong>: Nombre de la marca (ej. Toyota)</li>
-                                    <li><strong>Modelo</strong>: Nombre del modelo (ej. Corolla)</li>
-                                    <li><strong>Version</strong>: Nombre de la versión (ej. GLi)</li>
-                                    <li><strong>Año</strong>: Año del modelo (ej. 2023)</li>
-                                    <li><strong>Serie VIN</strong>: Número VIN (ej. 1HGCM82633A004352)</li>
-                                    <li><strong>Color</strong>: Nombre del color (ej. Rojo)</li>
-                                </ul>
+                                <div class="col-lg-7">
+                                    <div class="card border-light rounded-4 h-100">
+                                        <div class="card-body p-4">
+                                            <h5 class="fw-bold mb-3 text-dark">
+                                                <i class="fas fa-info-circle text-info me-2"></i> Guía de Formato Excel
+                                            </h5>
+                                            <p class="text-muted small mb-3">Asegúrate de que tu archivo tenga las siguientes columnas en el orden exacto o con los nombres correspondientes:</p>
+                                            <div class="row g-2">
+                                                <div class="col-md-6">
+                                                    <ul class="list-group list-group-flush rounded-3 overflow-hidden border">
+                                                        <li class="list-group-item small py-2"><strong>Fecha de compra</strong>: YYYY-MM-DD</li>
+                                                        <li class="list-group-item small py-2"><strong>Precio compra</strong>: Decimal (ej. 25000.50)</li>
+                                                        <li class="list-group-item small py-2"><strong>Nro de factura</strong>: Texto</li>
+                                                        <li class="list-group-item small py-2"><strong>Marca</strong>: Nombre de marca</li>
+                                                        <li class="list-group-item small py-2"><strong>Modelo</strong>: Nombre de modelo</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <ul class="list-group list-group-flush rounded-3 overflow-hidden border">
+                                                        <li class="list-group-item small py-2"><strong>Version</strong>: Nombre de versión</li>
+                                                        <li class="list-group-item small py-2"><strong>Año</strong>: Año (ej. 2023)</li>
+                                                        <li class="list-group-item small py-2"><strong>Serie VIN</strong>: Código VIN</li>
+                                                        <li class="list-group-item small py-2"><strong>Color</strong>: Nombre del color</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -126,6 +180,26 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+    .premium-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    .premium-tabs .nav-link:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+        color: #0d6efd;
+    }
+    .premium-tabs .nav-link.active {
+        color: #0d6efd;
+        background-color: transparent;
+        border-bottom-color: #0d6efd;
+    }
+</style>
+@endpush
 
 @push('scripts')
 <script>
@@ -165,12 +239,17 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function loadTabContent(tabId) {
+        let contentContainer = document.getElementById(tabId + '-content');
+        
+        // No recargar si ya tiene contenido (opcional, para esta demo recargamos para asegurar)
+        contentContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary mb-3" role="status"></div><p class="text-muted">Cargando...</p></div>';
+
         let url = document.getElementById(tabId + '-tab').getAttribute('href');
         
         fetch(url)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error('Error al cargar datos del servidor');
                 }
                 return response.text();
             })
@@ -179,27 +258,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 tempDiv.innerHTML = html;
                 
                 let content = null;
-                let mainContent = tempDiv.querySelector('.card-body');
+                // Intentar extraer el contenido útil (ajustar según la estructura de las vistas hijas)
+                let mainContent = tempDiv.querySelector('.card-body') || tempDiv.querySelector('.container') || tempDiv.querySelector('#app');
+                
                 if (mainContent) {
-                    content = mainContent.innerHTML;
-                } else if (tempDiv.querySelector('#app')) {
-                    let appContent = tempDiv.querySelector('#app').querySelector('.container');
-                    if (appContent) {
-                        content = appContent.innerHTML;
-                    }
-                } else if (tempDiv.querySelector('.container')) {
-                    content = tempDiv.querySelector('.container').innerHTML;
-                } else {
-                    let scripts = tempDiv.querySelectorAll('script');
+                    // Limpiar scripts y estilos del contenido inyectado para evitar colisiones
+                    let scripts = mainContent.querySelectorAll('script');
                     scripts.forEach(s => s.remove());
+                    content = mainContent.innerHTML;
+                } else {
+                    // Fallback si no se encuentra un contenedor estándar
                     let head = tempDiv.querySelector('head');
                     if (head) head.remove();
                     content = tempDiv.innerHTML;
                 }
                 
-                document.getElementById(tabId + '-content').innerHTML = content;
+                contentContainer.innerHTML = content;
                 
-                if (typeof bootstrap !== 'undefined') {
+                // Reinicializar tooltips si es necesario
+                if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
                     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
                     tooltipTriggerList.map(function (tooltipTriggerEl) {
                         return new bootstrap.Tooltip(tooltipTriggerEl);
@@ -208,8 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error al cargar el contenido:', error);
-                document.getElementById(tabId + '-content').innerHTML = 
-                    '<div class="alert alert-danger">Error al cargar el contenido: ' + error.message + '</div>';
+                contentContainer.innerHTML = 
+                    '<div class="alert alert-danger border-0 rounded-4 shadow-sm"><i class="fas fa-exclamation-circle me-2"></i> No se pudo cargar la información: ' + error.message + '</div>';
             });
     }
 });

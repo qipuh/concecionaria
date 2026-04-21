@@ -1,34 +1,34 @@
-<div class="card border-0 shadow" style="border-radius: 16px;">
+<div class="card dashboard-card border-0 shadow-sm">
     <div class="card-body p-0">
         @if($ordenes->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <thead class="table-light">
                         <tr>
-                            <th class="text-white py-3 px-4" style="border: none;">
-                                <i class="fas fa-hashtag me-2"></i>Orden
+                            <th class="py-3 px-4">
+                                <i class="fas fa-hashtag me-2 text-primary"></i>Orden
                             </th>
-                            <th class="text-white py-3 px-4" style="border: none;">
-                                <i class="fas fa-building me-2"></i>Proveedor
+                            <th class="py-3 px-4">
+                                <i class="fas fa-building me-2 text-primary"></i>Proveedor
                             </th>
-                            <th class="text-white py-3 px-4" style="border: none;">
-                                <i class="fas fa-calendar me-2"></i>Fecha
+                            <th class="py-3 px-4">
+                                <i class="fas fa-calendar me-2 text-primary"></i>Fecha
                             </th>
-                            <th class="text-white py-3 px-4" style="border: none;">
-                                <i class="fas fa-chart-pie me-2"></i>Estado
+                            <th class="py-3 px-4">
+                                <i class="fas fa-chart-pie me-2 text-primary"></i>Estado
                             </th>
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">
-                                <i class="fas fa-boxes me-2"></i>Items
+                            <th class="py-3 px-4 text-center">
+                                <i class="fas fa-boxes me-2 text-primary"></i>Items
                             </th>
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">
-                                <i class="fas fa-check-circle me-2"></i>Recibidos
+                            <th class="py-3 px-4 text-center">
+                                <i class="fas fa-check-circle me-2 text-primary"></i>Recibidos
                             </th>
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">
-                                <i class="fas fa-chart-bar me-2"></i>Progreso
+                            <th class="py-3 px-4 text-center">
+                                <i class="fas fa-chart-bar me-2 text-primary"></i>Progreso
                             </th>
                             @if($mostrarAcciones)
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">
-                                <i class="fas fa-cogs me-2"></i>Acciones
+                            <th class="py-3 px-4 text-center">
+                                <i class="fas fa-cogs me-2 text-primary"></i>Acciones
                             </th>
                             @endif
                         </tr>
@@ -109,8 +109,7 @@
                             <td class="text-center py-4 px-4">
                                 @if($orden->estado_recepcion != 'completo' && $orden->estado_recepcion != 'completo_con_faltantes')
                                 <a href="{{ route('admin.recepcion.show', $orden->id) }}" 
-                                   class="btn btn-primary px-3 py-2 fw-bold me-2" 
-                                   style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 12px;">
+                                   class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
                                     <i class="fas fa-box me-2"></i> Recepcionar
                                 </a>
                                 @endif

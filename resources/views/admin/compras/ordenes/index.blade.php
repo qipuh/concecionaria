@@ -1,23 +1,33 @@
 @extends('admin.layouts.app')
 
 @section('title', 'Órdenes de Compra')
-@section('header', 'Gestión de Órdenes de Compra')
 
 @section('content')
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-shopping-cart text-info me-2"></i> Compras
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Órdenes de Compra
+                </h2>
+                <p class="text-white-50 mb-0">Total registradas: {{ $ordenes->total() }} órdenes de compra.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
 <div class="row">
     <div class="col-12">
         <!-- Panel principal -->
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-                <!-- Header con botón de acción -->
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
-                    <div class="mb-3 mb-sm-0">
-                        <h2 class="h4 fw-bold mb-1" :class="darkMode ? 'text-light' : 'text-dark'">
-                            Total de Órdenes: {{ $ordenes->total() }}
-                        </h2>
-                        <p class="text-muted small mb-0">Gestiona las órdenes de compra desde aquí</p>
-                    </div>
-                </div>
 
                 <!-- Filtros -->
                 <div class="card mb-4 border-0 bg-light" :class="darkMode ? 'bg-dark-subtle text-light' : ''">
@@ -159,6 +169,7 @@
                 </div>
             </div>
         </div>
-    </div>
+</div>
+</div>
 </div>
 @endsection

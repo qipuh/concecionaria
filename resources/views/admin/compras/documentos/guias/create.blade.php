@@ -2,6 +2,19 @@
 
 @section('title', 'Nueva Guía de Entrega')
 
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        min-height: 38px;
+    }
+    .producto-item {
+        border-left: 4px solid #0d6efd;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid">
     <div class="row">
@@ -162,8 +175,19 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 let productoIndex = 0;
+
+$(document).ready(function() {
+    // Inicializar Select2 en proveedor
+    $('#proveedor_id').select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Seleccione un proveedor',
+        allowClear: true,
+        width: '100%'
+    });
+});
 
 document.getElementById('agregar-producto').addEventListener('click', function() {
     agregarProducto();
@@ -180,72 +204,206 @@ function agregarProducto() {
         <div class="card mb-3 producto-item">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="mb-0">Producto ${productoIndex + 1}</h6>
+                    <h6 class="mb-0">
+                        <i class="fas fa-box me-2"></i>
+                        Producto ${productoIndex + 1}
+                    </h6>
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarProducto(this)">
-                        <i class="fas fa-trash"></i>
+                        <i class="fas fa-trash me-1"></i>
+                        Eliminar
                     </button>
                 </div>
                 <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <div class="form-group mb-3">
-                            <label class="form-label">Tipo</label>
-                            <select class="form-control" name="productos[${productoIndex}][tipo]" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="parte">Parte</option>
-                                <option value="vehiculo">Vehículo</option>
+                            <label class="form-label">Buscar Producto <span class="text-danger">*</span></label>
+                            <select class="form-control producto-select"
+                                    id="producto_select_${productoIndex}"
+                                    data-index="${productoIndex}"
+                                    required>
+                                <option value="">Buscar por código o nombre...</option>
                             </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group mb-3">
-                            <label class="form-label">ID Producto</label>
-                            <input type="number" class="form-control" name="productos[${productoIndex}][id]" placeholder="ID" required>
+                            <input type="hidden" name="productos[${productoIndex}][id]" class="producto-id">
+                            <input type="hidden" name="productos[${productoIndex}][tipo]" class="producto-tipo">
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group mb-3">
-                            <label class="form-label">Cantidad</label>
-                            <input type="number" step="0.01" min="0.01" class="form-control" name="productos[${productoIndex}][cantidad]" placeholder="0.00" required>
+                            <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0.01"
+                                   class="form-control cantidad-input"
+                                   name="productos[${productoIndex}][cantidad]"
+                                   placeholder="0.00"
+                                   data-index="${productoIndex}"
+                                   required>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group mb-3">
-                            <label class="form-label">Precio</label>
-                            <input type="number" step="0.01" min="0" class="form-control" name="productos[${productoIndex}][precio]" placeholder="0.00" required>
+                            <label class="form-label">Precio Unit. <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" min="0"
+                                   class="form-control precio-input"
+                                   name="productos[${productoIndex}][precio]"
+                                   placeholder="0.00"
+                                   data-index="${productoIndex}"
+                                   required>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group mb-3">
                             <label class="form-label">Subtotal</label>
-                            <input type="text" class="form-control subtotal" readonly placeholder="0.00">
+                            <input type="text" class="form-control subtotal-input bg-light" readonly placeholder="S/. 0.00">
                         </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="info-producto text-muted small"></div>
                     </div>
                 </div>
             </div>
         </div>
     `;
-    
+
     container.insertAdjacentHTML('beforeend', productoHtml);
-    
-    // Agregar event listeners para cálculo automático
+
+    // Inicializar Select2 para el nuevo producto
+    const newSelect = $(`#producto_select_${productoIndex}`);
+    newSelect.select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Buscar por código o nombre...',
+        allowClear: true,
+        width: '100%',
+        ajax: {
+            url: '{{ route("admin.devoluciones.buscar-productos") }}',
+            dataType: 'json',
+            delay: 300,
+            data: function (params) {
+                return {
+                    search: params.term || '',
+                    tipo: ''
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.map(item => ({
+                        id: `${item.tipo}_${item.id}`, // ID único para Select2
+                        producto_id: item.id, // ID real del producto
+                        text: `${item.codigo} - ${item.nombre}`,
+                        tipo: item.tipo,
+                        codigo: item.codigo,
+                        nombre: item.nombre,
+                        stock: item.stock,
+                        precio: item.precio
+                    }))
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 2,
+        templateResult: formatProducto,
+        templateSelection: formatProductoSelection
+    });
+
+    // Event handler cuando se selecciona un producto
+    newSelect.on('select2:select', function (e) {
+        const data = e.params.data;
+        const index = $(this).data('index');
+        const card = $(this).closest('.producto-item');
+
+        // Llenar campos ocultos con el ID real del producto
+        card.find('.producto-id').val(data.producto_id);
+        card.find('.producto-tipo').val(data.tipo);
+
+        // Establecer precio
+        card.find('.precio-input').val(data.precio);
+
+        // Establecer cantidad por defecto
+        if (card.find('.cantidad-input').val() === '') {
+            card.find('.cantidad-input').val(1);
+        }
+
+        // Mostrar información del producto
+        card.find('.info-producto').html(`
+            <i class="fas fa-info-circle me-1"></i>
+            <span class="badge ${data.tipo === 'vehiculo' ? 'bg-info' : 'bg-primary'}">${data.tipo.toUpperCase()}</span>
+            Stock disponible: <strong>${data.stock}</strong> unidades
+        `);
+
+        // Calcular subtotal
+        calcularSubtotalCard(card);
+    });
+
+    // Event listeners para cálculo automático
     const lastProduct = container.lastElementChild;
-    const cantidadInput = lastProduct.querySelector('input[name*="[cantidad]"]');
-    const precioInput = lastProduct.querySelector('input[name*="[precio]"]');
-    const subtotalInput = lastProduct.querySelector('.subtotal');
-    
+    const cantidadInput = lastProduct.querySelector('.cantidad-input');
+    const precioInput = lastProduct.querySelector('.precio-input');
+
     [cantidadInput, precioInput].forEach(input => {
         input.addEventListener('input', function() {
-            calcularSubtotal(cantidadInput, precioInput, subtotalInput);
+            calcularSubtotalCard($(lastProduct));
         });
     });
-    
+
     productoIndex++;
 }
 
+function formatProducto(item) {
+    if (item.loading) {
+        return item.text;
+    }
+
+    const tipo = item.tipo || 'parte';
+    const badgeClass = tipo === 'vehiculo' ? 'bg-info' : 'bg-primary';
+
+    return $(`
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div>
+                    <span class="badge ${badgeClass}">${tipo.toUpperCase()}</span>
+                    <strong>${item.codigo}</strong> - ${item.nombre}
+                </div>
+                <small class="text-muted">Stock: ${item.stock} | Precio: S/. ${parseFloat(item.precio).toFixed(2)}</small>
+            </div>
+        </div>
+    `);
+}
+
+function formatProductoSelection(item) {
+    return item.text;
+}
+
+function calcularSubtotalCard(card) {
+    const cantidad = parseFloat(card.find('.cantidad-input').val()) || 0;
+    const precio = parseFloat(card.find('.precio-input').val()) || 0;
+    const subtotal = cantidad * precio;
+    card.find('.subtotal-input').val('S/. ' + subtotal.toFixed(2));
+    calcularTotal();
+}
+
+function calcularTotal() {
+    let total = 0;
+    $('.producto-item').each(function() {
+        const cantidad = parseFloat($(this).find('.cantidad-input').val()) || 0;
+        const precio = parseFloat($(this).find('.precio-input').val()) || 0;
+        total += cantidad * precio;
+    });
+
+    // Puedes mostrar el total en algún lugar si lo deseas
+    console.log('Total general:', total.toFixed(2));
+}
+
 function eliminarProducto(button) {
+    if (!confirm('¿Está seguro de eliminar este producto?')) {
+        return;
+    }
+
     const productoItem = button.closest('.producto-item');
+    $(productoItem).find('select').select2('destroy');
     productoItem.remove();
-    
+
+    calcularTotal();
+
     // Si no quedan productos, mostrar el mensaje informativo
     const container = document.getElementById('productos-container');
     if (container.children.length === 0) {
@@ -262,17 +420,32 @@ function calcularSubtotal(cantidadInput, precioInput, subtotalInput) {
     const cantidad = parseFloat(cantidadInput.value) || 0;
     const precio = parseFloat(precioInput.value) || 0;
     const subtotal = cantidad * precio;
-    subtotalInput.value = subtotal.toFixed(2);
+    subtotalInput.value = 'S/. ' + subtotal.toFixed(2);
 }
 
 // Validación del formulario
 document.getElementById('form-guia').addEventListener('submit', function(e) {
     const productosContainer = document.getElementById('productos-container');
     const productos = productosContainer.querySelectorAll('.producto-item');
-    
+
     if (productos.length === 0) {
         e.preventDefault();
-        alert('Debe agregar al menos un producto para crear la guía de entrega.');
+        toastr.error('Debe agregar al menos un producto para crear la guía de entrega.');
+        return false;
+    }
+
+    // Validar que todos los productos tengan ID
+    let valido = true;
+    productos.forEach(producto => {
+        const productoId = producto.querySelector('.producto-id').value;
+        if (!productoId) {
+            valido = false;
+        }
+    });
+
+    if (!valido) {
+        e.preventDefault();
+        toastr.error('Todos los productos deben tener un producto seleccionado.');
         return false;
     }
 });

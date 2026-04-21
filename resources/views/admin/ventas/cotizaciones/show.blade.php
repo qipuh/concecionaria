@@ -2,30 +2,43 @@
 
 @section('title', 'Detalles de Cotización')
 
-@section('header', 'Detalles de Cotización')
+@section('header')
+@endsection
 
 @section('content')
-<div class="container-fluid px-3 px-lg-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-                <div>
-                    <h1 class="h3 mb-1 text-dark fw-semibold">Cotización #{{ $cotizacion->codigo }}</h1>
-                    <p class="text-muted mb-0">
-                        <i class="far fa-calendar-alt me-1"></i> {{ $cotizacion->created_at->format('d M, Y H:i') }}
-                        <span class="mx-2">|</span>
-                        <i class="far fa-user me-1"></i> {{ $cotizacion->usuario ? $cotizacion->usuario->name : 'No asignado' }}
-                    </p>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-file-invoice-dollar text-info me-2"></i> Resumen Comercial
                 </div>
-                <div class="mt-3 mt-md-0">
-                    <span class="badge bg-{{ $cotizacion->estado->color ?? 'secondary' }} p-2 fs-6">
-                        <i class="fas fa-tag me-1"></i> {{ $cotizacion->estado->nombre ?? 'Sin estado' }}
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 d-flex align-items-center flex-wrap">
+                    Cotización #{{ $cotizacion->codigo }}
+                    <span class="badge bg-{{ $cotizacion->estado->color ?? 'secondary' }} bg-opacity-50 text-white border border-white border-opacity-25 rounded-pill fs-6 ms-0 ms-md-3 mt-2 mt-md-0 py-2 px-3 fw-medium backdrop-blur">
+                        <span class="d-inline-block rounded-circle bg-white me-2" style="width: 8px; height: 8px;"></span>{{ $cotizacion->estado->nombre ?? 'Sin estado' }}
                     </span>
-                </div>
+                </h2>
+                <p class="text-white-50 mb-0 mt-2">
+                    <i class="far fa-calendar-alt me-1"></i> {{ $cotizacion->created_at->format('d M, Y H:i') }}
+                    <span class="mx-2">|</span>
+                    <i class="far fa-user me-1"></i> Asesor: <span class="text-white">{{ $cotizacion->usuario ? $cotizacion->usuario->name : 'No asignado' }}</span>
+                </p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3 mt-lg-0">
+                <a href="{{ route('admin.ventas.cotizaciones.index') }}" class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold border border-white border-opacity-25 backdrop-blur transition hover:scale-105">
+                    <i class="fas fa-arrow-left me-2"></i> Volver a Cotizaciones
+                </a>
+                <a href="{{ route('admin.ventas.cotizaciones.edit', $cotizacion) }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105" style="border: 1px solid rgba(255,255,255,0.8);">
+                    <i class="fas fa-edit me-2 text-primary"></i> Editar Cotización
+                </a>
             </div>
         </div>
     </div>
+</div>
 
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
     <div class="row">
         <!-- Panel izquierdo - Información de cliente y detalles -->
         <div class="col-lg-8 mb-4">

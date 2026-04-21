@@ -2,51 +2,54 @@
 
 @section('title', 'Dashboard de Ventas')
 
-@section('header', 'Dashboard de Ventas')
+@section('header')
+@endsection
 
 @section('content')
-<div class="sales-dashboard-container">
-    <!-- Header con filtros y controles -->
-    <div class="card mb-4">
-        <div class="card-body p-3">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h4 class="mb-0">Panel de Gestión de Oportunidades y Ventas</h4>
-                    <p class="text-muted small mb-0">Visualiza, crea y gestiona oportunidades, cotizaciones y ventas</p>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-chart-pie text-info me-2"></i> Gestión Comercial
                 </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-end">
-                        <div class="input-group me-2 w-50">
-                            <input type="text" class="form-control" id="search-global" placeholder="Buscar...">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                Filtrar
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item filter-option" data-filter="all" href="#">Todos</a></li>
-                                <li><a class="dropdown-item filter-option" data-filter="recent" href="#">Recientes (7 días)</a></li>
-                                <li><a class="dropdown-item filter-option" data-filter="mine" href="#">Mis elementos</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item filter-option" data-filter="opportunities" href="#">Solo oportunidades</a></li>
-                                <li><a class="dropdown-item filter-option" data-filter="quotes" href="#">Solo cotizaciones</a></li>
-                            </ul>
-                        </div>
-                        <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#modalColumnaPersonalizada">
-                            <i class="fas fa-plus"></i> Columna
-                        </button>
-                        <div class="dropdown">
-                            <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-plus"></i> Crear
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearOportunidad">Nueva Oportunidad</a></li>
-                                <li><a class="dropdown-item" href="{{ route('admin.ventas.cotizaciones.create') }}">Nueva Cotización</a></li>
-                            </ul>
-                        </div>
-                    </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 d-flex align-items-center">Panel de Oportunidades y Ventas</h2>
+                <p class="text-white-50 mb-0">Visualiza, crea y gestiona oportunidades, cotizaciones y ventas.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="input-group" style="width: auto;">
+                    <input type="text" class="form-control border-0 bg-white bg-opacity-75" id="search-global" placeholder="Buscar..." style="border-radius: 50rem 0 0 50rem;">
+                    <button class="btn btn-light dropdown-toggle bg-white bg-opacity-75 border-0" type="button" data-bs-toggle="dropdown" style="border-radius: 0 50rem 50rem 0;">
+                        Filtrar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
+                        <li><a class="dropdown-item filter-option py-2" data-filter="all" href="#">Todos</a></li>
+                        <li><a class="dropdown-item filter-option py-2" data-filter="recent" href="#">Recientes (7 días)</a></li>
+                        <li><a class="dropdown-item filter-option py-2" data-filter="mine" href="#">Mis elementos</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item filter-option py-2" data-filter="opportunities" href="#">Solo oportunidades</a></li>
+                        <li><a class="dropdown-item filter-option py-2" data-filter="quotes" href="#">Solo cotizaciones</a></li>
+                    </ul>
+                </div>
+                <!--button class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold border border-white border-opacity-25 backdrop-blur transition hover:scale-105 ms-2" data-bs-toggle="modal" data-bs-target="#modalColumnaPersonalizada">
+                    <i class="fas fa-columns me-2 text-info"></i> Columna
+                </button-->
+                <div class="dropdown">
+                    <button class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 ms-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" style="border: 1px solid rgba(255,255,255,0.8);">
+                        <i class="fas fa-plus me-2 text-primary"></i> Crear
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4">
+                        <li><a class="dropdown-item py-2 fw-semibold" href="#" data-bs-toggle="modal" data-bs-target="#modalCrearOportunidad"><i class="fas fa-lightbulb text-warning me-2 bg-warning bg-opacity-10 p-2 rounded-lg"></i>Nueva Oportunidad</a></li>
+                        <li><a class="dropdown-item py-2 fw-semibold" href="{{ route('admin.ventas.cotizaciones.create') }}"><i class="fas fa-file-invoice text-primary me-2 bg-primary bg-opacity-10 p-2 rounded-lg"></i>Nueva Cotización</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative sales-dashboard-container" style="top: -3.5rem; z-index: 10;">
 
     <!-- Dashboard Tabs -->
     <ul class="nav nav-tabs mb-3" id="dashboardTabs" role="tablist">

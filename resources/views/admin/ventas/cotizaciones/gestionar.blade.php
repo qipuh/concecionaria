@@ -2,26 +2,72 @@
 
 @section('title', 'Gestionar Cotización')
 
+@php
+if (!function_exists('getBootstrapColorHex')) {
+    function getBootstrapColorHex($color) {
+        $colorMap = [
+            'primary' => '0d6efd',
+            'secondary' => '6c757d',
+            'success' => '198754',
+            'danger' => 'dc3545',
+            'warning' => 'ffc107',
+            'info' => '0dcaf0',
+            'light' => 'f8f9fa',
+            'dark' => '212529'
+        ];
+        return $colorMap[$color] ?? '6c757d'; 
+    }
+}
+@endphp
+
 @section('header', 'Gestionar Cotización')
 
 @section('content')
-<div class="container-fluid px-3 px-lg-4">
-    <!-- Estados de la cotización -->
-    <div class="row">
-        <div class="col-12">
-            @include('admin.ventas.cotizaciones.estados', ['cotizacion' => $cotizacion])
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-eye text-info me-2"></i> Detalles de Cotización
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6">Cotización #{{ $cotizacion->codigo }}</h2>
+                <div class="text-white-50 mb-0 d-flex align-items-center">
+                    <i class="far fa-calendar-alt me-1"></i> {{ $cotizacion->created_at->format('d M, Y H:i') }}
+                    <span class="mx-2">|</span>
+                    <i class="far fa-user me-1"></i> {{ $cotizacion->usuario ? $cotizacion->usuario->name : 'No asignado' }}
+                </div>
+            </div>
+            <div>
+                <div class="d-flex flex-column align-items-end">
+                    <small class="text-white-50 mb-1 fw-semibold text-uppercase tracking-wider">Estado Actual</small>
+                    <span class="badge bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center cursor-pointer transition hover:scale-105" id="btnEditarCotizacion" style="border: 1px solid rgba(255,255,255,0.8);">
+                        <span class="d-inline-block rounded-circle me-2" style="width: 8px; height: 8px; background-color: #{{ getBootstrapColorHex($cotizacion->estado->color ?? 'secondary') }};"></span>
+                        {{ $cotizacion->estado->nombre ?? 'Sin estado' }}
+                        <i class="bi bi-pencil-square ms-2 text-primary opacity-75"></i>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+    <!-- Offcanvas/Sidebar para Estados (se movió dentro de layout o states) -->
+    @include('admin.ventas.cotizaciones.estados', ['cotizacion' => $cotizacion])
 
     <!-- Sección de Requerimiento de Compra -->
     @if($cotizacion->estado && $cotizacion->estado->nombre === 'Cerrado Ganado')
         <div class="row mt-3">
             <div class="col-12">
-                <div class="card border-warning">
-                    <div class="card-header bg-warning-subtle">
-                        <h5 class="card-title mb-0 fw-bold">
-                            <i class="fas fa-shopping-cart me-2"></i> Requerimiento de Compra
-                        </h5>
+                <div class="card dashboard-card border-0 shadow-sm mb-4">
+                    <div class="card-header border-bottom-0 pb-0 bg-transparent">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 p-2 rounded-lg me-3">
+                                <i class="fas fa-shopping-cart text-warning"></i>
+                            </div>
+                            <h5 class="mb-0 fw-bold text-dark">Requerimiento de Compra</h5>
+                        </div>
                     </div>
                     <div class="card-body">
                         @if($cotizacion->requerimientoCompra)
@@ -83,11 +129,14 @@
     @else
         <div class="row mt-3">
             <div class="col-12">
-                <div class="card border-warning">
-                    <div class="card-header bg-warning-subtle">
-                        <h5 class="card-title mb-0 fw-bold">
-                            <i class="fas fa-shopping-cart me-2"></i> Requerimiento de Compra
-                        </h5>
+                <div class="card dashboard-card border-0 shadow-sm mb-4">
+                    <div class="card-header border-bottom-0 pb-0 bg-transparent">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-secondary bg-opacity-10 p-2 rounded-lg me-3">
+                                <i class="fas fa-shopping-cart text-secondary"></i>
+                            </div>
+                            <h5 class="mb-0 fw-bold text-muted">Requerimiento de Compra</h5>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-info">
@@ -106,12 +155,16 @@
         <!-- Panel izquierdo - Información del cliente -->
         <div class="col-lg-3 mb-4">
             <!-- Tarjeta Cliente -->
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden hover-shadow-lg transition-all mb-4">
-                <div class="card-header text-white py-3" style="background-color:#104eae;">
-                    <h5 class="card-title mb-0 fw-bold fs-5 d-flex align-items-center">
-                        <i class="fas fa-user-circle me-2 fs-4"></i> 
-                        Datos del Cliente
-                    </h5>
+            <div class="card dashboard-card border-0 shadow-sm mb-4">
+                <div class="card-header border-bottom-0 pt-4 pb-0 bg-transparent">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-lg me-3">
+                            <i class="fas fa-user text-primary"></i>
+                        </div>
+                        <h6 class="mb-0 fw-bold text-dark d-flex align-items-center">
+                            Datos del Cliente
+                        </h6>
+                    </div>
                 </div>
                 
                 <div class="card-body px-4">
@@ -183,12 +236,16 @@
             </div>
 
             <!-- Tarjeta Vehículo -->
-            <div class="card border-0 shadow-lg rounded-4">
-                <div class="card-header text-white py-2" style="background-color:#104eae;">
-                    <h5 class="card-title mb-0 fw-bold d-flex align-items-center fs-6">
-                        <i class="fas fa-truck me-2 fs-5"></i>
-                        Detalles Vehículo
-                    </h5>
+            <div class="card dashboard-card border-0 shadow-sm">
+                <div class="card-header border-bottom-0 pt-4 pb-0 bg-transparent">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-info bg-opacity-10 p-2 rounded-lg me-3">
+                            <i class="fas fa-car text-info"></i>
+                        </div>
+                        <h6 class="mb-0 fw-bold text-dark d-flex align-items-center">
+                            Detalles Vehículo
+                        </h6>
+                    </div>
                 </div>
                 <div class="card-body px-3 py-2">
                     @if($cotizacion->detalles && $cotizacion->detalles->isNotEmpty())
@@ -256,8 +313,8 @@
         
         <!-- Panel central y derecho - Sistema de pestañas -->
         <div class="col-lg-9">
-            <div class="card border-0 shadow-sm rounded-3">
-                <div class="card-header bg-white border-bottom p-0">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom p-0 rounded-top-4">
                     <ul class="nav nav-tabs" id="cotizacionTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active px-3 py-3" id="gestion-tab" data-bs-toggle="tab" data-bs-target="#gestion" 
@@ -321,25 +378,24 @@
                         <div class="tab-pane fade show active" id="gestion" role="tabpanel" aria-labelledby="gestion-tab">
                             <div class="row">
                                 <div class="col-lg-6">
-                                    <div class="card border shadow-none">
-                                        <div class="card-header bg-light">
-                                            <h5 class="card-title mb-0 fw-semibold">
-                                                <i class="fas fa-tasks me-2 text-primary"></i> Gestión de Cotización
-                                            </h5>
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body border-bottom pt-3 pb-2 bg-white rounded-top shadow-sm">
+                                            <h6 class="card-title mb-0 fw-bold text-dark d-flex align-items-center">
+                                                <i class="fas fa-tasks me-2 text-primary opacity-75"></i> Gestión de Cotización
+                                            </h6>
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-body p-4">
                                             @include('admin.ventas.cotizaciones.proceso.gestion-form', ['cotizacion' => $cotizacion])
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
-                                    <div class="card border shadow-none">
-                                        <div class="card-header bg-light">
-                                            <h5 class="card-title mb-0 fw-semibold">
-                                                <i class="fas fa-history me-2 text-primary"></i> 
-                                                Histórico de Seguimientos
-                                                <span class="badge bg-primary rounded-pill ms-2">{{ $cotizacion->seguimientos->count() }}</span>
-                                            </h5>
+                                    <div class="card bg-light border-0 h-100">
+                                        <div class="card-body border-bottom pt-3 pb-2 bg-white rounded-top shadow-sm d-flex align-items-center justify-content-between">
+                                            <h6 class="card-title mb-0 fw-bold text-dark d-flex align-items-center">
+                                                <i class="fas fa-history me-2 text-primary opacity-75"></i> Histórico de Seguimientos
+                                            </h6>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">{{ $cotizacion->seguimientos->count() }}</span>
                                         </div>
                                         <div class="card-body p-0">
                                             @include('admin.ventas.cotizaciones.proceso.seguimientos', ['cotizacion' => $cotizacion])

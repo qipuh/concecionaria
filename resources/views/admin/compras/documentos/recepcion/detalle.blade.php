@@ -1,43 +1,53 @@
 @extends('admin.layouts.app')
 @section('title', 'Detalle de Recepción')
-@section('header', 'Detalle de Recepción')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
-    <!-- Header -->
-    <div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 15px;">
-        <div class="card-body text-white p-4">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h2 class="mb-2 fw-bold">
-                        <i class="fas fa-list-alt me-3"></i>
-                        Detalle de Recepción #{{ $orden->codigo }}
-                    </h2>
-                    <p class="mb-0 opacity-75">Historial completo de recepciones y devoluciones</p>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-list-alt text-info me-2"></i> Reporte Detallado
                 </div>
-                <div class="col-md-4 text-end">
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Recepción #{{ $orden->codigo }}
+                </h2>
+                <div class="d-flex align-items-center mt-2">
                     @php
                         $estado = $orden->estado_recepcion ?? 'pendiente';
                         $badgeClass = $estado == 'completo' ? 'success' : 
                                     ($estado == 'completo_con_faltantes' ? 'warning' : 
                                     ($estado == 'parcial' ? 'info' : 'secondary'));
                     @endphp
-                    <span class="badge bg-{{ $badgeClass }} px-3 py-2 fs-6">
-                        {{ $estado == 'completo_con_faltantes' ? 'Completo con Faltantes' : ucfirst($estado) }}
+                    <span class="badge rounded-pill bg-{{ $badgeClass }} px-3 py-2 fw-bold shadow-sm">
+                        <i class="fas fa-circle me-1 small"></i> {{ $estado == 'completo_con_faltantes' ? 'COMPLETO CON FALTANTES' : strtoupper($estado) }}
                     </span>
                 </div>
             </div>
+            <div class="d-flex flex-wrap gap-2">
+                @if($orden->estado_recepcion != 'completo' && $orden->estado_recepcion != 'completo_con_faltantes')
+                <a href="{{ route('admin.recepcion.show', $orden->id) }}" class="btn bg-primary text-white rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-edit me-2"></i> Continuar Recepción
+                </a>
+                @endif
+                <a href="{{ route('admin.recepcion.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver
+                </a>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Info Summary -->
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+    <!-- Info Section -->
     <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-lg-3 mb-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-boxes text-primary fa-2x"></i>
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-boxes text-primary"></i>
                         </div>
                         <div class="ms-3">
                             <p class="text-muted mb-1 small">Items Pedidos</p>
@@ -47,12 +57,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-lg-3 mb-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-check-circle text-success fa-2x"></i>
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-check-circle text-success"></i>
                         </div>
                         <div class="ms-3">
                             <p class="text-muted mb-1 small">Items Recibidos</p>
@@ -62,12 +72,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-lg-3 mb-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-undo text-warning fa-2x"></i>
+                        <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-undo text-warning"></i>
                         </div>
                         <div class="ms-3">
                             <p class="text-muted mb-1 small">Items Devueltos</p>
@@ -81,12 +91,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-lg-3 mb-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-clock text-secondary fa-2x"></i>
+                        <div class="flex-shrink-0 bg-secondary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-clock text-secondary"></i>
                         </div>
                         <div class="ms-3">
                             <p class="text-muted mb-1 small">Items Pendientes</p>
@@ -100,26 +110,25 @@
         </div>
     </div>
 
-    <!-- Detalles por Producto -->
-    <div class="card border-0 shadow mb-4" style="border-radius: 15px;">
-        <div class="card-header bg-light" style="border-radius: 15px 15px 0 0;">
+    <div class="card dashboard-card border-0 shadow-sm mb-4">
+        <div class="card-header border-0 pb-0">
             <h5 class="mb-0 fw-bold">
-                <i class="fas fa-list me-2"></i>
+                <i class="fas fa-list me-2 text-primary"></i>
                 Detalle por Producto
             </h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <thead class="table-light">
                         <tr>
-                            <th class="text-white py-3 px-4" style="border: none;">Producto</th>
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">Pedida</th>
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">Recibida</th>
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">Devuelta</th>
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">Pendiente</th>
-                            <th class="text-white py-3 px-4 text-center" style="border: none;">Estado</th>
-                            <th class="text-white py-3 px-4" style="border: none;">Recepciones</th>
+                            <th class="py-3 px-4">Producto</th>
+                            <th class="py-3 px-4 text-center">Pedida</th>
+                            <th class="py-3 px-4 text-center">Recibida</th>
+                            <th class="py-3 px-4 text-center">Devuelta</th>
+                            <th class="py-3 px-4 text-center">Pendiente</th>
+                            <th class="py-3 px-4 text-center">Estado</th>
+                            <th class="py-3 px-4 text-center">Recepciones</th>
                         </tr>
                     </thead>
                     <tbody>

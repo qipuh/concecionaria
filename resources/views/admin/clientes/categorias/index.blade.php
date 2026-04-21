@@ -1,32 +1,36 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Categorías')
-
-@section('header', 'Gestión de Categorías')
+@section('title', 'Categorías de Clientes')
 
 @section('content')
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-tags text-info me-2"></i> Gestión de Clientes
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Categorías de Clientes
+                </h2>
+                <p class="text-white-50 mb-0">Total registradas: {{ $categorias->total() }} categorías.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.clientes.categorias.create') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-plus text-primary me-2"></i> Nueva Categoría
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
 <div class="row">
     <div class="col-12">
         <!-- Panel principal -->
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-                <!-- Header con botón de acción -->
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
-                    <div class="mb-3 mb-sm-0">
-                        <h2 class="h4 fw-bold mb-1" :class="darkMode ? 'text-light' : 'text-dark'">
-                            Total de Categorías: {{ $categorias->total() }}
-                        </h2>
-                        <p class="text-muted small mb-0">Gestiona las categorías de clientes desde aquí</p>
-                    </div>
-                    <div>
-                        <a href="{{ route('admin.clientes.categorias.create') }}" class="btn btn-primary d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="me-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Nueva Categoría
-                        </a>
-                    </div>
-                </div>
 
                 <!-- Mensaje de éxito o error -->
                 @if (session('success'))

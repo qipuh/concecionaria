@@ -55,16 +55,23 @@ public function index()
     public function ventas(Request $request)
     {
         try {
-            Log::info('Accediendo al dashboard de ventas', ['url' => $request->url(), 'method' => $request->method()]);
-            
+            Log::info('🔍 VENTAS: Accediendo al dashboard de ventas', [
+                'url' => $request->url(),
+                'method' => $request->method(),
+                'is_ajax' => $request->ajax(),
+                'wants_json' => $request->wantsJson(),
+                'headers' => $request->headers->all(),
+                'params' => $request->all()
+            ]);
+
             // Si es petición AJAX, devolver JSON
             if ($request->ajax() || $request->wantsJson()) {
+                Log::info('🔍 VENTAS: Es petición AJAX, llamando obtenerVentasAjax');
                 return $this->obtenerVentasAjax($request);
             }
 
             // Obtener clientes para el filtro
             $clientes = Cliente::select('id', 'nombres', 'apellido_paterno', 'documento_identidad')
-                              ->where('activo', true)
                               ->orderBy('nombres')
                               ->limit(100)
                               ->get();
@@ -102,10 +109,18 @@ public function index()
      */
     private function obtenerVentasAjax(Request $request)
     {
+        Log::info('🔍 AJAX: Iniciando obtenerVentasAjax', [
+            'params' => $request->all()
+        ]);
+
         $query = Venta::with(['cliente', 'usuario', 'almacen', 'pagos']);
-        
+
+        Log::info('🔍 AJAX: Consulta inicial creada');
+
         // Aplicar filtros
         $this->aplicarFiltrosVentas($query, $request);
+
+        Log::info('🔍 AJAX: Filtros aplicados');
         
         // Si se solicitan estadísticas
         if ($request->filled('estadisticas')) {
@@ -120,6 +135,12 @@ public function index()
                        ->orderBy('id', 'desc')
                        ->paginate(20);
 
+        Log::info('🔍 AJAX: Ventas obtenidas', [
+            'total' => $ventas->total(),
+            'count' => $ventas->count(),
+            'current_page' => $ventas->currentPage()
+        ]);
+
         // Agregar información calculada
         $ventas->getCollection()->transform(function ($venta) {
             $venta->esta_vencida = $venta->estaVencida();
@@ -127,10 +148,148 @@ public function index()
             return $venta;
         });
 
+        // Formatear las ventas para el frontend
+        $ventasFormateadas = $ventas->getCollection()->map(function($venta) {
+            $clienteNombre = '';
+            $clienteDocumento = '';
+
+            if ($venta->cliente) {
+                if ($venta->cliente->tipo_cliente == 'natural') {
+                    $clienteNombre = trim(
+                        ($venta->cliente->nombres ?? '') . ' ' .
+                        ($venta->cliente->apellido_paterno ?? '') . ' ' .
+                        ($venta->cliente->apellido_materno ?? '')
+                    );
+                } else {
+                    $clienteNombre = $venta->cliente->razon_social ?? 'Cliente corporativo';
+                }
+                $clienteDocumento = $venta->cliente->documento_identidad ?? 'Sin documento';
+            } else {
+                $clienteNombre = 'Cliente no especificado';
+                $clienteDocumento = 'N/A';
+            }
+
+            // Mapear estados de la base de datos a estados del frontend
+            $estadoMapeado = $this->mapearEstadoVenta($venta->estado);
+
+            return [
+                'id' => $venta->id,
+                'codigo' => $venta->codigo,
+                'fecha' => $venta->fecha,
+                'cliente_nombre' => $clienteNombre,
+                'cliente_documento' => $clienteDocumento,
+                'usuario_nombre' => $venta->usuario->name ?? 'N/A',
+                'almacen_nombre' => $venta->almacen->nombre ?? 'N/A',
+                'total' => $venta->total,
+                'monto_abonado' => $venta->monto_abonado ?? 0,
+                'saldo_pendiente' => $venta->saldo_pendiente ?? 0,
+                'porcentaje_abonado' => $venta->porcentaje_abonado ?? 0,
+                'estado' => $estadoMapeado,
+                'moneda' => $venta->moneda,
+                'cotizacion_codigo' => $venta->cotizacion_codigo ?? null
+            ];
+        });
+
+        // Información de paginación para el frontend
+        $pagination = [
+            'current_page' => $ventas->currentPage(),
+            'last_page' => $ventas->lastPage(),
+            'per_page' => $ventas->perPage(),
+            'total' => $ventas->total(),
+            'from' => $ventas->firstItem(),
+            'to' => $ventas->lastItem()
+        ];
+
+        // Calcular resumen
+        $resumen = $this->calcularResumenVentas($request);
+
+        Log::info('🔍 AJAX: Respuesta final preparada', [
+            'ventas_count' => count($ventasFormateadas),
+            'pagination' => $pagination,
+            'resumen' => $resumen
+        ]);
+
         return response()->json([
             'success' => true,
-            'ventas' => $ventas
+            'ventas' => $ventasFormateadas,
+            'pagination' => $pagination,
+            'resumen' => $resumen
         ]);
+    }
+
+    /**
+     * Mapear estados de la base de datos a estados del frontend
+     */
+    private function mapearEstadoVenta($estadoBD)
+    {
+        switch (strtolower($estadoBD)) {
+            case 'despachado':
+                return 'Completada';
+
+            case 'pagado':
+                return 'Pagado';
+
+            case 'pendiente':
+                return 'Pendiente';
+
+            case 'pendiente_stock':
+                return 'Pendiente Stock';
+
+            case 'en_compra':
+                return 'En Compra';
+
+            case 'listo_entrega':
+                return 'Listo Entrega';
+
+            case 'no_pagado':
+                return 'No Pagado';
+
+            case 'en_cotizacion':
+                return 'En Cotización';
+
+            case 'para_importacion':
+                return 'Para Importación';
+
+            case 'pedido_especial':
+                return 'Pedido Especial';
+
+            case 'parcial':
+            case 'abonado':
+                return 'Parcial';
+
+            case 'anulada':
+            case 'anulado':
+            case 'cancelada':
+            case 'cancelado':
+                return 'Cancelada';
+
+            default:
+                // Para estados no reconocidos, mostrar el estado original capitalizado
+                return ucfirst(str_replace('_', ' ', $estadoBD));
+        }
+    }
+
+    /**
+     * Calcular resumen de ventas
+     */
+    private function calcularResumenVentas(Request $request)
+    {
+        $query = Venta::query();
+
+        // Aplicar los mismos filtros que en la consulta principal
+        $this->aplicarFiltrosVentas($query, $request);
+
+        $totalVentas = $query->count();
+        $montoTotal = $query->sum('total');
+        $ventasParciales = $query->where('estado', 'Parcial')->count();
+        $saldoPendiente = $query->sum('saldo_pendiente');
+
+        return [
+            'total_ventas' => $totalVentas,
+            'monto_total' => $montoTotal,
+            'ventas_parciales' => $ventasParciales,
+            'saldo_pendiente' => $saldoPendiente
+        ];
     }
 
     /**
@@ -139,8 +298,8 @@ public function index()
     private function aplicarFiltrosVentas($query, Request $request)
     {
         // Filtros de búsqueda
-        if ($request->filled('search')) {
-            $search = $request->search;
+        if ($request->filled('buscar') || $request->filled('search')) {
+            $search = $request->buscar ?: $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('codigo', 'like', "%{$search}%")
                   ->orWhere('numero_factura', 'like', "%{$search}%")
@@ -783,53 +942,49 @@ public function procesarVenta(Request $request)
             $almacenPrincipal = $almacen->id;
         }
 
-        // Obtener estado inicial para cotizaciones
-        $estadoNueva = EstadoCotizacion::firstOrCreate(
-            ['nombre' => 'Nueva'],
-            ['color' => '#3490dc', 'icono' => 'fa-file-alt']
-        );
+        // Estado inicial configurado directamente en el modelo Venta
 
-        // Crear la cotización base con reintentos mejorados
-        $maxIntentosCotizacion = 5;
-        $cotizacion = null;
-        
-        for ($intento = 1; $intento <= $maxIntentosCotizacion; $intento++) {
-            try {
-                $codigoUnico = $this->generarCodigoCotizacion();
-                
-                $cotizacion = Cotizacion::create([
-                    'codigo' => $codigoUnico,
-                    'cliente_id' => $clienteId,
-                    'almacen_id' => $almacenPrincipal,
-                    'condicion' => $request->condicion,
-                    'canal' => 'Retail',
-                    'moneda' => $request->moneda,
-                    'forma_pago' => $request->forma_pago,
-                    'porcentaje_abono' => $request->forma_pago === 'Crédito' ? ($request->porcentaje_abono ?? 30) : 100,
-                    'datos_adicionales' => ($request->datos_adicionales ?? 'Venta generada desde POS') . 
-                                         "\nTipo de documento: " . $request->tipo_documento,
-                    'fecha_validez' => now()->addDays(30),
-                    'estado_id' => $estadoNueva->id,
-                    'user_id' => Auth::id(),
-                ]);
-                
-                Log::info("Cotización creada: {$cotizacion->codigo}");
-                break;
-                
-            } catch (\Illuminate\Database\QueryException $e) {
-                if ($e->errorInfo[1] == 1062 && $intento < $maxIntentosCotizacion) {
-                    Log::warning("Intento {$intento} falló, reintentando...");
-                    usleep(rand(10000, 30000)); // 10-30ms
-                    continue;
-                } else {
-                    throw $e;
-                }
-            }
+        // Crear venta directamente (sin cotización intermedia)
+        $venta = new Venta();
+        $venta->codigo = $this->generarCodigoVenta();
+        $venta->fecha = now();
+        $venta->cliente_id = $clienteId;
+        $venta->usuario_id = Auth::id();
+        $venta->almacen_id = $almacenPrincipal;
+        $venta->moneda = $request->moneda;
+        $venta->tipo_pago = $request->forma_pago;
+
+        // Obtener tipo de cambio si existe
+        $tipoCambio = null;
+        if (class_exists('App\Models\TipoCambio')) {
+            $tipoCambio = \App\Models\TipoCambio::obtenerActual();
+            $venta->tipo_cambio_usado = $tipoCambio ? $tipoCambio->venta : null;
         }
-        
-        if (!$cotizacion) {
-            throw new \Exception('No se pudo crear la cotización después de varios intentos');
+
+        // Configurar estado inicial (será ajustado después según stock)
+        if ($request->forma_pago === 'Contado') {
+            $venta->estado = 'pendiente'; // Temporal, se ajustará según stock
+            $venta->monto_abonado = 0; // Se calculará después
+            $venta->saldo_pendiente = 0;
+        } else {
+            $venta->estado = 'no_pagado';
+            $porcentajeAbono = $request->porcentaje_abono ?? 30;
+            $venta->monto_abonado = 0; // Se calculará después
+            $venta->saldo_pendiente = 0; // Se calculará después
+            $venta->fecha_vencimiento = now()->addDays(30);
         }
+
+        // Configurar observaciones
+        $venta->observaciones = ($request->datos_adicionales ?? 'Venta creada desde POS') .
+                               "\nTipo de documento: " . $request->tipo_documento;
+
+        // Guardar venta inicial (para tener ID disponible)
+        $venta->subtotal = 0; // Se calculará después
+        $venta->igv = 0;     // Se calculará después
+        $venta->total = 0;   // Se calculará después
+        $venta->save();
+
+        Log::info("Venta creada: {$venta->codigo}");
 
         // Variables para el procesamiento
         $subtotal = 0;
@@ -854,7 +1009,7 @@ public function procesarVenta(Request $request)
                     Log::warning("Stock insuficiente para {$parte->nombre}: solicitados {$item['cantidad']}, disponibles {$stockDisponible}");
                     
                     if ($request->generar_requerimiento) {
-                        $requerimiento = $this->generarRequerimientoCompra($parte, $item, $almacenItem, $cotizacion);
+                        $requerimiento = $this->generarRequerimientoCompra($parte, $item, $almacenItem, $venta);
                         if ($requerimiento) {
                             $requerimientosGenerados[] = $requerimiento;
                         }
@@ -872,12 +1027,12 @@ public function procesarVenta(Request $request)
                     $inventario->decrement('stock_disponible', $item['cantidad']);
                     
                     $this->registrarMovimientoInventario(
-                        $parte, 
-                        $almacenItem, 
-                        $item['cantidad'], 
-                        $stockAnterior, 
+                        $parte,
+                        $almacenItem,
+                        $item['cantidad'],
+                        $stockAnterior,
                         $inventario->stock_disponible,
-                        $cotizacion
+                        $venta
                     );
                 } else {
                     Log::info("No se descuenta stock para {$parte->nombre} - stock insuficiente o sin inventario");
@@ -888,10 +1043,12 @@ public function procesarVenta(Request $request)
                 $subtotalItem = $item['cantidad'] * $item['precio'];
                 $totalItem = $subtotalItem * (1 - $descuento / 100);
 
-                // Crear detalle de cotización simplificado
-                DetalleCotizacion::create([
-                    'cotizacion_id' => $cotizacion->id,
-                    'repuesto_id' => $item['id'],
+                // Crear detalle de venta POS
+                DetalleVenta::create([
+                    'venta_id' => $venta->id,
+                    'parte_id' => $item['id'],
+                    'tipo_item' => 'parte',
+                    'descripcion' => $parte->nombre,
                     'cantidad' => $item['cantidad'],
                     'precio_unitario' => $item['precio'],
                     'descuento' => $descuento,
@@ -925,52 +1082,62 @@ public function procesarVenta(Request $request)
         // Calcular totales finales
         $impuestos = $subtotal * 0.18;
         $total = $subtotal + $impuestos;
-        $abono = $total * ($cotizacion->porcentaje_abono / 100);
 
-        $cotizacion->update([
-            'subtotal' => $subtotal,
-            'impuestos' => $impuestos,
-            'total' => $total,
-            'abono' => $abono,
-        ]);
-
-        // Crear venta solo si hay items procesados y subtotal > 0
-        $venta = null;
-        if (!empty($itemsProcesados) && $subtotal > 0) {
-            $venta = $this->crearVentaDesdeCotizacion($cotizacion, $request->items);
+        // Calcular abono según forma de pago
+        if ($request->forma_pago === 'Contado') {
+            $abono = $total;
+            $saldoPendiente = 0;
+        } else {
+            $porcentajeAbono = $request->porcentaje_abono ?? 30;
+            $abono = $total * ($porcentajeAbono / 100);
+            $saldoPendiente = $total - $abono;
         }
-        
-        // Actualizar cotización con información de items sin stock
+
+        // Actualizar venta con totales finales
+        $venta->subtotal = $subtotal;
+        $venta->igv = $impuestos;
+        $venta->total = $total;
+        $venta->monto_abonado = $abono;
+        $venta->saldo_pendiente = $saldoPendiente;
+
+        // Actualizar estado final según pago (se ajustará después según stock)
+        if ($saldoPendiente <= 0) {
+            $venta->estado = 'pagado'; // Temporal, se ajustará según stock
+        }
+
+        // Agregar información de items sin stock a observaciones
         if (!empty($itemsSinStock)) {
-            $cotizacion->update([
-                'datos_adicionales' => $cotizacion->datos_adicionales . "\n\nITEMS SIN STOCK:\n" . implode("\n", $itemsSinStock)
-            ]);
+            $venta->observaciones .= "\n\nITEMS SIN STOCK:\n" . implode("\n", $itemsSinStock);
         }
+
+        $venta->save();
+
+        // Verificar stock y gestionar flujo de compra automático
+        $resultadoStock = $venta->verificarYGestionarStock();
 
         DB::commit();
 
-        // Preparar respuesta con información de redirección CORREGIDA
+        // Preparar respuesta con información de redirección
         $response = [
             'success' => true,
-            'cotizacion_id' => $cotizacion->id,
-            'venta_id' => $venta ? $venta->id : null,
+            'venta_id' => $venta->id,
+            'venta_codigo' => $venta->codigo,
+            'stock_info' => $resultadoStock
         ];
-        
+
         // Definir mensaje y redirección según el resultado
-        if ($venta && empty($itemsSinStock)) {
+        if (empty($itemsSinStock)) {
             // Venta completa procesada
             $response['message'] = 'Venta procesada correctamente';
             $response['redirect'] = route('admin.ventas.pos.ventas');
-        } elseif ($venta && !empty($itemsSinStock)) {
-            // Venta parcial con algunos items sin stock
-            $response['message'] = 'Venta procesada con algunos items pendientes por stock';
+        } else {
+            // Venta con algunos items sin stock
+            $response['message'] = 'Venta procesada. Algunos items requieren stock adicional';
             $response['items_sin_stock'] = $itemsSinStock;
             $response['redirect'] = route('admin.ventas.pos.ventas');
-        } else {
-            // Solo cotización generada por falta de stock
-            $response['message'] = 'Cotización generada. Items requieren stock adicional';
-            $response['items_sin_stock'] = $itemsSinStock;
-            $response['redirect'] = route('admin.ventas.cotizaciones.show', $cotizacion->id);
+            if (!empty($requerimientosGenerados)) {
+                $response['requerimientos_generados'] = $requerimientosGenerados;
+            }
         }
 
         return response()->json($response);
@@ -995,17 +1162,16 @@ public function procesarVenta(Request $request)
      */
     private function generarCodigoCotizacion()
     {
-        $año = date('Y');
-        $maxIntentos = 10;
-        
-        for ($intento = 1; $intento <= $maxIntentos; $intento++) {
-            // Obtener el último número de forma más segura
+        return DB::transaction(function () {
+            $año = date('Y');
+
+            // Obtener el último número usando FOR UPDATE para evitar condiciones de carrera
             $ultimaCotizacion = DB::table('cotizaciones')
                 ->where('codigo', 'like', "COT-{$año}%")
-                ->lockForUpdate()
                 ->orderByRaw('CAST(SUBSTRING(codigo, 9) AS UNSIGNED) DESC')
+                ->lockForUpdate()
                 ->first();
-            
+
             if ($ultimaCotizacion) {
                 // Extraer número: COT-20250005 -> 0005 -> 5
                 $numeroActual = intval(substr($ultimaCotizacion->codigo, -4));
@@ -1013,36 +1179,29 @@ public function procesarVenta(Request $request)
             } else {
                 $nuevoNumero = 1;
             }
-            
+
             // Generar nuevo código
             $nuevoCodigo = 'COT-' . $año . str_pad($nuevoNumero, 4, '0', STR_PAD_LEFT);
-            
-            // Verificar que no existe
+
+            // Verificar una vez más que no existe (por seguridad)
             $existe = DB::table('cotizaciones')
                 ->where('codigo', $nuevoCodigo)
                 ->exists();
-            
-            if (!$existe) {
-                Log::info("Código generado exitosamente: {$nuevoCodigo}");
-                return $nuevoCodigo;
+
+            if ($existe) {
+                // Si aún existe, usar timestamp único
+                $nuevoCodigo = 'COT-' . date('YmdHis') . '-' . rand(100, 999);
+                Log::warning("Código duplicado detectado, usando timestamp: {$nuevoCodigo}");
             }
-            
-            Log::warning("Código duplicado: {$nuevoCodigo}, intento {$intento}");
-            
-            // Esperar antes del siguiente intento
-            usleep(rand(5000, 15000)); // 5-15ms
-        }
-        
-        // Código de emergencia con timestamp
-        $codigoEmergencia = 'COT-' . date('YmdHis');
-        Log::error("Usando código de emergencia: {$codigoEmergencia}");
-        
-        return $codigoEmergencia;
+
+            Log::info("Código generado: {$nuevoCodigo}");
+            return $nuevoCodigo;
+        });
     }
     /**
      * Generar requerimiento de compra para items sin stock
      */
-    private function generarRequerimientoCompra($parte, $item, $almacenId, $cotizacion)
+    private function generarRequerimientoCompra($parte, $item, $almacenId, $venta)
     {
         try {
             // Verificar si existe la tabla y modelo de requerimientos
@@ -1051,34 +1210,44 @@ public function procesarVenta(Request $request)
                 return null;
             }
             
-            // Obtener o crear estado "Pendiente" para requerimientos
+            // Obtener estado "Pendiente" para requerimientos
             $estadoPendiente = null;
-            if (Schema::hasTable('estados_requerimiento')) {
-                $estadoPendiente = DB::table('estados_requerimiento')
-                    ->where('nombre', 'Pendiente')
+            if (Schema::hasTable('estado_requerimientos')) {
+                $estadoPendiente = DB::table('estado_requerimientos')
+                    ->where('nombre', 'pendiente')
                     ->first();
-                
+
                 if (!$estadoPendiente) {
-                    $estadoPendiente = DB::table('estados_requerimiento')
+                    // Crear estado pendiente si no existe
+                    $estadoPendienteId = DB::table('estado_requerimientos')
                         ->insertGetId([
-                            'nombre' => 'Pendiente',
-                            'color' => 'warning',
+                            'nombre' => 'pendiente',
                             'descripcion' => 'Requerimiento pendiente de atención',
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);
-                    $estadoPendiente = (object)['id' => $estadoPendiente];
+                    $estadoPendiente = (object)['id' => $estadoPendienteId];
                 }
+            } else {
+                // Si no existe la tabla de estados, usar estado por defecto
+                Log::warning('Tabla estado_requerimientos no existe, usando estado por defecto');
+                $estadoPendiente = (object)['id' => 1]; // Estado por defecto
             }
             
+            // Verificar que tenemos un estado válido
+            if (!$estadoPendiente || !$estadoPendiente->id) {
+                Log::error('No se pudo obtener un estado válido para el requerimiento de compra');
+                return null;
+            }
+
             // Crear requerimiento
             $requerimientoId = DB::table('requerimientos_compra')->insertGetId([
-                'codigo' => 'REQ-' . date('YmdHis') . '-' . rand(100, 999),
+                'codigo' => 'REQ-' . date('ymdHi') . rand(100, 999),
                 'fecha' => now(),
                 'almacen_id' => $almacenId,
-                'estado_id' => $estadoPendiente ? $estadoPendiente->id : null,
+                'estado_id' => $estadoPendiente->id,
                 'prioridad' => 'Alta',
-                'motivo' => "Generado automáticamente por venta POS (Cotización: {$cotizacion->codigo})",
+                'comentario' => "Generado automáticamente por venta POS (Venta: {$venta->codigo})",
                 'user_id' => Auth::id(),
                 'created_at' => now(),
                 'updated_at' => now()
@@ -1098,7 +1267,7 @@ public function procesarVenta(Request $request)
             
             return [
                 'id' => $requerimientoId,
-                'codigo' => 'REQ-' . date('YmdHis') . '-' . rand(100, 999),
+                'codigo' => 'REQ-' . date('ymdHi') . rand(100, 999),
                 'parte_id' => $parte->id,
                 'parte_nombre' => $parte->nombre,
                 'cantidad' => $item['cantidad']
@@ -1113,7 +1282,7 @@ public function procesarVenta(Request $request)
     /**
      * Registrar movimiento de inventario
      */
-    private function registrarMovimientoInventario($parte, $almacenId, $cantidad, $stockAnterior, $stockResultante, $cotizacion)
+    private function registrarMovimientoInventario($parte, $almacenId, $cantidad, $stockAnterior, $stockResultante, $venta)
     {
         try {
             // Obtener o crear tipo de movimiento
@@ -1135,10 +1304,10 @@ public function procesarVenta(Request $request)
                 'cantidad' => $cantidad,
                 'stock_anterior' => $stockAnterior,
                 'stock_resultante' => $stockResultante,
-                'documento_referencia' => $cotizacion->codigo,
+                'documento_referencia' => $venta->codigo,
                 'fecha_movimiento' => now(),
                 'usuario_id' => Auth::id(),
-                'observaciones' => "Venta generada desde POS. Cotización: {$cotizacion->codigo}",
+                'observaciones' => "Venta generada desde POS. Venta: {$venta->codigo}",
             ];
             
             Movimiento::create($datosMovimiento);
@@ -1241,18 +1410,35 @@ public function procesarVenta(Request $request)
      */
     private function generarCodigoVenta()
     {
-        $año = date('Y');
-        $ultimaVenta = Venta::where('codigo', 'like', "VTA-{$año}%")
-            ->orderBy('codigo', 'desc')
-            ->first();
-        
-        if ($ultimaVenta) {
-            $numero = intval(substr($ultimaVenta->codigo, -4)) + 1;
-        } else {
-            $numero = 1;
-        }
-        
-        return 'VTA-' . $año . str_pad($numero, 4, '0', STR_PAD_LEFT);
+        return DB::transaction(function () {
+            $año = date('Y');
+
+            // Usar lockForUpdate para evitar concurrencia
+            $ultimaVenta = Venta::where('codigo', 'like', "VTA-{$año}%")
+                ->orderBy('codigo', 'desc')
+                ->lockForUpdate()
+                ->first();
+
+            if ($ultimaVenta) {
+                $numero = intval(substr($ultimaVenta->codigo, -4)) + 1;
+            } else {
+                $numero = 1;
+            }
+
+            $codigo = 'VTA-' . $año . str_pad($numero, 4, '0', STR_PAD_LEFT);
+
+            // Verificar que no exista (double-check)
+            $existe = Venta::where('codigo', $codigo)->exists();
+            if ($existe) {
+                // Si existe, buscar el siguiente disponible
+                do {
+                    $numero++;
+                    $codigo = 'VTA-' . $año . str_pad($numero, 4, '0', STR_PAD_LEFT);
+                } while (Venta::where('codigo', $codigo)->exists());
+            }
+
+            return $codigo;
+        });
     }
 
     /**
@@ -1718,33 +1904,49 @@ public function procesarVenta(Request $request)
                 'estado' => $venta->estado,
                 'observaciones' => $venta->observaciones,
                 'cotizacion_codigo' => $venta->cotizacion->codigo ?? null,
-                'detallesPOS' => $detallesPOS
+                'detalles' => $detallesPOS, // Cambiar key para compatibilidad con la vista
+                'detallesPOS' => $detallesPOS // Mantener para retrocompatibilidad
             ];
             
-            // Generar HTML del detalle
-            $html = view('admin.ventas.pos.partials.detalle-venta', compact('venta', 'ventaData'))->render();
-            
-            return response()->json([
-                'success' => true,
-                'venta' => $ventaData,
-                'html' => $html
-            ]);
+            // Si es petición AJAX, devolver JSON
+            if (request()->ajax() || request()->wantsJson()) {
+                // Generar HTML del detalle
+                $html = view('admin.ventas.pos.partials.detalle-venta', compact('venta', 'ventaData'))->render();
+
+                return response()->json([
+                    'success' => true,
+                    'venta' => $ventaData,
+                    'html' => $html
+                ]);
+            }
+
+            // Si es petición directa, devolver vista completa con layout
+            return view('admin.ventas.pos.show', compact('venta', 'ventaData'));
             
         } catch (\Exception $e) {
             Log::error('Error al mostrar venta: ' . $e->getMessage());
-            return response()->json([
-                'error' => true,
-                'message' => 'Error al cargar el detalle de la venta'
-            ], 404);
+
+            // Si es petición AJAX, devolver JSON
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'error' => true,
+                    'message' => 'Error al cargar el detalle de la venta'
+                ], 404);
+            }
+
+            // Si es petición directa, redirigir con error
+            return redirect()->route('admin.ventas.pos.ventas')
+                           ->with('error', 'No se pudo cargar el detalle de la venta');
         }
     }
 
     /**
      * Registrar pago adicional a una venta
      */
- public function registrarPago(Request $request, $id)
+ public function registrarPago(Request $request)
     {
         $request->validate([
+            'venta_id' => 'required|exists:ventas,id',
             'monto' => 'required|numeric|min:0.01',
             'referencia' => 'nullable|string|max:255',
             'comentario' => 'nullable|string|max:500'
@@ -1752,51 +1954,127 @@ public function procesarVenta(Request $request)
 
         try {
             DB::beginTransaction();
-            
-            $venta = Venta::findOrFail($id);
+
+            $venta = Venta::findOrFail($request->venta_id);
             
             // Verificar que el monto no exceda el saldo pendiente
             if ($request->monto > $venta->saldo_pendiente) {
-                return redirect()->back()
-                    ->with('error', 'El monto ingresado excede el saldo pendiente');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El monto ingresado excede el saldo pendiente'
+                ], 400);
             }
             
-            // Registrar el pago
+            // Registrar el pago (sin pasar moneda para que use el mapeo automático)
             $resultado = $venta->registrarPago(
                 $request->monto,
+                'efectivo', // método de pago por defecto
                 $request->referencia,
                 $request->comentario
+                // No pasamos moneda para que use el mapeo automático basado en $this->moneda
             );
             
             if (!$resultado) {
                 throw new \Exception('No se pudo registrar el pago');
             }
             
-            // Registrar en historial de pagos si existe la tabla
-            if (\Schema::hasTable('pagos_venta')) {
-                DB::table('pagos_venta')->insert([
-                    'venta_id' => $venta->id,
-                    'monto' => $request->monto,
-                    'fecha_pago' => now(),
-                    'referencia' => $request->referencia,
-                    'comentario' => $request->comentario,
-                    'usuario_id' => Auth::id(),
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-            }
+            // No necesitamos insertar manualmente porque el modelo PagoVenta ya lo hace
+            // El método registrarPago del modelo Venta ya crea el registro en pagos_ventas
             
             DB::commit();
-            
-            return redirect()->back()
-                ->with('success', 'Pago registrado correctamente');
-            
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pago registrado correctamente',
+                'venta' => [
+                    'id' => $venta->id,
+                    'monto_abonado' => $venta->fresh()->monto_abonado,
+                    'saldo_pendiente' => $venta->fresh()->saldo_pendiente,
+                    'estado' => $venta->fresh()->estado
+                ]
+            ]);
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error al registrar pago: ' . $e->getMessage());
-            
-            return redirect()->back()
-                ->with('error', 'Error al registrar el pago: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al registrar el pago: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Marcar venta como lista para entrega (cuando llega el stock)
+     */
+    public function marcarListaEntrega(Request $request, $id)
+    {
+        try {
+            $venta = Venta::findOrFail($id);
+
+            if (!$venta->puedeMarcarseListaEntrega()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Esta venta no puede marcarse como lista para entrega en su estado actual'
+                ], 400);
+            }
+
+            $resultado = $venta->marcarListaParaEntrega(
+                $request->comentario,
+                auth()->id()
+            );
+
+            if ($resultado) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Venta marcada como lista para entrega',
+                    'nuevo_estado' => $venta->fresh()->estado
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al marcar la venta como lista para entrega'
+                ], 500);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Error al marcar venta como lista para entrega: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno al procesar la solicitud'
+            ], 500);
+        }
+    }
+
+    /**
+     * Marcar venta como despachada (entregada al cliente)
+     */
+    public function marcarDespachada(Request $request, $id)
+    {
+        try {
+            $venta = Venta::findOrFail($id);
+
+            if (!$venta->puedeDespacharse()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Esta venta no puede despacharse. Verifique que esté lista para entrega y completamente pagada.'
+                ], 400);
+            }
+
+            $resultado = $venta->marcarComoDespachada(
+                $request->comentario,
+                auth()->id()
+            );
+
+            return response()->json($resultado);
+
+        } catch (\Exception $e) {
+            Log::error('Error al marcar venta como despachada: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno al procesar la solicitud'
+            ], 500);
         }
     }
 
@@ -1823,7 +2101,7 @@ public function procesarVenta(Request $request)
 public function anular(Request $request, $id)
     {
         $request->validate([
-            'motivo' => 'required|string|max:500'
+            'comentario' => 'required|string|max:500'
         ]);
 
         try {
@@ -2177,76 +2455,6 @@ private function obtenerHistorialPagos($ventaId)
         }
     }
 
-    /**
-     * Calcular resumen de ventas
-     */
-    private function calcularResumenVentas(Request $request)
-    {
-        try {
-            $query = Venta::query();
-            
-            // Aplicar los mismos filtros que en listarVentas
-            if ($request->filled('fecha_desde')) {
-                $query->whereDate('fecha', '>=', $request->fecha_desde);
-            }
-            
-            if ($request->filled('fecha_hasta')) {
-                $query->whereDate('fecha', '<=', $request->fecha_hasta);
-            }
-            
-            if ($request->filled('estado')) {
-                $query->where('estado', $request->estado);
-            }
-            
-            if ($request->filled('almacen_id')) {
-                $query->where('almacen_id', $request->almacen_id);
-            }
-            
-            if ($request->filled('moneda')) {
-                $query->where('moneda', $request->moneda);
-            }
-            
-            if ($request->filled('buscar')) {
-                $buscar = $request->buscar;
-                $query->where(function($q) use ($buscar) {
-                    $q->where('codigo', 'like', "%{$buscar}%")
-                      ->orWhereHas('cliente', function($clienteQuery) use ($buscar) {
-                          $clienteQuery->where('nombres', 'like', "%{$buscar}%")
-                                      ->orWhere('apellido_paterno', 'like', "%{$buscar}%")
-                                      ->orWhere('apellido_materno', 'like', "%{$buscar}%")
-                                      ->orWhere('razon_social', 'like', "%{$buscar}%")
-                                      ->orWhere('documento_identidad', 'like', "%{$buscar}%");
-                      })
-                      ->orWhereHas('usuario', function($usuarioQuery) use ($buscar) {
-                          $usuarioQuery->where('name', 'like', "%{$buscar}%");
-                      });
-                });
-            }
-            
-            $resumen = $query->selectRaw('
-                COUNT(*) as total_ventas,
-                SUM(total) as monto_total,
-                SUM(CASE WHEN estado = "Parcial" THEN 1 ELSE 0 END) as ventas_parciales,
-                SUM(saldo_pendiente) as saldo_pendiente
-            ')->first();
-            
-            return [
-                'total_ventas' => $resumen->total_ventas ?? 0,
-                'monto_total' => $resumen->monto_total ?? 0,
-                'ventas_parciales' => $resumen->ventas_parciales ?? 0,
-                'saldo_pendiente' => $resumen->saldo_pendiente ?? 0
-            ];
-            
-        } catch (\Exception $e) {
-            Log::error('Error al calcular resumen: ' . $e->getMessage());
-            return [
-                'total_ventas' => 0,
-                'monto_total' => 0,
-                'ventas_parciales' => 0,
-                'saldo_pendiente' => 0
-            ];
-        }
-    }
     /**
      * Generar código único genérico - MÉTODO AUXILIAR MEJORADO
      */

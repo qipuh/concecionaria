@@ -1,30 +1,32 @@
 @extends('admin.layouts.app')
 @section('title', 'Historial de Recepciones')
-@section('header', 'Historial de Recepciones')
 
 @section('content')
-<div class="container-fluid px-4 py-4" style="min-height: 100vh;">
-    <!-- Hero Section -->
-    <div class="card mb-4" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 24px;">
-        <div class="card-body text-black p-5">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <h1 class="display-4 mb-3 fw-bold">
-                        <i class="fas fa-history me-3"></i>
-                        Historial de Recepciones
-                    </h1>
-                    <p class="fs-5 mb-0 opacity-75">
-                        Registro completo de todas las recepciones realizadas
-                    </p>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-history text-info me-2"></i> Auditoría
                 </div>
-                <a href="{{ route('admin.recepcion.index') }}" 
-                   class="btn btn-light text-dark fw-bold px-4 py-3" 
-                   style="border-radius: 16px; backdrop-filter: blur(20px);">
-                    <i class="fas fa-arrow-left me-2"></i> Volver a Recepciones
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Historial de Recepciones
+                </h2>
+                <p class="text-white-50 mb-0">Registro completo de todas las recepciones realizadas.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.recepcion.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver a Recepciones
                 </a>
             </div>
         </div>
     </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+    <div class="card dashboard-card border-0 shadow-sm mb-4">
+        <div class="card-body p-0">
 
     <!-- Main Content -->
     <div class="card border-0 shadow-lg" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px;">
@@ -44,28 +46,28 @@
             @if($recepciones->count() > 0)
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <thead class="table-light">
                             <tr>
-                                <th class="text-black py-4 px-4" style="border: none;">
-                                    <i class="fas fa-calendar-day me-2"></i>Fecha
+                                <th class="py-4 px-4">
+                                    <i class="fas fa-calendar-day me-2 text-primary"></i>Fecha
                                 </th>
-                                <th class="text-black py-4 px-4" style="border: none;">
-                                    <i class="fas fa-file-invoice me-2"></i>Orden
+                                <th class="py-4 px-4">
+                                    <i class="fas fa-file-invoice me-2 text-primary"></i>Orden
                                 </th>
-                                <th class="text-black py-4 px-4" style="border: none;">
-                                    <i class="fas fa-cube me-2"></i>Producto
+                                <th class="py-4 px-4">
+                                    <i class="fas fa-cube me-2 text-primary"></i>Producto
                                 </th>
-                                <th class="text-black py-4 px-4 text-center" style="border: none;">
-                                    <i class="fas fa-tag me-2"></i>Tipo
+                                <th class="py-4 px-4 text-center">
+                                    <i class="fas fa-tag me-2 text-primary"></i>Tipo
                                 </th>
-                                <th class="text-black py-4 px-4 text-center" style="border: none;">
-                                    <i class="fas fa-plus-circle me-2"></i>Cantidad
+                                <th class="py-4 px-4 text-center">
+                                    <i class="fas fa-plus-circle me-2 text-primary"></i>Cantidad
                                 </th>
-                                <th class="text-black py-4 px-4" style="border: none;">
-                                    <i class="fas fa-user me-2"></i>Recibido Por
+                                <th class="py-4 px-4">
+                                    <i class="fas fa-user me-2 text-primary"></i>Recibido Por
                                 </th>
-                                <th class="text-black py-4 px-4" style="border: none;">
-                                    <i class="fas fa-comment-dots me-2"></i>Observaciones
+                                <th class="py-4 px-4">
+                                    <i class="fas fa-comment-dots me-2 text-primary"></i>Observaciones
                                 </th>
                             </tr>
                         </thead>
@@ -320,96 +322,7 @@
             </div>
         </div>
     </div>
-    @endif
-    @endif
+        </div>
+    </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Efecto hover para las filas de la tabla
-    const tableRows = document.querySelectorAll('tbody tr');
-    tableRows.forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)';
-            this.style.transform = 'translateX(10px) scale(1.01)';
-            this.style.borderRadius = '12px';
-            this.style.transition = 'all 0.3s ease';
-            this.style.boxShadow = '0 8px 32px rgba(102, 126, 234, 0.2)';
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            this.style.background = '';
-            this.style.transform = '';
-            this.style.borderRadius = '';
-            this.style.boxShadow = '';
-        });
-    });
-    
-    // Animación de contadores para estadísticas
-    const animateCounters = () => {
-        document.querySelectorAll('.col-lg-3 h2').forEach(counter => {
-            const target = parseInt(counter.textContent);
-            const duration = 2000;
-            const step = target / (duration / 16);
-            let current = 0;
-            
-            const updateCounter = () => {
-                current += step;
-                if (current < target) {
-                    counter.textContent = Math.floor(current);
-                    requestAnimationFrame(updateCounter);
-                } else {
-                    counter.textContent = target;
-                }
-            };
-            
-            updateCounter();
-        });
-    };
-    
-    // Observador para activar animación cuando las estadísticas sean visibles
-    const statsObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                animateCounters();
-                statsObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.5 });
-    
-    const statsSection = document.querySelector('.row.mt-5');
-    if (statsSection) {
-        statsObserver.observe(statsSection);
-    }
-    
-    // Efecto hover para las tarjetas de estadísticas
-    const statCards = document.querySelectorAll('.col-lg-3 .card');
-    statCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-10px) scale(1.02)';
-            this.style.transition = 'all 0.3s ease';
-            this.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.2)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = '';
-            this.style.boxShadow = '';
-        });
-    });
-    
-    // Efecto hover para badges y elementos especiales
-    document.querySelectorAll('.badge, .quantity-display').forEach(element => {
-        element.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.1)';
-            this.style.transition = 'all 0.2s ease';
-        });
-        
-        element.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-        });
-    });
-});
-</script>
-@endpush
 @endsection

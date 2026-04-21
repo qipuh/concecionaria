@@ -2,101 +2,102 @@
 
 @section('title', 'Categorías de Servicios Tercerizados')
 
-@section('header', 'Gestión de Categorías de Servicios Tercerizados')
-
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
-                    <div class="mb-3 mb-sm-0">
-                        <h2 class="h4 fw-bold mb-1" :class="darkMode ? 'text-light' : 'text-dark'">
-                            Total de Categorías: {{ $totalCategorias }}
-                        </h2>
-                        <p class="text-muted small mb-0">Gestiona las categorías de servicios tercerizados desde aquí</p>
-                    </div>
-                    <div>
-                        <a href="{{ route('admin.productos-servicios.servicios.categorias.create') }}" class="btn btn-primary d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="me-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            Agregar Categoría
-                        </a>
-                    </div>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-tags text-info me-2"></i> Gestión de Servicios
                 </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Categorías de Servicios
+                </h2>
+                <p class="text-white-50 mb-0">Total registradas: {{ $totalCategorias }}</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.productos-servicios.servicios.index') }}" class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border border-white border-opacity-25 backdrop-blur me-2">
+                    <i class="fas fa-list me-2"></i> Ver Servicios
+                </a>
+                <a href="{{ route('admin.productos-servicios.servicios.categorias.create') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-plus text-primary me-2"></i> Agregar Categoría
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+    <div class="card dashboard-card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            @if (session('success'))
+                <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
+            @if (session('error'))
+                <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle" :class="darkMode ? 'table-dark' : ''">
-                        <thead class="table-light" :class="darkMode ? 'table-dark' : ''">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="py-3 px-4 border-0 text-uppercase small">#</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small">Nombre</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small text-center">Fecha Creación</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($categorias as $index => $categoria)
                             <tr>
-                                <th scope="col" class="text-uppercase small">#</th>
-                                <th scope="col" class="text-uppercase small">Nombre</th>
-                                <th scope="col" class="text-uppercase small">Fecha Creación</th>
-                                <th scope="col" class="text-uppercase small text-end">Acciones</th>
+                                <td class="px-4 py-3">{{ $categorias->firstItem() + $index }}</td>
+                                <td class="px-4 py-3 fw-bold text-primary">{{ $categoria->nombre }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="text-muted small">
+                                        <i class="far fa-calendar-alt me-1"></i>
+                                        {{ $categoria->created_at->format('d/m/Y H:i') }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-end">
+                                    <div class="btn-group shadow-sm rounded-pill overflow-hidden">
+                                        <a href="{{ route('admin.productos-servicios.servicios.categorias.edit', $categoria) }}" class="btn btn-white btn-sm border-0 px-3 transition hover:bg-warning hover:text-white" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('admin.productos-servicios.servicios.categorias.destroy', $categoria) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('¿Estás seguro de eliminar esta categoría?')" class="btn btn-white btn-sm border-0 px-3 transition hover:bg-danger hover:text-white" title="Eliminar">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($categorias as $index => $categoria)
-                                <tr>
-                                    <td>{{ $categorias->firstItem() + $index }}</td>
-                                    <td class="fw-medium">{{ $categoria->nombre }}</td>
-                                    <td>{{ $categoria->created_at->format('d/m/Y H:i') }}</td>
-                                    <td class="text-end">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{{ route('admin.productos-servicios.servicios.categorias.edit', $categoria) }}" class="btn btn-outline-warning" title="Editar">
-                                                <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </a>
-                                            <form action="{{ route('admin.productos-servicios.servicios.categorias.destroy', $categoria) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" onclick="return confirm('¿Estás seguro de eliminar esta categoría?')" class="btn btn-outline-danger" title="Eliminar">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="py-5 text-center">
-                                        <div class="d-flex flex-column align-items-center justify-content-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" style="height: 3rem; width: 3rem;" class="text-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <p class="text-muted mb-2">No hay categorías registradas</p>
-                                            <a href="{{ route('admin.productos-servicios.servicios.categorias.create') }}" class="btn btn-sm btn-link text-decoration-none">
-                                                Agregar una nueva categoría
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="py-5 text-center">
+                                    <div class="bg-light d-inline-flex p-4 rounded-circle mb-3">
+                                        <i class="fas fa-tags text-muted fa-3x"></i>
+                                    </div>
+                                    <h5 class="text-dark fw-bold">No hay categorías registradas</h5>
+                                    <p class="text-muted mb-0">Organiza tus servicios tercerizados mediante categorías</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
-                <div class="mt-4">
-                    {{ $categorias->links() }}
-                </div>
+            <div class="mt-4 d-flex justify-content-center">
+                {{ $categorias->links() }}
             </div>
         </div>
     </div>

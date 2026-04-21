@@ -422,10 +422,11 @@ public function index(Request $request)
      */
     public function edit(Cotizacion $cotizacion)
     {
-        // Solo se pueden editar cotizaciones en estado Borrador
-        if ($cotizacion->estado->nombre !== 'Borrador') {
+        // Se puede editar si no está en un estado final como Facturada o Cerrada
+        $estadosBloqueados = ['Facturada', 'Cerrada', 'Convertida'];
+        if ($cotizacion->estado && in_array($cotizacion->estado->nombre, $estadosBloqueados)) {
             return redirect()->route('admin.ventas.cotizaciones.show', $cotizacion)
-                ->with('error', 'Solo se pueden editar cotizaciones en estado Borrador');
+                ->with('error', 'No se pueden editar cotizaciones que ya están ' . $cotizacion->estado->nombre);
         }
         
         $cotizacion->load(['cliente', 'almacen', 'detalles.vehiculo', 'detalles.color']);
@@ -440,10 +441,10 @@ public function index(Request $request)
      */
     public function update(Request $request, Cotizacion $cotizacion)
     {
-        // Solo se pueden actualizar cotizaciones en estado Nueva
-        if ($cotizacion->estado->nombre !== 'Nueva') {
+        $estadosBloqueados = ['Facturada', 'Cerrada', 'Convertida'];
+        if ($cotizacion->estado && in_array($cotizacion->estado->nombre, $estadosBloqueados)) {
             return redirect()->route('admin.ventas.cotizaciones.show', $cotizacion)
-                ->with('error', 'Solo se pueden actualizar cotizaciones en estado Nueva');
+                ->with('error', 'No se pueden actualizar cotizaciones que ya están ' . $cotizacion->estado->nombre);
         }
         
         $request->validate([
@@ -598,10 +599,10 @@ public function index(Request $request)
      */
     public function destroy(Cotizacion $cotizacion)
     {
-        // Solo se pueden eliminar cotizaciones en estado Nueva
-        if ($cotizacion->estado->nombre !== 'Nueva') {
-            return redirect()->route('admin.ventas.cotizaciones.show', $cotizacion)
-                ->with('error', 'Solo se pueden eliminar cotizaciones en estado Nueva');
+        $estadosBloqueados = ['Facturada', 'Cerrada', 'Convertida'];
+        if ($cotizacion->estado && in_array($cotizacion->estado->nombre, $estadosBloqueados)) {
+            return redirect()->route('admin.ventas.cotizaciones.index')
+                ->with('error', 'No se pueden eliminar cotizaciones que ya están ' . $cotizacion->estado->nombre);
         }
         
         try {

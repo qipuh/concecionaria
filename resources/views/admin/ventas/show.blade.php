@@ -4,68 +4,62 @@
 @section('title', 'Detalle de Venta #' . $venta->codigo)
 
 @section('content')
-<div class="container-fluid">
-    {{-- Header --}}
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('admin.ventas.index') }}">Ventas</a>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        Detalle #{{ $venta->codigo }}
-                    </li>
-                </ol>
-            </nav>
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-shopping-cart mr-2"></i>
-                Venta #{{ $venta->codigo }}
-                @switch($venta->estado)
-                    @case('Completada')
-                        <span class="badge badge-success ml-2">{{ $venta->estado }}</span>
-                        @break
-                    @case('Parcial')
-                        <span class="badge badge-warning ml-2">{{ $venta->estado }}</span>
-                        @break
-                    @case('Cancelada')
-                        <span class="badge badge-danger ml-2">{{ $venta->estado }}</span>
-                        @break
-                    @default
-                        <span class="badge badge-secondary ml-2">{{ $venta->estado }}</span>
-                @endswitch
-            </h1>
-        </div>
-        <div class="d-flex gap-2">
-            @if($venta->saldo_pendiente > 0 && $venta->estado != 'Cancelada')
-                <button type="button" 
-                        class="btn btn-success mr-2" 
-                        onclick="abrirModalPago({{ $venta->id }}, {{ $venta->saldo_pendiente }})">
-                    <i class="fas fa-credit-card mr-1"></i>Registrar Pago
-                </button>
-            @endif
-            
-            @if($venta->estado != 'Cancelada')
-                <button type="button" 
-                        class="btn btn-danger mr-2" 
-                        onclick="abrirModalAnular({{ $venta->id }})">
-                    <i class="fas fa-ban mr-1"></i>Anular
-                </button>
-            @endif
-            
-            <a href="#" 
-               onclick="window.print()" 
-               class="btn btn-secondary mr-2">
-                <i class="fas fa-print mr-1"></i>Imprimir
-            </a>
-            
-            <a href="{{ route('admin.ventas.index') }}" 
-               class="btn btn-outline-primary">
-                <i class="fas fa-arrow-left mr-1"></i>Volver
-            </a>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-shopping-cart text-info me-2"></i> Detalles de Venta
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 d-flex align-items-center">
+                    Venta #{{ $venta->codigo }}
+                    @switch($venta->estado)
+                        @case('Completada')
+                            <span class="badge bg-success bg-opacity-25 border border-success border-opacity-50 ms-3 fs-6 rounded-pill px-3 py-2"><span class="d-inline-block rounded-circle bg-success me-1" style="width: 8px; height: 8px;"></span> Completada</span>
+                            @break
+                        @case('Parcial')
+                            <span class="badge bg-warning bg-opacity-25 border border-warning border-opacity-50 text-warning ms-3 fs-6 rounded-pill px-3 py-2"><span class="d-inline-block rounded-circle bg-warning me-1" style="width: 8px; height: 8px;"></span> Parcial</span>
+                            @break
+                        @case('Cancelada')
+                            <span class="badge bg-danger bg-opacity-25 border border-danger border-opacity-50 ms-3 fs-6 rounded-pill px-3 py-2"><span class="d-inline-block rounded-circle bg-danger me-1" style="width: 8px; height: 8px;"></span> Cancelada</span>
+                            @break
+                        @default
+                            <span class="badge bg-secondary bg-opacity-25 border border-secondary border-opacity-50 ms-3 fs-6 rounded-pill px-3 py-2"><span class="d-inline-block rounded-circle bg-secondary me-1" style="width: 8px; height: 8px;"></span> {{ $venta->estado }}</span>
+                    @endswitch
+                </h2>
+                <div class="text-white-50 mt-2 d-flex align-items-center">
+                    <i class="far fa-calendar-alt me-1"></i> {{ $venta->fecha->format('d M, Y H:i') }}
+                    <span class="mx-2">|</span>
+                    <i class="far fa-user me-1"></i> {{ $venta->usuario->name ?? 'Sistema' }}
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                @if($venta->saldo_pendiente > 0 && $venta->estado != 'Cancelada')
+                    <button type="button" class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold border border-white border-opacity-25 backdrop-blur transition hover:scale-105" onclick="abrirModalPago({{ $venta->id }}, {{ $venta->saldo_pendiente }})">
+                        <i class="fas fa-credit-card me-2 text-success"></i> Registrar Pago
+                    </button>
+                @endif
+                
+                @if($venta->estado != 'Cancelada')
+                    <button type="button" class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold border border-white border-opacity-25 backdrop-blur transition hover:scale-105" onclick="abrirModalAnular({{ $venta->id }})">
+                        <i class="fas fa-ban me-2 text-danger"></i> Anular
+                    </button>
+                @endif
+                
+                <a href="#" onclick="window.print()" class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold border border-white border-opacity-25 backdrop-blur transition hover:scale-105">
+                    <i class="fas fa-print me-2 text-info"></i> Imprimir
+                </a>
+                
+                <a href="{{ route('admin.ventas.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105" style="border: 1px solid rgba(255,255,255,0.8);">
+                    <i class="fas fa-arrow-left me-2 text-primary"></i> Volver a Ventas
+                </a>
+            </div>
         </div>
     </div>
+</div>
 
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
     <div class="row">
         {{-- Información Principal --}}
         <div class="col-xl-8 col-lg-7">

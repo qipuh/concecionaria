@@ -5,22 +5,29 @@
 @section('header', 'Proveedores')
 
 @section('content')
-<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4">
-    <div class="mb-3 mb-sm-0">
-        <h2 class="h4 fw-bold mb-1" :class="darkMode ? 'text-light' : 'text-dark'">
-            Total de Proveedores: <span id="total-proveedores">{{ $proveedores->total() }}</span>
-        </h2>
-        <p class="text-muted small mb-0">Gestiona los proveedores desde aquí</p>
-    </div>
-    <div>
-        <a href="{{ route('admin.compras.proveedores.create') }}" class="btn btn-primary d-flex align-items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="me-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Agregar Proveedor
-        </a>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-truck text-info me-2"></i> Adquisiciones
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Proveedores
+                </h2>
+                <p class="text-white-50 mb-0">Total registrados: <span id="total-proveedores">{{ $proveedores->total() }}</span> proveedores en el sistema.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.compras.proveedores.create') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-plus text-primary me-2"></i> Agregar Proveedor
+                </a>
+            </div>
+        </div>
     </div>
 </div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
 
 @if (session('success'))
     <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
@@ -101,6 +108,7 @@
 
 <div class="mt-4" id="proveedores-pagination">
     @include('admin.compras.proveedores.partials.pagination')
+</div>
 </div>
 @endsection
 

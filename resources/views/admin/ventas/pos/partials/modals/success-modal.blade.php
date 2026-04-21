@@ -1,5 +1,5 @@
 {{-- resources/views/admin/ventas/pos/partials/modals/success-modal.blade.php --}}
-<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">

@@ -69,6 +69,10 @@ Route::get('/', function () {
 Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
 
+// Rutas públicas de seguimiento
+Route::get('/tracking', [App\Http\Controllers\TrackingController::class, 'index'])->name('tracking.index');
+Route::post('/tracking/buscar', [App\Http\Controllers\TrackingController::class, 'buscarVenta'])->name('tracking.buscar');
+
 ### Rutas protegidas por autenticación
 Route::middleware(['auth'])->group(function () {
     # Dashboard, Perfil y Logout
@@ -89,6 +93,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{cotizacion}/cambiar-estado', [EstadoCotizacionController::class, 'cambiarEstado'])
             ->name('cambiar-estado');
         Route::get('/buscar-servicios', [CotizacionController::class, 'buscarServicios'])->name('buscarServicios');
+        Route::get('/buscar-clientes', [CotizacionController::class, 'buscarClientes'])->name('buscar-clientes');
+        Route::get('/buscar-vehiculos', [CotizacionController::class, 'buscarVehiculos'])->name('buscar-vehiculos');
         // Ruta existente para gestión
         Route::get('/{cotizacion}/gestionar', [CotizacionController::class, 'gestionar'])->name('gestionar');
         Route::post('/{cotizacion}/seguimiento', [App\Http\Controllers\Admin\Ventas\SeguimientoCotizacionController::class, 'agregar'])->name('seguimiento.agregar');
@@ -454,6 +460,17 @@ Route::middleware(['auth'])->prefix('admin/planes-mantenimiento')->name('admin.p
     Route::delete('/{planMantenimiento}', [PlanMantenimientoController::class, 'destroy'])->name('destroy');
     Route::patch('/{planMantenimiento}/toggle-status', [PlanMantenimientoController::class, 'toggleStatus'])->name('toggle-status');
     Route::post('/{planMantenimiento}/duplicate', [PlanMantenimientoController::class, 'duplicate'])->name('duplicate');
+});
+
+# Módulo Mantenimiento - Técnicos
+Route::middleware(['auth'])->prefix('admin/mantenimiento/tecnicos')->name('admin.mantenimiento.tecnicos.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\Mantenimiento\TecnicoController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Admin\Mantenimiento\TecnicoController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Admin\Mantenimiento\TecnicoController::class, 'store'])->name('store');
+    Route::get('/{tecnico}', [App\Http\Controllers\Admin\Mantenimiento\TecnicoController::class, 'show'])->name('show');
+    Route::get('/{tecnico}/edit', [App\Http\Controllers\Admin\Mantenimiento\TecnicoController::class, 'edit'])->name('edit');
+    Route::put('/{tecnico}', [App\Http\Controllers\Admin\Mantenimiento\TecnicoController::class, 'update'])->name('update');
+    Route::delete('/{tecnico}', [App\Http\Controllers\Admin\Mantenimiento\TecnicoController::class, 'destroy'])->name('destroy');
 });
 
     Route::prefix('admin/almacenes')->name('admin.almacenes.')->group(function () {
@@ -835,6 +852,8 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/ventas/list', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'listarVentas'])->name('ventas.list');
         Route::get('/ventas/{id}', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'mostrarVenta'])->name('ventas.show');
         Route::post('/ventas/registrar-pago', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'registrarPago'])->name('ventas.registrar-pago');
+        Route::post('/ventas/{id}/marcar-lista-entrega', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'marcarListaEntrega'])->name('ventas.marcar-lista-entrega');
+        Route::post('/ventas/{id}/marcar-despachada', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'marcarDespachada'])->name('ventas.marcar-despachada');
         Route::get('/ventas/{id}/imprimir', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'imprimirVenta'])->name('ventas.imprimir');
         Route::get('/ventas/exportar/excel', [\App\Http\Controllers\Admin\Ventas\POSController::class, 'exportarVentas'])->name('ventas.exportar');
         // ========================================================
@@ -886,6 +905,7 @@ Route::prefix('admin/compras/guias')->name('admin.guias.')->group(function () {
 
 // Rutas para vales de devolución
 Route::prefix('admin/compras/devoluciones')->name('admin.devoluciones.')->group(function () {
+    Route::get('/buscar-productos', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'buscarProductos'])->name('buscar-productos');
     Route::get('/', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'index'])->name('index');
     Route::get('/create', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'create'])->name('create');
     Route::post('/', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'store'])->name('store');

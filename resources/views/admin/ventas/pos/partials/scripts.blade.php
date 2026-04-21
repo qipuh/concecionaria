@@ -540,8 +540,6 @@ $(document).ready(function() {
             }
         });
         
-        $('#form-nuevo-cliente').off('submit').on('submit', crearNuevoCliente);
-        $('input[name="tipo_cliente"]').off('change').on('change', toggleTipoCliente);
         $('#btn-remove-cliente').off('click').on('click', removerCliente);
         
         $('#clienteModal').off('show.bs.modal').on('show.bs.modal', function() {
@@ -549,7 +547,6 @@ $(document).ready(function() {
             cargarClientesRecientes();
         });
         
-        configurarValidacionesCliente();
     }
     
     function buscarClientes(query) {
@@ -657,17 +654,39 @@ $(document).ready(function() {
         const id = $(this).data('id');
         const nombre = $(this).data('nombre');
         const documento = $(this).data('documento');
-        
+
+        console.log('Seleccionando cliente:', {id, nombre, documento});
+
         $('#cliente-id').val(id);
         $('.nombre-cliente').text(nombre);
         $('.documento-cliente').text(`DOC: ${documento}`);
-        
+
         $('#cliente-placeholder').addClass('d-none');
         $('#cliente-seleccionado').removeClass('d-none');
-        
-        $('#clienteModal').modal('hide');
-        mostrarNotificacion(`Cliente "${nombre}" seleccionado correctamente`, 'success');
-        verificarEstadoProcesar();
+
+        // Cerrar modal correctamente con limpieza manual
+        const modal = bootstrap.Modal.getInstance(document.getElementById('clienteModal'));
+        if (modal) {
+            modal.hide();
+        } else {
+            $('#clienteModal').modal('hide');
+        }
+
+        // Limpieza automática del modal
+        setTimeout(() => {
+            $('body').removeClass('modal-open');
+            $('body').css({
+                'padding-right': '',
+                'overflow': ''
+            });
+
+            // Remover focus del botón problemático
+            $('.select-cliente-btn').blur();
+            $(document.activeElement).blur();
+
+            mostrarNotificacion(`Cliente "${nombre}" seleccionado correctamente`, 'success');
+            verificarEstadoProcesar();
+        }, 200);
     }
     
     function removerCliente() {
@@ -681,176 +700,12 @@ $(document).ready(function() {
         }
     }
     
-    function crearNuevoCliente(e) {
-        e.preventDefault();
-        
-        if (!validarFormularioCompleto()) {
-            return;
-        }
-        
-        const $submitBtn = $('#form-nuevo-cliente button[type="submit"]');
-        const originalText = $submitBtn.html();
-        
-        $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Creando...');
-        
-        // Simulación de creación
-        setTimeout(() => {
-            const tipoCliente = $('input[name="tipo_cliente"]:checked').val();
-            let nombre = '';
-            
-            if (tipoCliente === 'natural') {
-                nombre = `${$('#nombres').val()} ${$('#apellido_paterno').val()} ${$('#apellido_materno').val()}`.trim();
-            } else {
-                nombre = $('#razon_social').val();
-            }
-            
-            const clienteId = Date.now();
-            const documento = $('#documento_identidad').val();
-            
-            $('#cliente-id').val(clienteId);
-            $('.nombre-cliente').text(nombre);
-            $('.documento-cliente').text(`DOC: ${documento}`);
-            
-            $('#cliente-placeholder').addClass('d-none');
-            $('#cliente-seleccionado').removeClass('d-none');
-            
-            $('#clienteModal').modal('hide');
-            limpiarFormularioCliente();
-            
-            mostrarNotificacion(`Cliente "${nombre}" creado y seleccionado`, 'success');
-            verificarEstadoProcesar();
-            
-            $submitBtn.prop('disabled', false).html(originalText);
-        }, 2000);
-    }
-    
-    function toggleTipoCliente() {
-        const tipoNatural = $('#tipo-natural').is(':checked');
-        
-        if (tipoNatural) {
-            $('#datos-natural').removeClass('d-none');
-            $('#datos-juridico').addClass('d-none');
-            $('#nombres, #apellido_paterno').prop('required', true);
-            $('#razon_social').prop('required', false);
-        } else {
-            $('#datos-natural').addClass('d-none');
-            $('#datos-juridico').removeClass('d-none');
-            $('#nombres, #apellido_paterno').prop('required', false);
-            $('#razon_social').prop('required', true);
-        }
-    }
     
     function limpiarFormularioCliente() {
-        $('#form-nuevo-cliente')[0].reset();
-        $('#tipo-natural').prop('checked', true);
-        toggleTipoCliente();
-        $('#form-nuevo-cliente .is-invalid').removeClass('is-invalid');
-        $('#form-nuevo-cliente .is-valid').removeClass('is-valid');
+        // Solo limpiar búsqueda
+        $('#cliente-search').val('');
     }
     
-    function configurarValidacionesCliente() {
-        $('#documento_identidad').off('input').on('input', function() {
-            const valor = $(this).val().replace(/[^0-9A-Za-z]/g, '');
-            $(this).val(valor.toUpperCase());
-            
-            const tipoCliente = $('input[name="tipo_cliente"]:checked').val();
-            let esValido = false;
-            
-            if (tipoCliente === 'natural') {
-                esValido = /^[0-9]{8}$/.test(valor) || /^[A-Z0-9]{9,12}$/.test(valor);
-            } else {
-                esValido = /^[0-9]{11}$/.test(valor);
-            }
-            
-            toggleValidationClass(this, esValido && valor.length > 0);
-        });
-        
-        $('#nombres, #apellido_paterno, #apellido_materno, #razon_social').off('input').on('input', function() {
-            let valor = $(this).val().replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-            valor = valor.replace(/\b\w+/g, function(txt) {
-                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            });
-            $(this).val(valor);
-            
-            const esRequerido = $(this).prop('required');
-            const esValido = !esRequerido || (valor.trim().length >= 2);
-            toggleValidationClass(this, esValido);
-        });
-        
-        $('#telefono').off('input').on('input', function() {
-            let valor = $(this).val().replace(/[^0-9]/g, '');
-            
-            if (valor.length > 0) {
-                if (valor.length <= 3) {
-                    valor = valor;
-                } else if (valor.length <= 6) {
-                    valor = valor.substring(0, 3) + ' ' + valor.substring(3);
-                } else {
-                    valor = valor.substring(0, 3) + ' ' + valor.substring(3, 6) + ' ' + valor.substring(6, 9);
-                }
-            }
-            
-            $(this).val(valor);
-            
-            const numeroLimpio = valor.replace(/\s/g, '');
-            const esValido = numeroLimpio.length === 0 || (numeroLimpio.length === 9 && /^9/.test(numeroLimpio));
-            toggleValidationClass(this, esValido);
-        });
-        
-        $('#correo').off('input').on('input', function() {
-            const valor = $(this).val().toLowerCase();
-            $(this).val(valor);
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const esValido = valor.length === 0 || emailRegex.test(valor);
-            toggleValidationClass(this, esValido);
-        });
-    }
-    
-    function toggleValidationClass(elemento, esValido) {
-        const $elemento = $(elemento);
-        
-        if (esValido) {
-            $elemento.removeClass('is-invalid').addClass('is-valid');
-        } else {
-            $elemento.removeClass('is-valid').addClass('is-invalid');
-        }
-    }
-    
-    function validarFormularioCompleto() {
-        let esValido = true;
-        const tipoCliente = $('input[name="tipo_cliente"]:checked').val();
-        
-        const documento = $('#documento_identidad').val().trim();
-        if (!documento) {
-            toggleValidationClass('#documento_identidad', false);
-            esValido = false;
-        }
-        
-        if (tipoCliente === 'natural') {
-            const nombres = $('#nombres').val().trim();
-            const apellidoPaterno = $('#apellido_paterno').val().trim();
-            
-            if (!nombres || nombres.length < 2) {
-                toggleValidationClass('#nombres', false);
-                esValido = false;
-            }
-            
-            if (!apellidoPaterno || apellidoPaterno.length < 2) {
-                toggleValidationClass('#apellido_paterno', false);
-                esValido = false;
-            }
-        } else {
-            const razonSocial = $('#razon_social').val().trim();
-            
-            if (!razonSocial || razonSocial.length < 3) {
-                toggleValidationClass('#razon_social', false);
-                esValido = false;
-            }
-        }
-        
-        return esValido;
-    }
     
     // =============================================
     // FUNCIONES DE CONFIGURACIÓN
@@ -913,53 +768,114 @@ $(document).ready(function() {
     function enviarVenta() {
         const $btnProcesar = $('#btn-procesar');
         const textoOriginal = $btnProcesar.html();
-        
+
         $btnProcesar.prop('disabled', true)
                     .html('<i class="fas fa-spinner fa-spin me-2"></i>Procesando...');
-        
-        // Simulación de envío
-        setTimeout(() => {
-            const ventaId = Date.now();
-            const codigoCotizacion = `COT-${String(ventaId).slice(-6)}`;
-            
-            mostrarModalExito({
-                success: true,
-                id: ventaId,
-                codigo: codigoCotizacion,
-                requerimientos: generarRequerimiento ? [
-                    { descripcion: 'Repuesto ABC', cantidad: 2 }
-                ] : []
-            });
-            
-            $btnProcesar.prop('disabled', false).html(textoOriginal);
-        }, 3000);
+
+        // Preparar datos para envío
+        const datosVenta = {
+            items: itemsSeleccionados.map(item => ({
+                id: item.id,
+                tipo: item.tipo,
+                cantidad: item.cantidad,
+                precio: item.precio,
+                almacen_id: item.almacen_id,
+                descuento: item.descuento || 0
+            })),
+            cliente_id: $('#cliente-id').val(),
+            almacen_id: $('#almacen').val(),
+            moneda: $('#moneda').val(),
+            condicion: $('#condicion').val(),
+            forma_pago: $('#forma-pago').val(),
+            porcentaje_abono: porcentajeAbono,
+            generar_requerimiento: generarRequerimiento,
+            datos_adicionales: $('#observaciones').val() || null,
+            tipo_documento: $('#tipo-documento').val() || 'Boleta',
+            _token: $('meta[name="csrf-token"]').attr('content')
+        };
+
+        $.ajax({
+            url: '{{ route("admin.ventas.pos.procesar-venta") }}',
+            type: 'POST',
+            data: datosVenta,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Mostrar notificaciones según el resultado de stock
+                    if (response.stock_info) {
+                        if (response.stock_info.requiere_compra) {
+                            toastr.warning(response.stock_info.mensaje, 'Productos sin Stock');
+
+                            // Mostrar detalles de items sin stock
+                            if (response.stock_info.items_sin_stock.length > 0) {
+                                let mensaje = 'Items sin stock suficiente:<br>';
+                                response.stock_info.items_sin_stock.forEach(item => {
+                                    mensaje += `• ${item.nombre}: necesita ${item.cantidad_faltante} unidades más<br>`;
+                                });
+                                toastr.info(mensaje, 'Detalles de Stock', {timeOut: 8000});
+                            }
+                        } else {
+                            toastr.success(response.stock_info.mensaje, 'Stock Verificado');
+                        }
+                    }
+
+                    // Mostrar modal de éxito
+                    mostrarModalExito({
+                        success: true,
+                        id: response.venta_id,
+                        codigo: response.venta_codigo,
+                        requerimientos: response.stock_info && response.stock_info.requiere_compra ?
+                            response.stock_info.items_sin_stock : []
+                    });
+                } else {
+                    toastr.error(response.message || 'Error al procesar la venta', 'Error');
+                }
+            },
+            error: function(xhr, status, error) {
+                const response = xhr.responseJSON;
+                const message = response?.message || 'Error al procesar la venta';
+                toastr.error(message, 'Error');
+                console.error('Error procesando venta:', error, response);
+            },
+            complete: function() {
+                $btnProcesar.prop('disabled', false).html(textoOriginal);
+            }
+        });
     }
     
     function mostrarModalExito(response) {
         $('#cotizacion-codigo').text(response.codigo || 'N/A');
-        
+
         if (response.id) {
-            $('#btn-ver-cotizacion').attr('href', `/admin/ventas/cotizaciones/${response.id}`);
+            $('#btn-ver-cotizacion').attr('href', `{{ route('admin.ventas.pos.ventas.show', '') }}/${response.id}`);
         }
-        
+
         if (response.requerimientos && response.requerimientos.length > 0) {
             let requerimientosHTML = `
                 <div class="alert alert-warning mt-3">
-                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Requerimientos Generados</h6>
-                    <p class="mb-2">Se generaron los siguientes requerimientos automáticos:</p>
+                    <h6><i class="fas fa-shopping-cart me-2"></i>Productos Sin Stock</h6>
+                    <p class="mb-2">Los siguientes productos requieren compra automática:</p>
                     <ul class="mb-0">
             `;
-            
-            response.requerimientos.forEach(req => {
-                requerimientosHTML += `<li>${req.descripcion} - Cantidad: ${req.cantidad}</li>`;
+
+            response.requerimientos.forEach(item => {
+                requerimientosHTML += `<li>${item.nombre} - Faltante: ${item.cantidad_faltante} unidades</li>`;
             });
-            
-            requerimientosHTML += '</ul></div>';
+
+            requerimientosHTML += `</ul>
+                <p class="mt-2 mb-0"><small class="text-muted">
+                    <i class="fas fa-info-circle"></i> Se ha generado automáticamente una orden de compra.
+                </small></p>
+            </div>`;
             $('#requerimientos-info').html(requerimientosHTML);
         } else {
-            $('#requerimientos-info').empty();
+            $('#requerimientos-info').html(`
+                <div class="alert alert-success mt-3">
+                    <i class="fas fa-check-circle me-2"></i>Todos los productos tienen stock suficiente
+                </div>
+            `);
         }
-        
+
         $('#successModal').modal('show');
     }
     
@@ -2375,7 +2291,39 @@ $(function() {
     // Eventos para el modal de cliente
     $('#clienteModal').on('hidden.bs.modal', function() {
         limpiarFormularioCliente();
+
+        // Limpieza automática del modal
+        setTimeout(() => {
+            $('body').removeClass('modal-open');
+            $('body').css({
+                'padding-right': '',
+                'overflow': ''
+            });
+
+            // Remover cualquier focus residual de elementos del modal
+            $('.select-cliente-btn').blur();
+            $(document.activeElement).blur();
+
+            // Enfocar algo seguro fuera del modal
+            $('#search-items').focus();
+        }, 100);
     });
+
+    // Función de limpieza general de modales
+    window.limpiarModalEstado = function() {
+        $('body').removeClass('modal-open');
+        $('body').css({
+            'padding-right': '',
+            'overflow': ''
+        });
+
+        // Limpiar cualquier foco problemático
+        $('.select-cliente-btn').blur();
+        $(document.activeElement).blur();
+        $('#search-items').focus();
+
+        console.log('Estado de modales limpiado');
+    };
     
     // Focus automático en búsqueda de clientes
     $('#clienteModal').on('shown.bs.modal', function() {

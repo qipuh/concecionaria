@@ -229,7 +229,7 @@
                     @endif
                 </td>
                 <td class="text-center">{{ number_format($detalle->cantidad, 2) }}</td>
-                <td class="text-right">{{ $venta->moneda == 'Dólares' ? ' : 'S/.' }} {{ number_format($detalle->precio_unitario, 2) }}</td>
+                <td class="text-right">{{ $venta->moneda == 'Dólares' ? '$' : 'S/.' }} {{ number_format($detalle->precio_unitario, 2) }}</td>
                 <td class="text-center">
                     @if($detalle->descuento > 0)
                         {{ number_format($detalle->descuento, 1) }}%
@@ -237,7 +237,7 @@
                         -
                     @endif
                 </td>
-                <td class="text-right">{{ $venta->moneda == 'Dólares' ? ' : 'S/.' }} {{ number_format($detalle->total, 2) }}</td>
+                <td class="text-right">{{ $venta->moneda == 'Dólares' ? '$' : 'S/.' }} {{ number_format($detalle->total, 2) }}</td>
             </tr>
             @empty
             <tr>
@@ -252,24 +252,24 @@
         <table class="totals-table">
             <tr>
                 <td><strong>Subtotal:</strong></td>
-                <td class="text-right">{{ $venta->moneda == 'Dólares' ? ' : 'S/.' }} {{ number_format($venta->subtotal, 2) }}</td>
+                <td class="text-right">{{ $venta->moneda == 'Dólares' ? '$' : 'S/.' }} {{ number_format($venta->subtotal, 2) }}</td>
             </tr>
             <tr>
                 <td><strong>IGV (18%):</strong></td>
-                <td class="text-right">{{ $venta->moneda == 'Dólares' ? ' : 'S/.' }} {{ number_format($venta->igv, 2) }}</td>
+                <td class="text-right">{{ $venta->moneda == 'Dólares' ? '$' : 'S/.' }} {{ number_format($venta->igv, 2) }}</td>
             </tr>
             <tr class="total-final">
                 <td><strong>TOTAL:</strong></td>
-                <td class="text-right"><strong>{{ $venta->moneda == 'Dólares' ? ' : 'S/.' }} {{ number_format($venta->total, 2) }}</strong></td>
+                <td class="text-right"><strong>{{ $venta->moneda == 'Dólares' ? '$' : 'S/.' }} {{ number_format($venta->total, 2) }}</strong></td>
             </tr>
             <tr>
                 <td><strong>Abonado:</strong></td>
-                <td class="text-right" style="color: #28a745;">{{ $venta->moneda == 'Dólares' ? ' : 'S/.' }} {{ number_format($venta->monto_abonado, 2) }}</td>
+                <td class="text-right" style="color: #28a745;">{{ $venta->moneda == 'Dólares' ? '$' : 'S/.' }} {{ number_format($venta->monto_abonado, 2) }}</td>
             </tr>
             @if($venta->saldo_pendiente > 0)
             <tr>
                 <td><strong>Saldo Pendiente:</strong></td>
-                <td class="text-right" style="color: #dc3545; font-weight: bold;">{{ $venta->moneda == 'Dólares' ? ' : 'S/.' }} {{ number_format($venta->saldo_pendiente, 2) }}</td>
+                <td class="text-right" style="color: #dc3545; font-weight: bold;">{{ $venta->moneda == 'Dólares' ? '$' : 'S/.' }} {{ number_format($venta->saldo_pendiente, 2) }}</td>
             </tr>
             @endif
         </table>
@@ -290,7 +290,7 @@
         
         @if($venta->saldo_pendiente > 0)
         <div style="margin-top: 15px; padding: 10px; border: 2px solid #dc3545; background-color: #f8d7da; color: #721c24;">
-            <strong>ATENCIÓN: Esta venta tiene un saldo pendiente de {{ $venta->moneda == 'Dólares' ? ' : 'S/.' }} {{ number_format($venta->saldo_pendiente, 2) }}</strong>
+            <strong>ATENCIÓN: Esta venta tiene un saldo pendiente de {{ $venta->moneda == 'Dólares' ? '$' : 'S/.' }} {{ number_format($venta->saldo_pendiente, 2) }}</strong>
         </div>
         @endif
     </div>

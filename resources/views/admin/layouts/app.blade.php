@@ -107,30 +107,34 @@ x-data="{
         /* Estilo para tema oscuro */
         .dark {
             --bs-body-color: #f8f9fa;
-            --bs-body-bg: #1a202c;
+            --bs-body-bg: #0f172a;
         }
         
         .dark .bg-dark-custom {
-            background-color: #2d3748;
+            background-color: #0f172a !important;
         }
         
         .dark .text-dark-custom {
-            color: #f8f9fa;
+            color: #f8fafc;
         }
         
         .dark .border-dark-custom {
-            border-color: #4a5568;
+            border-color: #1e293b;
         }
         
         .sidebar {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1050;
+            background-color: #0f172a !important; /* Premium dark background always */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            border-right: 1px solid #1e293b !important;
         }
         
         .sidebar-overlay {
             position: fixed;
             inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
             z-index: 1040;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -152,7 +156,7 @@ x-data="{
         /* Mejoras en el scroll del sidebar */
         .sidebar-scroll {
             scrollbar-width: thin;
-            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+            scrollbar-color: rgba(148, 163, 184, 0.2) transparent;
         }
         
         .sidebar-scroll::-webkit-scrollbar {
@@ -164,12 +168,12 @@ x-data="{
         }
         
         .sidebar-scroll::-webkit-scrollbar-thumb {
-            background-color: rgba(156, 163, 175, 0.5);
-            border-radius: 2px;
+            background-color: rgba(148, 163, 184, 0.2);
+            border-radius: 4px;
         }
         
         .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(156, 163, 175, 0.7);
+            background-color: rgba(100, 116, 139, 0.5);
         }
 
         /* Sin bordes para botones de toggle */
@@ -183,13 +187,15 @@ x-data="{
             outline: none;
         }
         
-        /* Hover para elementos de menú */
-        .nav-link:hover, .dropdown-item:hover {
-            background-color: rgba(0,0,0,0.05);
+        /* OVERRIDES: Forzar Sidebar a ser Dark ignorando clases de HTML/Alpine */
+        .sidebar .nav-link, .sidebar .dropdown-item {
+            color: #94a3b8 !important; /* slate-400 */
+            transition: all 0.2s ease;
         }
-        
-        .dark .nav-link:hover, .dark .dropdown-item:hover {
-            background-color: rgba(255,255,255,0.05);
+
+        .sidebar .nav-link:hover, .sidebar .dropdown-item:hover, .sidebar .hover-light:hover {
+            background-color: #1e293b !important; /* slate-800 */
+            color: #f8fafc !important; /* platinium white */
         }
 
         /* Ajuste para el logo */
@@ -197,47 +203,57 @@ x-data="{
             height: auto;
             width: 4rem;
         }
+        
+        .sidebar h5 {
+            color: #ffffff !important;
+        }
+        
+        .sidebar .text-dark, .sidebar .text-secondary {
+            color: #94a3b8 !important;
+        }
+        
+        .sidebar .border-bottom {
+            border-bottom-color: #1e293b !important;
+        }
+        
         a{
             text-decoration:none;
         }
+        
         /* Estilo para ítem de menú activo */
-        .menu-active {
-            background-color: #f8f9fa !important;
-            font-weight: 500 !important;
+        .sidebar .menu-active {
+            background-color: #1e3a8a !important; /* blue-900 */
+            color: #bfdbfe !important; /* blue-200 */
+            font-weight: 600 !important;
         }
         
-        .dark .menu-active {
-            background-color: #384152 !important;
-        }
-        
-        /* Estilos para icono activo (fondo rojo circular con icono blanco) */
-        .menu-icon-container {
+        /* Estilos para icono activo */
+        .sidebar .menu-icon-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 2rem;
-            height: 2rem;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.6rem;
             transition: all 0.3s ease;
+            color: #64748b !important;
         }
         
-        .icon-active {
-            background-color: #dc3545;
-            border-radius: 50%;
+        .sidebar .icon-active {
+            background-color: #2563eb !important; /* blue-600 */
             color: white !important;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
         }
         
-        .icon-active svg, .icon-active i {
+        .sidebar .icon-active svg, .sidebar .icon-active i {
             color: white !important;
         }
         
         /* Estilo para submenú activo */
-        .submenu-active {
-            font-weight: 500 !important;
-            color: #dc3545 !important;
-        }
-        
-        .dark .submenu-active {
-            color: #ff6b6b !important;
+        .sidebar .submenu-active {
+            font-weight: 600 !important;
+            color: #60a5fa !important;
+            background-color: transparent !important;
         }
 
         /* Utilidades adicionales */
@@ -258,11 +274,11 @@ x-data="{
         }
 
         .hover-light:hover {
-            background-color: rgba(0, 0, 0, 0.05);
+            background-color: #f8fafc;
         }
 
         .hover-dark:hover {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: #1e293b;
         }
         
         /* Responsive adjustments */
@@ -287,7 +303,133 @@ x-data="{
             font-weight: 500;
             padding: 0.25em 0.5em;
         }
+
+        /* --- Diseño Premium Corporativo Global (Paneles, Dashboard, Cotizaciones) --- */
+        .dashboard-hero {
+            background-color: #0f172a; /* slate-900 */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            color: white;
+            padding: 3.5rem 2rem;
+            margin: -1.5rem -1.5rem 2.5rem -1.5rem;
+            border-radius: 0 0 1.5rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-glow {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: #2563eb;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.15;
+            top: -100px;
+            right: -50px;
+            pointer-events: none;
+        }
+        
+        .hero-glow-alt {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: #06b6d4;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.1;
+            bottom: -150px;
+            left: -50px;
+            pointer-events: none;
+        }
+
+        .stat-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.05);
+            background: #ffffff;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02) !important;
+        }
+        
+        .stat-icon-wrapper {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .dashboard-card {
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.05);
+            border-radius: 1.25rem;
+        }
+        
+        .dashboard-card .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid #f1f5f9;
+            border-radius: 1.25rem 1.25rem 0 0;
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .quick-action-btn {
+            transition: all 0.2s ease;
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #334155;
+            text-decoration: none;
+            display: block;
+        }
+        
+        .quick-action-btn:hover {
+            transform: translateY(-3px);
+            background: #ffffff;
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            color: #0f172a;
+        }
+        
+        .activity-number {
+            font-size: 2.25rem;
+            letter-spacing: -1px;
+        }
+        
+        .dark .dashboard-hero {
+            border-bottom: 1px solid #1e293b;
+        }
+        
+        .dark .stat-card, .dark .dashboard-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        
+        .dark .dashboard-card .card-header {
+            border-bottom-color: #334155;
+        }
+
+        .dark .quick-action-btn {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+        
+        .dark .quick-action-btn:hover {
+            background: #1e293b;
+            border-color: #475569;
+            color: #ffffff;
+        }
+        
+        .dark .bg-light {
+            background-color: #0f172a !important; /* Para fondos que emulan bg-light globalmente en dark */
+        }
     </style>
+    
+    @stack('styles')
 </head>
 <body class="min-vh-100 transition bg-light" :class="darkMode ? 'dark bg-dark text-light' : 'bg-light'">
     <!-- Mobile Sidebar Overlay -->
@@ -752,6 +894,64 @@ x-data="{
                             </div>
                         </li>
 
+                        <!-- Reportes -->
+                        <li class="nav-item">
+                            <button @click="activeMenu = (activeMenu === 'reportes') ? null : 'reportes'"
+                                    class="nav-link d-flex align-items-center justify-content-between w-100 px-3 py-2 mb-1 rounded text-start btn-no-border"
+                                    :class="[
+                                        darkMode ? 'text-light hover-dark' : 'text-dark hover-light',
+                                        isActive('admin/reportes') ? 'menu-active' : ''
+                                    ]">
+                                <div class="d-flex align-items-center">
+                                    <div class="menu-icon-container me-2" :class="isActive('admin/reportes') ? 'icon-active' : ''">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </div>
+                                    <span x-show="!collapsed || isMobile()">Reportes</span>
+                                </div>
+                                <svg x-show="!collapsed || isMobile()" :class="{ 'rotate-180': activeMenu === 'reportes' }" class="ms-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <div x-show="activeMenu === 'reportes' && (!collapsed || isMobile())" class="ms-4 my-1">
+                                <a href="{{ route('admin.reportes.mantenimiento') }}"
+                                class="nav-link d-block py-2 px-3 rounded small"
+                                :class="[
+                                    darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
+                                    isActive('admin/reportes/mantenimiento') ? 'submenu-active' : ''
+                                ]">
+                                    <i class="fas fa-tools me-2"></i>Mantenimiento
+                                </a>
+
+                                <a href="{{ route('admin.reportes.ventas') }}"
+                                class="nav-link d-block py-2 px-3 rounded small"
+                                :class="[
+                                    darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
+                                    isActive('admin/reportes/ventas') ? 'submenu-active' : ''
+                                ]">
+                                    <i class="fas fa-chart-line me-2"></i>Ventas
+                                </a>
+
+                                <a href="{{ route('admin.reportes.compras') }}"
+                                class="nav-link d-block py-2 px-3 rounded small"
+                                :class="[
+                                    darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
+                                    isActive('admin/reportes/compras') ? 'submenu-active' : ''
+                                ]">
+                                    <i class="fas fa-shopping-cart me-2"></i>Compras
+                                </a>
+
+                                <a href="{{ route('admin.reportes.inventario') }}"
+                                class="nav-link d-block py-2 px-3 rounded small"
+                                :class="[
+                                    darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
+                                    isActive('admin/reportes/inventario') ? 'submenu-active' : ''
+                                ]">
+                                    <i class="fas fa-boxes me-2"></i>Inventario
+                                </a>
+                            </div>
+                        </li>
+
                         <!-- Mantenimiento -->
                         <li class="nav-item">
                             <button @click="activeMenu = (activeMenu === 'mantenimiento') ? null : 'mantenimiento'"
@@ -770,7 +970,7 @@ x-data="{
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            
+
                             <div x-show="activeMenu === 'mantenimiento' && (!collapsed || isMobile())" class="ms-4 my-1">
                                 <!-- Dashboard -->
                                 <a href="{{ route('admin.mantenimiento.dashboard') }}"
@@ -781,7 +981,7 @@ x-data="{
                                 ]">
                                     <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                                 </a>
-                                
+
                                 <!-- Citas -->
                                 <a href="{{ route('admin.mantenimiento.citas.index') }}"
                                 class="nav-link d-block py-2 px-3 rounded small"
@@ -791,7 +991,7 @@ x-data="{
                                 ]">
                                     <i class="fas fa-calendar-alt me-2"></i>Citas
                                 </a>
-                                
+
                                 <!-- Órdenes de Trabajo -->
                                 <a href="{{ route('admin.mantenimiento.ordenes.index') }}"
                                 class="nav-link d-block py-2 px-3 rounded small"
@@ -801,7 +1001,7 @@ x-data="{
                                 ]">
                                     <i class="fas fa-tools me-2"></i>Órdenes de Trabajo
                                 </a>
-                                
+
                                 <!-- Planes de Mantenimiento -->
                                 <a href="{{ route('admin.planes-mantenimiento.index') }}"
                                 class="nav-link d-block py-2 px-3 rounded small"
@@ -811,72 +1011,30 @@ x-data="{
                                 ]">
                                     <i class="fas fa-wrench me-2"></i>Planes de Mantenimiento
                                 </a>
-                                
-                                <!-- Reportes -->
-                                <div x-data="{ open: false }">
-                                    <button @click="open = !open"
-                                            class="nav-link d-flex align-items-center justify-content-between w-100 py-2 px-3 rounded small btn-no-border"
-                                            :class="[
-                                                darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
-                                                isActive('admin/mantenimiento/reportes') ? 'submenu-active' : ''
-                                            ]">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-chart-bar me-2"></i>Reportes
-                                        </div>
-                                        <svg :class="{ 'rotate-180': open }" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-
-                                    <div x-show="open" class="ms-3">
-                                        <a href="#"
-                                        class="nav-link d-block py-2 px-3 rounded smaller"
-                                        :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
-                                            <i class="fas fa-chart-line me-2"></i>Ventas
-                                        </a>
-                                        <a href="#"
-                                        class="nav-link d-block py-2 px-3 rounded smaller"
-                                        :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
-                                            <i class="fas fa-users me-2"></i>Clientes
-                                        </a>
-                                        <a href="#"
-                                        class="nav-link d-block py-2 px-3 rounded smaller"
-                                        :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
-                                            <i class="fas fa-cogs me-2"></i>Servicios
-                                        </a>
-                                    </div>
-                                </div>
 
                                 <!-- Configuración -->
-                                <div x-data="{ open: false }">
-                                    <button @click="open = !open"
+                                <div x-data="{ openSub: shouldBeOpen(['admin/productos-servicios/servicios', 'admin/mantenimiento/tecnicos']) }" x-init="openSub = shouldBeOpen(['admin/productos-servicios/servicios', 'admin/mantenimiento/tecnicos'])">
+                                    <button @click="openSub = !openSub"
                                             class="nav-link d-flex align-items-center justify-content-between w-100 py-2 px-3 rounded small btn-no-border"
                                             :class="[
                                                 darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
-                                                isActive('admin/mantenimiento/configuracion') ? 'submenu-active' : ''
+                                                (isActive('admin/productos-servicios/servicios') || isActive('admin/mantenimiento/tecnicos')) ? 'submenu-active' : ''
                                             ]">
                                         <div class="d-flex align-items-center">
                                             <i class="fas fa-cog me-2"></i>Configuración
                                         </div>
-                                        <svg :class="{ 'rotate-180': open }" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg :class="{ 'rotate-180': openSub }" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
 
-                                    <div x-show="open" class="ms-3">
-                                        <a href="#"
+                                    <div x-show="openSub" class="ms-3">
+                                        <a href="{{ route('admin.mantenimiento.tecnicos.index') }}"
                                         class="nav-link d-block py-2 px-3 rounded smaller"
-                                        :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
-                                            <i class="fas fa-tags me-2"></i>Servicios
-                                        </a>
-                                        <a href="#"
-                                        class="nav-link d-block py-2 px-3 rounded smaller"
-                                        :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
-                                            <i class="fas fa-boxes me-2"></i>Repuestos
-                                        </a>
-                                        <a href="#"
-                                        class="nav-link d-block py-2 px-3 rounded smaller"
-                                        :class="darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light'">
+                                        :class="[
+                                            darkMode ? 'text-light-50 hover-dark' : 'text-secondary hover-light',
+                                            isActive('admin/mantenimiento/tecnicos') ? 'submenu-active' : ''
+                                        ]">
                                             <i class="fas fa-user-cog me-2"></i>Técnicos
                                         </a>
                                     </div>
@@ -932,26 +1090,6 @@ x-data="{
                                     </svg>
                                 </div>
                                 <span x-show="!collapsed || isMobile()">Talleres</span>
-                            </a>
-                        </li>
-                        
-                        <!-- Reportes -->
-                        <li class="nav-item">
-                            <a href="#" 
-                            class="nav-link d-flex align-items-center px-3 py-2 mb-1 rounded position-relative" 
-                            :class="[
-                                darkMode ? 'text-light hover-dark' : 'text-dark hover-light',
-                                isActive('admin/reportes') ? 'menu-active' : ''
-                            ]">
-                                <div class="menu-icon-container me-2" :class="isActive('admin/reportes') ? 'icon-active' : ''">
-                                    <svg xmlns="http://www.w3.org/2000/svg" style="height: 1.25rem; width: 1.25rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <span x-show="!collapsed || isMobile()">Reportes</span>
-                                <small class="ms-2 d-inline-flex align-items-center">
-                                    <span class="badge bg-danger badge-notification rounded-pill">Prox</span>
-                                </small>
                             </a>
                         </li>
                         

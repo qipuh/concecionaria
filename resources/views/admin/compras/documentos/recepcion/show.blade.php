@@ -1,43 +1,48 @@
 @extends('admin.layouts.app')
 @section('title', 'Recepcionar Orden')
-@section('header', 'Recepción de Orden de Compra')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
-    <!-- Header -->
-    <div class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 15px;">
-        <div class="card-body text-white p-4">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h2 class="mb-2 fw-bold">
-                        <i class="fas fa-truck-loading me-3"></i>
-                        Recepción #{{ $orden->codigo }}
-                    </h2>
-                    <p class="mb-0 opacity-75">Registra los productos recibidos de manera detallada</p>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-truck-loading text-info me-2"></i> Recepción en Proceso
                 </div>
-                <div class="col-md-4 text-end">
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Recepción #{{ $orden->codigo }}
+                </h2>
+                <div class="d-flex align-items-center mt-2">
                     @php
                         $estado = $orden->estado_recepcion ?? 'pendiente';
                         $badgeClass = $estado == 'completo' ? 'success' : 
                                     ($estado == 'completo_con_faltantes' ? 'warning' : 
                                     ($estado == 'parcial' ? 'info' : 'secondary'));
                     @endphp
-                    <span class="badge bg-{{ $badgeClass }} px-3 py-2 fs-6">
-                        {{ $estado == 'completo_con_faltantes' ? 'Completo con Faltantes' : ucfirst($estado) }}
+                    <span class="badge rounded-pill bg-{{ $badgeClass }} px-3 py-2 fw-bold shadow-sm">
+                        <i class="fas fa-circle me-1 small"></i> {{ $estado == 'completo_con_faltantes' ? 'COMPLETO CON FALTANTES' : strtoupper($estado) }}
                     </span>
                 </div>
             </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.recepcion.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver
+                </a>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Info Cards -->
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+    <!-- Info Section -->
     <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-lg-3 mb-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-building text-primary fa-2x"></i>
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-building text-primary"></i>
                         </div>
                         <div class="ms-3">
                             <p class="text-muted mb-1 small">Proveedor</p>
@@ -47,12 +52,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-lg-3 mb-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-calendar text-info fa-2x"></i>
+                        <div class="flex-shrink-0 bg-info bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-calendar text-info"></i>
                         </div>
                         <div class="ms-3">
                             <p class="text-muted mb-1 small">Fecha</p>
@@ -62,12 +67,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-lg-3 mb-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-warehouse text-success fa-2x"></i>
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-warehouse text-success"></i>
                         </div>
                         <div class="ms-3">
                             <p class="text-muted mb-1 small">Almacén</p>
@@ -77,12 +82,12 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="col-12 col-lg-3 mb-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-boxes text-warning fa-2x"></i>
+                        <div class="flex-shrink-0 bg-warning bg-opacity-10 p-3 rounded-circle">
+                            <i class="fas fa-boxes text-warning"></i>
                         </div>
                         <div class="ms-3">
                             <p class="text-muted mb-1 small">Total Items</p>
@@ -116,8 +121,7 @@
         </div>
     @endif
 
-    <!-- Main Form -->
-    <div class="card border-0 shadow" style="border-radius: 15px;">
+    <div class="card dashboard-card border-0 shadow-sm mb-4">
         <form action="{{ route('admin.recepcion.store', $orden->id) }}" method="POST" id="recepcionForm">
             @csrf
             <input type="hidden" name="tipo_recepcion" id="tipoRecepcion" value="normal">
@@ -125,31 +129,31 @@
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
-                        <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <thead class="table-light">
                             <tr>
-                                <th class="text-black py-3 px-4" style="border: none;">
-                                    <i class="fas fa-cube me-2"></i>Producto
+                                <th class="py-3 px-4">
+                                    <i class="fas fa-cube me-2 text-primary"></i>Producto
                                 </th>
-                                <th class="text-black py-3 px-4 text-center" style="border: none;">
-                                    <i class="fas fa-shopping-cart me-2"></i>Pedida
+                                <th class="py-3 px-4 text-center">
+                                    <i class="fas fa-shopping-cart me-2 text-primary"></i>Pedida
                                 </th>
-                                <th class="text-black py-3 px-4 text-center" style="border: none;">
-                                    <i class="fas fa-check me-2"></i>Recibida
+                                <th class="py-3 px-4 text-center">
+                                    <i class="fas fa-check me-2 text-primary"></i>Recibida
                                 </th>
-                                <th class="text-black py-3 px-4 text-center" style="border: none;">
-                                    <i class="fas fa-plus-circle me-2"></i>A Recibir
+                                <th class="py-3 px-4 text-center">
+                                    <i class="fas fa-plus-circle me-2 text-primary"></i>A Recibir
                                 </th>
-                                <th class="text-black py-3 px-4 text-center" style="border: none;">
-                                    <i class="fas fa-clock me-2"></i>Pendiente
+                                <th class="py-3 px-4 text-center">
+                                    <i class="fas fa-clock me-2 text-primary"></i>Pendiente
                                 </th>
-                                <th class="text-black py-3 px-4 text-center" style="border: none;">
-                                    <i class="fas fa-chart-line me-2"></i>Estado
+                                <th class="py-3 px-4 text-center">
+                                    <i class="fas fa-chart-line me-2 text-primary"></i>Estado
                                 </th>
-                                <th class="text-black py-3 px-4" style="border: none;">
-                                    <i class="fas fa-comment me-2"></i>Observaciones
+                                <th class="py-3 px-4">
+                                    <i class="fas fa-comment me-2 text-primary"></i>Observaciones
                                 </th>
-                                <th class="text-black py-3 px-4" style="border: none;">
-                                    <i class="fas fa-undo me-2"></i>Acciones
+                                <th class="py-3 px-4 text-center">
+                                    <i class="fas fa-undo me-2 text-primary"></i>Acciones
                                 </th>
                             </tr>
                         </thead>
@@ -280,8 +284,7 @@
                 
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <a href="{{ route('admin.recepcion.index') }}" 
-                       class="btn btn-secondary btn-lg px-4 py-2" 
-                       style="border-radius: 10px;">
+                       class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
                         <i class="fas fa-arrow-left me-2"></i>
                         Volver al Listado
                     </a>
@@ -289,17 +292,15 @@
                     <div class="d-flex gap-2 flex-wrap">
                         @if($orden->estado_recepcion != 'completo' && $orden->estado_recepcion != 'completo_con_faltantes')
                         <button type="button" 
-                                class="btn btn-warning btn-lg px-4 py-2" 
-                                onclick="completarConFaltantes()"
-                                style="border-radius: 10px;">
+                                class="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0" 
+                                onclick="completarConFaltantes()">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             Completar con Faltantes
                         </button>
                         @endif
                         
                         <button type="submit" 
-                                class="btn btn-primary btn-lg px-4 py-2" 
-                                style="border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
                             <i class="fas fa-save me-2"></i>
                             Registrar Recepción
                         </button>
@@ -314,12 +315,12 @@
 <div class="modal fade" id="modalDevolucion" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content" style="border-radius: 15px;">
-            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
-                <h5 class="modal-title">
-                    <i class="fas fa-undo me-2"></i>
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-undo me-2 text-danger"></i>
                     Devolver Items
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('admin.recepcion.devolver', $orden->id) }}" method="POST">
                 @csrf

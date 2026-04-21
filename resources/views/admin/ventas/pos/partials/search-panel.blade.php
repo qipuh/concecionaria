@@ -65,7 +65,7 @@
 </div>
 
 <!-- MODAL PARA CONFIRMAR ITEMS SIN STOCK -->
-<div class="modal fade" id="modalSinStock" tabindex="-1">
+<div class="modal fade" id="modalSinStock" tabindex="-1" data-bs-backdrop="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">

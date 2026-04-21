@@ -193,22 +193,97 @@ class DevolucionController extends Controller
     public function destroy($id)
     {
         $devolucion = ValeDevolucion::findOrFail($id);
-        
+
         // Solo permitir eliminar si está en estado pendiente
         if ($devolucion->estado !== 'pendiente') {
             return redirect()->route('admin.devoluciones.index')
                 ->with('error', 'Solo se pueden eliminar vales de devolución en estado pendiente.');
         }
-        
+
         try {
             $numero = $devolucion->numero;
             $devolucion->delete();
-            
+
             return redirect()->route('admin.devoluciones.index')
                 ->with('success', "Vale de devolución {$numero} eliminado correctamente.");
         } catch (\Exception $e) {
             return redirect()->route('admin.devoluciones.index')
                 ->with('error', 'Error al eliminar el vale de devolución: ' . $e->getMessage());
         }
+    }
+
+    public function buscarProductos(Request $request)
+    {
+        $search = $request->input('search', '');
+        $tipo = $request->input('tipo', '');
+
+        $resultados = [];
+
+        // Buscar partes
+        if ($tipo === '' || $tipo === 'parte') {
+            $partes = Parte::where(function($query) use ($search) {
+                $query->where('codigo', 'LIKE', "%{$search}%")
+                      ->orWhere('nombre', 'LIKE', "%{$search}%");
+
+                // Buscar en campos opcionales si existen
+                if (\Schema::hasColumn('partes', 'marca')) {
+                    $query->orWhere('marca', 'LIKE', "%{$search}%");
+                }
+                if (\Schema::hasColumn('partes', 'codigo_oem')) {
+                    $query->orWhere('codigo_oem', 'LIKE', "%{$search}%");
+                }
+            })
+            ->with('inventarios')
+            ->limit(10)
+            ->get()
+            ->map(function($parte) {
+                $stockTotal = $parte->inventarios->sum('stock_disponible');
+                return [
+                    'id' => $parte->id,
+                    'tipo' => 'parte',
+                    'codigo' => $parte->codigo ?? 'SIN-CODIGO',
+                    'nombre' => $parte->nombre,
+                    'descripcion' => $parte->marca ? "Marca: {$parte->marca}" : '',
+                    'stock' => $stockTotal,
+                    'precio' => $parte->precio_venta ?? $parte->precio_compra ?? 0
+                ];
+            })
+            ->filter(function($parte) {
+                return $parte['stock'] > 0;
+            })
+            ->values();
+
+            $resultados = array_merge($resultados, $partes->toArray());
+        }
+
+        // Buscar vehículos
+        if ($tipo === '' || $tipo === 'vehiculo') {
+            $vehiculos = Vehiculo::where(function($query) use ($search) {
+                $query->where('placa', 'LIKE', "%{$search}%")
+                      ->orWhere('marca', 'LIKE', "%{$search}%")
+                      ->orWhere('modelo', 'LIKE', "%{$search}%");
+
+                if (\Schema::hasColumn('vehiculos', 'codigo')) {
+                    $query->orWhere('codigo', 'LIKE', "%{$search}%");
+                }
+            })
+            ->limit(10)
+            ->get()
+            ->map(function($vehiculo) {
+                return [
+                    'id' => $vehiculo->id,
+                    'tipo' => 'vehiculo',
+                    'codigo' => $vehiculo->placa,
+                    'nombre' => "{$vehiculo->marca} {$vehiculo->modelo}",
+                    'descripcion' => "Placa: {$vehiculo->placa}",
+                    'stock' => 1,
+                    'precio' => $vehiculo->precio_venta ?? 0
+                ];
+            });
+
+            $resultados = array_merge($resultados, $vehiculos->toArray());
+        }
+
+        return response()->json($resultados);
     }
 }

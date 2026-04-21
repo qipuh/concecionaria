@@ -1,5 +1,5 @@
 {{-- resources/views/admin/ventas/pos/partials/modals/cliente-modal.blade.php --}}
-<div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true">
+<div class="modal fade" id="clienteModal" tabindex="-1" aria-labelledby="clienteModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
@@ -9,22 +9,15 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <ul class="nav nav-pills nav-fill mb-3" id="clienteTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search-cliente" type="button" role="tab">
-                            <i class="fas fa-search me-1"></i>Buscar Cliente
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="create-tab" data-bs-toggle="tab" data-bs-target="#create-cliente" type="button" role="tab">
-                            <i class="fas fa-user-plus me-1"></i>Nuevo Cliente
-                        </button>
-                    </li>
-                </ul>
+                <div class="mb-3">
+                    <h6 class="text-primary">
+                        <i class="fas fa-search me-2"></i>Buscar Cliente Existente
+                    </h6>
+                    <small class="text-muted">Selecciona un cliente de la lista o busca por nombre/documento</small>
+                </div>
                
-                <div class="tab-content" id="clienteTabsContent">
-                    <!-- Tab de Búsqueda -->
-                    <div class="tab-pane fade show active" id="search-cliente" role="tabpanel" aria-labelledby="search-tab">
+                <div id="clienteTabsContent">
+                    <!-- Contenido de búsqueda -->
                         <div class="mb-3">
                             <div class="input-group">
                                 <span class="input-group-text bg-white border-end-0">
@@ -72,81 +65,6 @@
                         </div>
                     </div>
                    
-                    <!-- Tab de Nuevo Cliente -->
-                    <div class="tab-pane fade" id="create-cliente" role="tabpanel" aria-labelledby="create-tab">
-                        <form id="cliente-form" novalidate>
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Tipo de Cliente <span class="text-danger">*</span></label>
-                                    <div class="btn-group w-100" role="group">
-                                        <input type="radio" class="btn-check" name="tipo_cliente" id="tipo_natural" value="natural" checked>
-                                        <label class="btn btn-outline-primary" for="tipo_natural">
-                                            <i class="fas fa-user me-1"></i>Natural
-                                        </label>
-                                        <input type="radio" class="btn-check" name="tipo_cliente" id="tipo_juridico" value="juridico">
-                                        <label class="btn btn-outline-primary" for="tipo_juridico">
-                                            <i class="fas fa-building me-1"></i>Jurídico
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="documento_identidad" class="form-label">Documento <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="documento_identidad" name="documento_identidad" required>
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                            </div>
-
-                            <!-- Campos para persona natural -->
-                            <div id="campos-natural">
-                                <div class="row mb-3">
-                                    <div class="col-md-4">
-                                        <label for="nombres" class="form-label">Nombres <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="nombres" name="nombres">
-                                        <div class="invalid-feedback"></div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="apellido_paterno" class="form-label">Apellido Paterno <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="apellido_paterno" name="apellido_paterno">
-                                        <div class="invalid-feedback"></div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label for="apellido_materno" class="form-label">Apellido Materno</label>
-                                        <input type="text" class="form-control" id="apellido_materno" name="apellido_materno">
-                                        <div class="invalid-feedback"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Campos para persona jurídica -->
-                            <div id="campos-juridico" style="display: none;">
-                                <div class="mb-3">
-                                    <label for="razon_social" class="form-label">Razón Social <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="razon_social" name="razon_social">
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label for="correo" class="form-label">Correo Electrónico</label>
-                                    <input type="email" class="form-control" id="correo" name="correo">
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="telefono" class="form-label">Teléfono</label>
-                                    <input type="tel" class="form-control" id="telefono" name="telefono">
-                                    <div class="invalid-feedback"></div>
-                                </div>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-success" id="btn-crear-cliente">
-                                    <i class="fas fa-user-plus me-1"></i>
-                                    <span class="btn-text">Crear Cliente</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
                 </div>
             </div>
             <div class="modal-footer bg-light">

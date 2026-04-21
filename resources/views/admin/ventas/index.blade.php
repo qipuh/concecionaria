@@ -75,90 +75,94 @@
 @endpush
 
 @section('content')
-<div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 mb-1">
-                <i class="fas fa-chart-line me-2 text-primary"></i>Gestión de Ventas
-            </h1>
-            <p class="text-muted mb-0">Dashboard completo de ventas con estados y cuentas por cobrar</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('admin.ventas.pos.index') }}" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>Nueva Venta (POS)
-            </a>
-            <button type="button" class="btn btn-success" onclick="exportarVentas()">
-                <i class="fas fa-download me-1"></i>Exportar
-            </button>
-            <button type="button" class="btn btn-info" onclick="mostrarCuentasPorCobrar()">
-                <i class="fas fa-money-check-alt me-1"></i>Cuentas x Cobrar
-            </button>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-chart-line text-info me-2"></i> Módulo de Finanzas
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6">Gestión de Ventas</h2>
+                <p class="text-white-50 mb-0">Dashboard general de comprobantes, recaudación y cuentas por cobrar</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.ventas.pos.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105" style="border: 1px solid rgba(255,255,255,0.8);">
+                    <i class="fas fa-plus me-2 text-primary"></i> Nueva Venta
+                </a>
+                <button type="button" class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold border border-white border-opacity-25 backdrop-blur transition hover:scale-105" onclick="exportarVentas()">
+                    <i class="fas fa-download me-2 text-success"></i> Exportar
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Estadísticas Principales -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card card-stats border-0 shadow-sm" onclick="filtrarPorEstado('')">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+
+    <!-- Estadísticas Principales Flotantes -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card border-0 shadow-sm h-100 card-stats transition hover:scale-105 cursor-pointer" onclick="filtrarPorEstado('')">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-muted mb-1 small">TOTAL VENTAS</div>
-                            <div class="h4 mb-0 text-dark" id="total-ventas">-</div>
+                            <div class="text-muted mb-1 small fw-bold tracking-wider">TOTAL VENTAS</div>
+                            <div class="h3 mb-0 text-dark fw-bold" id="total-ventas">-</div>
                         </div>
-                        <div class="text-primary">
-                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                            <i class="fas fa-shopping-cart fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card card-stats border-0 shadow-sm" onclick="filtrarPorEstado('pagado')">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card border-0 shadow-sm h-100 card-stats transition hover:scale-105 cursor-pointer" onclick="filtrarPorEstado('pagado')">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-muted mb-1 small">PAGADAS</div>
-                            <div class="h4 mb-0 text-success" id="ventas-pagadas">-</div>
-                            <div class="small text-success" id="monto-pagadas">-</div>
+                            <div class="text-muted mb-1 small fw-bold tracking-wider">PAGADAS</div>
+                            <div class="h3 mb-0 text-success fw-bold" id="ventas-pagadas">-</div>
+                            <div class="small fw-semibold text-success bg-success bg-opacity-10 rounded-pill px-2 py-1 mt-1 d-inline-block" id="monto-pagadas">-</div>
                         </div>
-                        <div class="text-success">
-                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                        <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
+                            <i class="fas fa-check-circle fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card card-stats border-0 shadow-sm" onclick="filtrarPorEstado('no_pagado')">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card border-0 shadow-sm h-100 card-stats transition hover:scale-105 cursor-pointer" onclick="filtrarPorEstado('no_pagado')">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-muted mb-1 small">PENDIENTES PAGO</div>
-                            <div class="h4 mb-0 text-warning" id="ventas-pendientes">-</div>
-                            <div class="small text-warning" id="monto-pendientes">-</div>
+                            <div class="text-muted mb-1 small fw-bold tracking-wider">PENDIENTES</div>
+                            <div class="h3 mb-0 text-warning fw-bold" id="ventas-pendientes">-</div>
+                            <div class="small fw-semibold text-warning bg-warning bg-opacity-10 rounded-pill px-2 py-1 mt-1 d-inline-block" id="monto-pendientes">-</div>
                         </div>
-                        <div class="text-warning">
-                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
+                            <i class="fas fa-clock fa-lg"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card card-stats border-0 shadow-sm" onclick="mostrarVencidas()">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card dashboard-card border-0 shadow-sm h-100 card-stats transition hover:scale-105 cursor-pointer" onclick="mostrarVencidas()">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-muted mb-1 small">VENCIDAS</div>
-                            <div class="h4 mb-0 text-danger" id="ventas-vencidas">-</div>
-                            <div class="small text-danger" id="monto-vencidas">-</div>
+                            <div class="text-muted mb-1 small fw-bold tracking-wider">VENCIDAS</div>
+                            <div class="h3 mb-0 text-danger fw-bold" id="ventas-vencidas">-</div>
+                            <div class="small fw-semibold text-danger bg-danger bg-opacity-10 rounded-pill px-2 py-1 mt-1 d-inline-block" id="monto-vencidas">-</div>
                         </div>
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                        <div class="bg-danger bg-opacity-10 p-3 rounded-circle text-danger">
+                            <i class="fas fa-exclamation-triangle fa-lg"></i>
                         </div>
                     </div>
                 </div>
@@ -167,68 +171,79 @@
     </div>
 
     <!-- Filtros -->
-    <div class="filter-section">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label small fw-bold">Estado</label>
-                <select class="form-select" id="filtro-estado">
-                    <option value="">Todos los estados</option>
-                    <option value="pagado">Pagado</option>
-                    <option value="no_pagado">No Pagado</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="despachado">Despachado</option>
-                    <option value="en_cotizacion">En Cotización</option>
-                    <option value="para_importacion">Para Importación</option>
-                    <option value="pedido_especial">Pedido Especial</option>
-                    <option value="cancelado">Cancelado</option>
-                </select>
+    <div class="card dashboard-card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-filter text-primary me-2"></i>
+                <h6 class="mb-0 fw-bold text-dark">Filtros de búsqueda</h6>
+            </div>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Estado</label>
+                    <select class="form-select bg-light border-light shadow-none" id="filtro-estado">
+                        <option value="">Todos los estados</option>
+                        <option value="pagado">Pagado</option>
+                        <option value="no_pagado">No Pagado</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="despachado">Despachado</option>
+                        <option value="en_cotizacion">En Cotización</option>
+                        <option value="para_importacion">Para Importación</option>
+                        <option value="pedido_especial">Pedido Especial</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small text-muted mb-1">Cliente</label>
+                    <select class="form-select bg-light border-light shadow-none" id="filtro-cliente">
+                        <option value="">Todos los clientes</option>
+                        @foreach($clientes as $cliente)
+                            <option value="{{ $cliente->id }}">{{ $cliente->nombres }} {{ $cliente->apellido_paterno }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Desde</label>
+                    <input type="date" class="form-control bg-light border-light shadow-none" id="fecha-desde">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Hasta</label>
+                    <input type="date" class="form-control bg-light border-light shadow-none" id="fecha-hasta">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small text-muted mb-1">Moneda</label>
+                    <select class="form-select bg-light border-light shadow-none" id="filtro-moneda">
+                        <option value="">Todas</option>
+                        <option value="Soles">Soles</option>
+                        <option value="Dólares">Dólares</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label small fw-bold">Cliente</label>
-                <select class="form-select" id="filtro-cliente">
-                    <option value="">Todos los clientes</option>
-                    @foreach($clientes as $cliente)
-                        <option value="{{ $cliente->id }}">{{ $cliente->nombres }} {{ $cliente->apellido_paterno }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Fecha Desde</label>
-                <input type="date" class="form-control" id="fecha-desde">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Fecha Hasta</label>
-                <input type="date" class="form-control" id="fecha-hasta">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Moneda</label>
-                <select class="form-select" id="filtro-moneda">
-                    <option value="">Todas</option>
-                    <option value="Soles">Soles</option>
-                    <option value="Dólares">Dólares</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary" onclick="aplicarFiltros()">
-                        <i class="fas fa-search me-1"></i>Filtrar
-                    </button>
-                    <button class="btn btn-outline-secondary" onclick="limpiarFiltros()">
-                        <i class="fas fa-times me-1"></i>Limpiar
-                    </button>
-                    <div class="ms-auto">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="auto-refresh">
-                            <label class="form-check-label small" for="auto-refresh">
-                                Auto-actualizar (30s)
-                            </label>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="aplicarFiltros()">
+                                Buscar
+                            </button>
+                            <button class="btn btn-light text-muted rounded-pill px-4" onclick="limpiarFiltros()">
+                                Limpiar
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <button type="button" class="btn btn-outline-info rounded-pill px-3 py-1 btn-sm fw-bold" onclick="mostrarCuentasPorCobrar()">
+                                <i class="fas fa-money-check-alt me-1 text-info"></i> CxC
+                            </button>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox" id="auto-refresh">
+                                <label class="form-check-label small text-muted" for="auto-refresh">
+                                    Auto-actualizar
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -237,13 +252,13 @@
     </div>
 
     <!-- Tabla de Ventas -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3">
+    <div class="card dashboard-card border-0 shadow-sm">
+        <div class="card-header bg-transparent border-bottom-0 pt-4 pb-2 px-4">
             <div class="d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold">Listado de Ventas</h6>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="small text-muted" id="total-registros">Cargando...</span>
-                    <div class="spinner-border spinner-border-sm d-none" id="loading-spinner" role="status">
+                <h6 class="mb-0 fw-bold text-dark">Registros de Venta</h6>
+                <div class="d-flex align-items-center py-1 px-3 bg-light rounded-pill">
+                    <span class="small text-muted fw-bold" id="total-registros">Cargando...</span>
+                    <div class="spinner-border spinner-border-sm text-primary ms-2 d-none" id="loading-spinner" role="status">
                         <span class="visually-hidden">Cargando...</span>
                     </div>
                 </div>
@@ -252,17 +267,17 @@
 
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0" id="tabla-ventas">
-                    <thead class="bg-light">
+                <table class="table table-borderless table-hover align-middle mb-0" id="tabla-ventas">
+                    <thead class="bg-light bg-opacity-75" style="border-bottom: 1px solid #f1f5f9;">
                         <tr>
-                            <th class="px-3 py-3 border-0">Código</th>
-                            <th class="px-3 py-3 border-0">Cliente</th>
-                            <th class="px-3 py-3 border-0">Fecha</th>
-                            <th class="px-3 py-3 border-0">Total</th>
-                            <th class="px-3 py-3 border-0">Estado</th>
-                            <th class="px-3 py-3 border-0">Pagos</th>
-                            <th class="px-3 py-3 border-0">Vencimiento</th>
-                            <th class="px-3 py-3 border-0">Acciones</th>
+                            <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Comprobante</th>
+                            <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Cliente</th>
+                            <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Realización</th>
+                            <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Total</th>
+                            <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Estado</th>
+                            <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Liquidación</th>
+                            <th class="px-3 py-3 text-muted small fw-bold text-uppercase">Vencimiento</th>
+                            <th class="px-4 py-3 text-muted small fw-bold text-uppercase text-end">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tbody-ventas">
@@ -271,7 +286,7 @@
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Cargando...</span>
                                 </div>
-                                <div class="mt-2 text-muted">Cargando ventas...</div>
+                                <div class="mt-2 text-muted fw-semibold">Consultando ventas...</div>
                             </td>
                         </tr>
                     </tbody>
@@ -279,7 +294,7 @@
             </div>
         </div>
 
-        <div class="card-footer bg-white border-0">
+        <div class="card-footer bg-white border-top-0 d-flex justify-content-center mt-3 pb-4">
             <nav id="pagination-container">
                 <!-- Paginación se carga dinámicamente -->
             </nav>

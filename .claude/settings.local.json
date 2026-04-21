@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(php artisan migrate:*)",
-      "Bash(php artisan:*)"
+      "Bash(php artisan:*)",
+      "Bash(ls:*)",
+      "Bash(/c/laragon/bin/php/php-8.2.12-Win32-vs16-x64/php.exe artisan migrate:*)",
+      "Bash(c:/laragon/bin/php/php-8.2.29/php.exe:*)"
     ],
     "deny": [],
     "ask": []

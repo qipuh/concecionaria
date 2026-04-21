@@ -1,68 +1,69 @@
 @extends('admin.layouts.app')
 
 @section('title', 'Detalle de Orden de Compra')
-@section('header', 'Orden de Compra #' . $orden->codigo)
 
 @section('content')
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                    <i class="fas fa-file-invoice text-info me-2"></i> Detalle de Orden
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                    Orden #{{ $orden->codigo }}
+                </h2>
+                <div class="d-flex align-items-center mt-2">
+                    @if($orden->estado == 'en espera')
+                        <span class="badge rounded-pill bg-warning text-dark px-3 py-2 fw-bold shadow-sm">
+                            <i class="fas fa-clock me-1"></i> EN ESPERA
+                        </span>
+                    @elseif($orden->estado == 'aprobada')
+                        <span class="badge rounded-pill bg-success px-3 py-2 fw-bold shadow-sm">
+                            <i class="fas fa-check-circle me-1"></i> APROBADA
+                        </span>
+                    @elseif($orden->estado == 'rechazada')
+                        <span class="badge rounded-pill bg-danger px-3 py-2 fw-bold shadow-sm">
+                            <i class="fas fa-times-circle me-1"></i> RECHAZADA
+                        </span>
+                    @endif
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                @if($orden->estado == 'en espera')
+                    <form action="{{ route('admin.compras.ordenes.aprobar', $orden) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn bg-success text-white rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0" onclick="return confirm('¿Estás seguro de aprobar esta orden?')">
+                            <i class="fas fa-check me-2"></i> Aprobar
+                        </button>
+                    </form>
+                    <form action="{{ route('admin.compras.ordenes.rechazar', $orden) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn bg-danger text-white rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0" onclick="return confirm('¿Estás seguro de rechazar esta orden?')">
+                            <i class="fas fa-times me-2"></i> Rechazar
+                        </button>
+                    </form>
+                    <a href="{{ route('admin.compras.ordenes.edit', $orden) }}" class="btn bg-warning text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                        <i class="fas fa-edit me-2"></i> Editar
+                    </a>
+                @endif
+                <button onclick="window.print()" class="btn bg-info text-white rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-print me-2"></i> Imprimir
+                </button>
+                <a href="{{ route('admin.compras.ordenes.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
 <div class="row">
     <div class="col-12">
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-                <!-- Mensajes de éxito/error -->
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                <!-- Estado de la orden -->
-                <div class="mb-4">
-                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
-                        <h5 class="fw-bold mb-3" :class="darkMode ? 'text-light' : 'text-dark'">
-                            Estado: 
-                            @if($orden->estado == 'en espera')
-                                <span class="badge bg-warning text-dark">En Espera</span>
-                            @elseif($orden->estado == 'aprobada')
-                                <span class="badge bg-success">Aprobada</span>
-                            @elseif($orden->estado == 'rechazada')
-                                <span class="badge bg-danger">Rechazada</span>
-                            @endif
-                        </h5>
-                        <div>
-                            @if($orden->estado == 'en espera')
-                                <div class="btn-group">
-                                    <form action="{{ route('admin.compras.ordenes.aprobar', $orden) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('¿Estás seguro de aprobar esta orden?')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" class="me-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            Aprobar
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('admin.compras.ordenes.rechazar', $orden) }}" method="POST" class="d-inline ms-2">
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de rechazar esta orden?')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" class="me-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                            Rechazar
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Información General -->
                 <div class="row mb-4">
                     <div class="col-md-6">
@@ -166,28 +167,11 @@
                     </div>
                 </div>
 
-                <!-- Botones de Acción -->
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('admin.compras.ordenes.index') }}" class="btn btn-outline-secondary btn-sm">Volver</a>
-                    @if($orden->estado == 'en espera')
-                        <a href="{{ route('admin.compras.ordenes.edit', $orden) }}" class="btn btn-warning btn-sm">Editar</a>
-                        <form action="{{ route('admin.compras.ordenes.destroy', $orden) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta orden?')">Eliminar</button>
-                        </form>
-                    @endif
-                    <button onclick="window.print()" class="btn btn-primary btn-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" class="me-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                        Imprimir
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
+</div>
+</div>
+@endsection
 
 <style>
     @media print {

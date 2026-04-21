@@ -2,94 +2,31 @@
 
 @section('title', 'Dashboard Principal')
 
-@push('styles')
-<style>
-    .dashboard-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 3rem 0;
-        margin: -1.5rem -1.5rem 2rem -1.5rem;
-        border-radius: 0 0 1.5rem 1.5rem;
-    }
-    
-    .stat-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: none;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        border-radius: 1rem;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
-    }
-    
-    .stat-icon {
-        font-size: 2.5rem;
-        opacity: 0.9;
-    }
-    
-    .dashboard-card {
-        border: none;
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        border-radius: 1rem;
-    }
-    
-    .dashboard-card .card-header {
-        background-color: transparent;
-        border-bottom: 1px solid #e5e7eb;
-        border-radius: 1rem 1rem 0 0;
-        padding: 1.5rem 1.5rem 1rem 1.5rem;
-    }
-    
-    .quick-action-btn {
-        transition: all 0.3s ease;
-        border-radius: 0.75rem;
-    }
-    
-    .quick-action-btn:hover {
-        transform: translateY(-2px);
-    }
-    
-    .progress-ring {
-        transform: rotate(-90deg);
-    }
-    
-    .progress-ring-circle {
-        transition: stroke-dashoffset 0.35s;
-        stroke-linecap: round;
-    }
-    
-    @media (max-width: 768px) {
-        .dashboard-hero {
-            padding: 2rem 0;
-            margin: -1rem -1rem 1.5rem -1rem;
-        }
-        
-        .stat-card .card-body {
-            padding: 1.25rem;
-        }
-        
-        .stat-icon {
-            font-size: 2rem;
-        }
-    }
-</style>
-@endpush
+
 
 @section('content')
     <!-- Hero Section -->
     <div class="dashboard-hero">
-        <div class="container-fluid">
+        <div class="hero-glow"></div>
+        <div class="hero-glow-alt"></div>
+        <div class="container-fluid position-relative z-1">
             <div class="row align-items-center">
                 <div class="col-lg-8">
-                    <h1 class="display-4 fw-bold mb-3">¡Bienvenido a MSA Automotriz!</h1>
-                    <p class="lead mb-0 opacity-75">Sistema integral de gestión automotriz - Panel de control principal</p>
+                    <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-4 border border-white border-opacity-25 backdrop-blur">
+                        <span class="badge bg-primary rounded-pill me-2">V2.0</span> Panel de Control Técnico
+                    </div>
+                    <h1 class="display-5 fw-bold mb-3 tracking-tight">Potencia tu gestión con excelencia</h1>
+                    <p class="fs-5 mb-0 text-white-50 max-w-lg">Sistema integral de administración automotriz. Monitorea el rendimiento, recursos y operaciones diarias.</p>
                 </div>
-                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                    <div class="d-inline-block text-center">
-                        <div class="fs-1 fw-bold">{{ \Carbon\Carbon::now()->format('d') }}</div>
-                        <div class="small opacity-75">{{ \Carbon\Carbon::now()->format('M Y') }}</div>
+                <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                    <div class="d-inline-flex align-items-center bg-white bg-opacity-10 p-3 rounded-4 border border-white border-opacity-10 backdrop-blur shadow-sm">
+                        <div class="me-3 text-end">
+                            <div class="text-white-50 small text-uppercase fw-bold letter-spacing-wide">Fecha Actual</div>
+                            <div class="fs-5 fw-bold text-white">{{ \Carbon\Carbon::now()->translatedFormat('d M, Y') }}</div>
+                        </div>
+                        <div class="bg-blue-500 bg-opacity-20 p-3 rounded-3 border border-white border-opacity-10">
+                            <i class="fas fa-calendar-alt fs-4 text-white"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -98,98 +35,86 @@
 
     <!-- Estadísticas principales -->
     <div class="row g-4 mb-5">
+        <!-- Usuarios -->
         <div class="col-xl-3 col-md-6">
-            <div class="card stat-card bg-primary text-white h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h6 class="card-title text-uppercase text-white-50 mb-2">Total Usuarios</h6>
-                            <h2 class="mb-0 fw-bold">{{ $totalUsuarios ?? 0 }}</h2>
-                            <p class="small mb-0 text-white-50">Sistema activo</p>
+            <div class="card stat-card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <p class="text-muted small fw-bold text-uppercase mb-1 tracking-wider">Total Usuarios</p>
+                            <h2 class="mb-0 fw-bold text-dark">{{ $totalUsuarios ?? 0 }}</h2>
                         </div>
-                        <div class="col-auto">
-                            <div class="stat-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
+                        <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-users"></i>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ route('admin.usuarios.usuarios.index') }}" class="text-white text-decoration-none small">
-                        <i class="fas fa-external-link-alt me-1"></i>Ver usuarios
-                    </a>
+                    <div class="d-flex justify-content-between align-items-center border-t pt-3" style="border-top: 1px solid #f1f5f9;">
+                        <span class="text-success small fw-semibold"><i class="fas fa-check-circle me-1"></i>Activos</span>
+                        <a href="{{ route('admin.usuarios.usuarios.index') }}" class="text-primary text-decoration-none bg-primary bg-opacity-10 px-2 py-1 rounded small fw-semibold transition hover:bg-opacity-25">Administrar</a>
+                    </div>
                 </div>
             </div>
         </div>
         
+        <!-- Ventas -->
         <div class="col-xl-3 col-md-6">
-            <div class="card stat-card bg-success text-white h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h6 class="card-title text-uppercase text-white-50 mb-2">Ventas del Mes</h6>
-                            <h2 class="mb-0 fw-bold">S/ {{ number_format($ventasMes ?? 0, 2) }}</h2>
-                            <p class="small mb-0 text-white-50">Facturación actual</p>
+            <div class="card stat-card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <p class="text-muted small fw-bold text-uppercase mb-1 tracking-wider">Ventas del Mes</p>
+                            <h2 class="mb-0 fw-bold text-dark">S/ {{ number_format($ventasMes ?? 0, 2) }}</h2>
                         </div>
-                        <div class="col-auto">
-                            <div class="stat-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
+                        <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-chart-line"></i>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ route('admin.ventas.index') }}" class="text-white text-decoration-none small">
-                        <i class="fas fa-external-link-alt me-1"></i>Ver ventas
-                    </a>
+                    <div class="d-flex justify-content-between align-items-center border-t pt-3" style="border-top: 1px solid #f1f5f9;">
+                        <span class="text-muted small fw-semibold">Facturación actual</span>
+                        <a href="{{ route('admin.ventas.index') }}" class="text-success text-decoration-none bg-success bg-opacity-10 px-2 py-1 rounded small fw-semibold transition hover:bg-opacity-25">Reportes</a>
+                    </div>
                 </div>
             </div>
         </div>
         
+        <!-- Órdenes -->
         <div class="col-xl-3 col-md-6">
-            <div class="card stat-card bg-warning text-white h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h6 class="card-title text-uppercase text-white-50 mb-2">Órdenes Pendientes</h6>
-                            <h2 class="mb-0 fw-bold">{{ $ordenesPendientes ?? 0 }}</h2>
-                            <p class="small mb-0 text-white-50">Requieren atención</p>
+            <div class="card stat-card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <p class="text-muted small fw-bold text-uppercase mb-1 tracking-wider">Órdenes Activas</p>
+                            <h2 class="mb-0 fw-bold text-dark">{{ $ordenesPendientes ?? 0 }}</h2>
                         </div>
-                        <div class="col-auto">
-                            <div class="stat-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
+                        <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-tools"></i>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ route('admin.mantenimiento.ordenes.index') }}" class="text-white text-decoration-none small">
-                        <i class="fas fa-external-link-alt me-1"></i>Ver órdenes
-                    </a>
+                    <div class="d-flex justify-content-between align-items-center border-t pt-3" style="border-top: 1px solid #f1f5f9;">
+                        <span class="text-warning small fw-semibold"><i class="fas fa-clock me-1"></i>En taller</span>
+                        <a href="{{ route('admin.mantenimiento.ordenes.index') }}" class="text-warning text-decoration-none bg-warning bg-opacity-10 px-2 py-1 rounded small fw-semibold transition hover:bg-opacity-25">Gestionar</a>
+                    </div>
                 </div>
             </div>
         </div>
         
+        <!-- Stock -->
         <div class="col-xl-3 col-md-6">
-            <div class="card stat-card bg-info text-white h-100">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h6 class="card-title text-uppercase text-white-50 mb-2">Stock Crítico</h6>
-                            <h2 class="mb-0 fw-bold">{{ $stockCritico ?? 0 }}</h2>
-                            <p class="small mb-0 text-white-50">Items por reponer</p>
+            <div class="card stat-card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <p class="text-muted small fw-bold text-uppercase mb-1 tracking-wider">Stock Crítico</p>
+                            <h2 class="mb-0 fw-bold text-dark">{{ $stockCritico ?? 0 }}</h2>
                         </div>
-                        <div class="col-auto">
-                            <div class="stat-icon">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
+                        <div class="stat-icon-wrapper bg-danger bg-opacity-10 text-danger">
+                            <i class="fas fa-boxes"></i>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-transparent border-0">
-                    <a href="{{ route('admin.inventario.index') }}" class="text-white text-decoration-none small">
-                        <i class="fas fa-external-link-alt me-1"></i>Ver inventario
-                    </a>
+                    <div class="d-flex justify-content-between align-items-center border-t pt-3" style="border-top: 1px solid #f1f5f9;">
+                        <span class="text-danger small fw-semibold"><i class="fas fa-exclamation-triangle me-1"></i>Reponer</span>
+                        <a href="{{ route('admin.inventario.index') }}" class="text-danger text-decoration-none bg-danger bg-opacity-10 px-2 py-1 rounded small fw-semibold transition hover:bg-opacity-25">Inventario</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -199,48 +124,50 @@
     <div class="row g-4 mb-5">
         <div class="col-12">
             <div class="card dashboard-card">
-                <div class="card-header">
+                <div class="card-header border-bottom">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-bolt text-warning me-2"></i>
-                        <h5 class="mb-0">Acciones Rápidas</h5>
+                        <div class="bg-primary bg-opacity-10 p-2 rounded-lg me-3">
+                            <i class="fas fa-bolt text-primary"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold text-dark">Acciones Rápidas</h5>
                     </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <div class="row g-3">
                         <div class="col-lg-2 col-md-4 col-6">
-                            <a href="{{ route('admin.ventas.cotizaciones.create') }}" class="btn btn-outline-primary quick-action-btn w-100 py-3">
-                                <i class="fas fa-file-invoice fa-2x d-block mb-2"></i>
-                                <small class="fw-semibold">Nueva Cotización</small>
+                            <a href="{{ route('admin.ventas.cotizaciones.create') }}" class="quick-action-btn w-100 py-4 text-center">
+                                <i class="fas fa-file-invoice fs-3 d-block mb-3 text-primary"></i>
+                                <span class="fw-semibold small d-block">Cotización</span>
                             </a>
                         </div>
                         <div class="col-lg-2 col-md-4 col-6">
-                            <a href="{{ route('admin.ventas.pos.index') }}" class="btn btn-outline-success quick-action-btn w-100 py-3">
-                                <i class="fas fa-cash-register fa-2x d-block mb-2"></i>
-                                <small class="fw-semibold">Punto de Venta</small>
+                            <a href="{{ route('admin.ventas.pos.index') }}" class="quick-action-btn w-100 py-4 text-center">
+                                <i class="fas fa-cash-register fs-3 d-block mb-3 text-success"></i>
+                                <span class="fw-semibold small d-block">Punto de Venta</span>
                             </a>
                         </div>
                         <div class="col-lg-2 col-md-4 col-6">
-                            <a href="{{ route('admin.mantenimiento.citas.create') }}" class="btn btn-outline-info quick-action-btn w-100 py-3">
-                                <i class="fas fa-calendar-plus fa-2x d-block mb-2"></i>
-                                <small class="fw-semibold">Agendar Cita</small>
+                            <a href="{{ route('admin.mantenimiento.citas.create') }}" class="quick-action-btn w-100 py-4 text-center">
+                                <i class="fas fa-calendar-plus fs-3 d-block mb-3 text-info"></i>
+                                <span class="fw-semibold small d-block">Nueva Cita</span>
                             </a>
                         </div>
                         <div class="col-lg-2 col-md-4 col-6">
-                            <a href="{{ route('admin.clientes.create') }}" class="btn btn-outline-warning quick-action-btn w-100 py-3">
-                                <i class="fas fa-user-plus fa-2x d-block mb-2"></i>
-                                <small class="fw-semibold">Nuevo Cliente</small>
+                            <a href="{{ route('admin.clientes.create') }}" class="quick-action-btn w-100 py-4 text-center">
+                                <i class="fas fa-user-plus fs-3 d-block mb-3 text-warning"></i>
+                                <span class="fw-semibold small d-block">Alta Cliente</span>
                             </a>
                         </div>
                         <div class="col-lg-2 col-md-4 col-6">
-                            <a href="{{ route('admin.compras.ordenes.create') }}" class="btn btn-outline-secondary quick-action-btn w-100 py-3">
-                                <i class="fas fa-shopping-cart fa-2x d-block mb-2"></i>
-                                <small class="fw-semibold">Nueva Compra</small>
+                            <a href="{{ route('admin.compras.ordenes.create') }}" class="quick-action-btn w-100 py-4 text-center">
+                                <i class="fas fa-shopping-cart fs-3 d-block mb-3 text-secondary"></i>
+                                <span class="fw-semibold small d-block">Comprar Stock</span>
                             </a>
                         </div>
                         <div class="col-lg-2 col-md-4 col-6">
-                            <a href="{{ route('admin.inventario.movimientos.create') }}" class="btn btn-outline-dark quick-action-btn w-100 py-3">
-                                <i class="fas fa-exchange-alt fa-2x d-block mb-2"></i>
-                                <small class="fw-semibold">Movimiento</small>
+                            <a href="{{ route('admin.inventario.movimientos.create') }}" class="quick-action-btn w-100 py-4 text-center">
+                                <i class="fas fa-exchange-alt fs-3 d-block mb-3 text-dark"></i>
+                                <span class="fw-semibold small d-block">Movimiento</span>
                             </a>
                         </div>
                     </div>
@@ -249,43 +176,50 @@
         </div>
     </div>
 
-    <!-- Actividad reciente -->
+    <!-- Actividad -->
     <div class="row g-4">
+        <!-- Actividad Reciente -->
         <div class="col-lg-8">
-            <div class="card dashboard-card">
-                <div class="card-header">
+            <div class="card dashboard-card h-100">
+                <div class="card-header border-bottom">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="d-flex align-items-center">
-                            <i class="fas fa-chart-bar text-primary me-2"></i>
-                            <h5 class="mb-0">Actividad del Sistema</h5>
+                            <div class="bg-info bg-opacity-10 p-2 rounded-lg me-3">
+                                <i class="fas fa-chart-bar text-info"></i>
+                            </div>
+                            <h5 class="mb-0 fw-bold text-dark">Actividad Reciente</h5>
                         </div>
-                        <span class="badge bg-primary">Últimos 30 días</span>
+                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill shadow-sm">Últimos 30 días</span>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <div class="fs-3 fw-bold text-primary">{{ $actividadReciente['cotizaciones'] ?? 0 }}</div>
-                                <small class="text-muted">Cotizaciones</small>
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="row text-center w-100">
+                        <div class="col-md-3 col-6 mb-4 mb-md-0">
+                            <div class="p-3 bg-light rounded-4">
+                                <i class="fas fa-file-contract text-primary mb-2 fs-4"></i>
+                                <div class="activity-number fw-bold text-dark">{{ $actividadReciente['cotizaciones'] ?? 0 }}</div>
+                                <div class="text-muted small fw-semibold text-uppercase mt-1">Cotizaciones</div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <div class="fs-3 fw-bold text-success">{{ $actividadReciente['ventas'] ?? 0 }}</div>
-                                <small class="text-muted">Ventas</small>
+                        <div class="col-md-3 col-6 mb-4 mb-md-0">
+                            <div class="p-3 bg-light rounded-4">
+                                <i class="fas fa-hand-holding-usd text-success mb-2 fs-4"></i>
+                                <div class="activity-number fw-bold text-dark">{{ $actividadReciente['ventas'] ?? 0 }}</div>
+                                <div class="text-muted small fw-semibold text-uppercase mt-1">Ventas Exitosas</div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <div class="fs-3 fw-bold text-warning">{{ $actividadReciente['ordenes'] ?? 0 }}</div>
-                                <small class="text-muted">Órdenes</small>
+                        <div class="col-md-3 col-6">
+                            <div class="p-3 bg-light rounded-4">
+                                <i class="fas fa-clipboard-check text-warning mb-2 fs-4"></i>
+                                <div class="activity-number fw-bold text-dark">{{ $actividadReciente['ordenes'] ?? 0 }}</div>
+                                <div class="text-muted small fw-semibold text-uppercase mt-1">Órdenes</div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="mb-3">
-                                <div class="fs-3 fw-bold text-info">{{ $actividadReciente['clientes'] ?? 0 }}</div>
-                                <small class="text-muted">Nuevos Clientes</small>
+                        <div class="col-md-3 col-6">
+                            <div class="p-3 bg-light rounded-4">
+                                <i class="fas fa-user-friends text-info mb-2 fs-4"></i>
+                                <div class="activity-number fw-bold text-dark">{{ $actividadReciente['clientes'] ?? 0 }}</div>
+                                <div class="text-muted small fw-semibold text-uppercase mt-1">Nuevos Clientes</div>
                             </div>
                         </div>
                     </div>
@@ -293,42 +227,45 @@
             </div>
         </div>
         
+        <!-- Notificaciones y Avisos -->
         <div class="col-lg-4">
-            <div class="card dashboard-card">
-                <div class="card-header">
+            <div class="card dashboard-card h-100">
+                <div class="card-header border-bottom">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-bell text-danger me-2"></i>
-                        <h5 class="mb-0">Notificaciones</h5>
+                        <div class="bg-danger bg-opacity-10 p-2 rounded-lg me-3">
+                            <i class="fas fa-bell text-danger"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold text-dark">Alertas del Día</h5>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center p-3 bg-light rounded mb-3">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-circle text-warning fa-lg"></i>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start p-3 bg-light border-start border-danger border-4 rounded mb-3 shadow-sm transition hover:shadow-md cursor-pointer">
+                        <div class="flex-shrink-0 mt-1">
+                            <i class="fas fa-exclamation-circle text-danger fs-5"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="small fw-semibold">Stock Bajo</div>
-                            <div class="small text-muted">{{ $stockCritico ?? 0 }} productos necesitan reposición</div>
+                            <div class="small fw-bold text-dark">Stock Bajo o Crítico</div>
+                            <div class="small text-muted mt-1">{{ $stockCritico ?? 0 }} artículos necesitan reposición en el sistema de inventario.</div>
                         </div>
                     </div>
                     
-                    <div class="d-flex align-items-center p-3 bg-light rounded mb-3">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-clock text-info fa-lg"></i>
+                    <div class="d-flex align-items-start p-3 bg-light border-start border-info border-4 rounded mb-3 shadow-sm transition hover:shadow-md cursor-pointer">
+                        <div class="flex-shrink-0 mt-1">
+                            <i class="fas fa-calendar-check text-info fs-5"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="small fw-semibold">Citas Pendientes</div>
-                            <div class="small text-muted">{{ $citasPendientes ?? 0 }} citas programadas para hoy</div>
+                            <div class="small fw-bold text-dark">Citas Programadas</div>
+                            <div class="small text-muted mt-1">{{ $citasPendientes ?? 0 }} vehículo(s) programados para ingresar al taller hoy.</div>
                         </div>
                     </div>
                     
-                    <div class="d-flex align-items-center p-3 bg-light rounded">
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-tools text-success fa-lg"></i>
+                    <div class="d-flex align-items-start p-3 bg-light border-start border-warning border-4 rounded shadow-sm transition hover:shadow-md cursor-pointer">
+                        <div class="flex-shrink-0 mt-1">
+                            <i class="fas fa-cog text-warning fs-5"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <div class="small fw-semibold">Órdenes Activas</div>
-                            <div class="small text-muted">{{ $ordenesPendientes ?? 0 }} en proceso</div>
+                            <div class="small fw-bold text-dark">Órdenes en Proceso</div>
+                            <div class="small text-muted mt-1">{{ $ordenesPendientes ?? 0 }} orden(es) activas siendo trabajadas actualmente.</div>
                         </div>
                     </div>
                 </div>
