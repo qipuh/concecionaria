@@ -284,6 +284,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Recent Activity -->
     @if($recepciones->count() > 0)
@@ -322,7 +323,6 @@
             </div>
         </div>
     </div>
-        </div>
-    </div>
+    @endif
 </div>
 @endsection
