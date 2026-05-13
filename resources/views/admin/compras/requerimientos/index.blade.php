@@ -150,7 +150,7 @@
 
                 <!-- Paginación -->
                 <div class="mt-4">
-                    {{ $requerimientos->links() }}
+                    {{ $requerimientos->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>
