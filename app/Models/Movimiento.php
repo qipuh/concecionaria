@@ -39,7 +39,7 @@ class Movimiento extends Model
 
     public function vehiculo()
     {
-        return $this->belongsTo(vehiculo::class);
+        return $this->belongsTo(Vehiculo::class);
     }
     
     public function almacen()
