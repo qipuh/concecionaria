@@ -110,6 +110,12 @@
     @include('admin.compras.proveedores.partials.pagination')
 </div>
 </div>
+
+<!-- Contenedor para los modales -->
+<div id="proveedores-modals">
+    @include('admin.compras.proveedores.partials.table-modals')
+</div>
+
 @endsection
 
 @push('styles')
@@ -174,6 +180,14 @@
                     document.getElementById('proveedores-table').innerHTML = data.table;
                     // Actualizar la paginación
                     document.getElementById('proveedores-pagination').innerHTML = data.pagination;
+                    // Actualizar los modales
+                    let modalsContainer = document.getElementById('proveedores-modals');
+                    if (!modalsContainer) {
+                        modalsContainer = document.createElement('div');
+                        modalsContainer.id = 'proveedores-modals';
+                        document.body.appendChild(modalsContainer);
+                    }
+                    modalsContainer.innerHTML = data.modals;
                     // Actualizar el total de proveedores
                     document.getElementById('total-proveedores').textContent = data.total;
                     // Ocultar overlay de carga

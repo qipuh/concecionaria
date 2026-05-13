@@ -10,22 +10,22 @@
     <div class="card-body">
         <!-- Barra de búsqueda -->
         <div class="mb-3">
-            <div class="input-group">
+            <div class="input-group input-group-sm input-group-md">
                 <span class="input-group-text">
                     <i class="fas fa-search"></i>
                 </span>
-                <input type="text" class="form-control" id="buscar-partes" 
+                <input type="text" class="form-control" id="buscar-partes"
                        placeholder="Buscar por nombre, código o marca...">
                 <button class="btn btn-primary" type="button" id="btn-buscar">
-                    Buscar
+                    <i class="fas fa-search d-md-none"></i><span class="d-none d-md-inline">Buscar</span>
                 </button>
             </div>
         </div>
-        
+
         <!-- Filtros -->
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <select class="form-select" id="categoria-filtro">
+        <div class="row g-2 g-md-3 mb-3">
+            <div class="col-12 col-sm-6 col-md-4">
+                <select class="form-select form-select-sm form-select-md" id="categoria-filtro">
                     <option value="">Todas las categorías</option>
                     @if(isset($categoriasParte))
                         @foreach($categoriasParte as $categoria)
@@ -34,8 +34,8 @@
                     @endif
                 </select>
             </div>
-            <div class="col-md-4">
-                <select class="form-select" id="almacen-filtro">
+            <div class="col-12 col-sm-6 col-md-4">
+                <select class="form-select form-select-sm form-select-md" id="almacen-filtro">
                     <option value="">Todos los almacenes</option>
                     @if(isset($almacenes))
                         @foreach($almacenes as $almacen)
@@ -44,10 +44,10 @@
                     @endif
                 </select>
             </div>
-            <div class="col-md-4">
-                <div class="form-check mt-2">
+            <div class="col-12 col-md-4">
+                <div class="form-check mt-1 mt-md-2">
                     <input class="form-check-input" type="checkbox" id="incluir-sin-stock" checked>
-                    <label class="form-check-label" for="incluir-sin-stock">
+                    <label class="form-check-label fs-7 fs-md-6" for="incluir-sin-stock">
                         Incluir sin stock
                     </label>
                 </div>
@@ -237,28 +237,32 @@ $(document).ready(function() {
                     `<small class="text-info d-block"><i class="fas fa-warehouse me-1"></i>Múltiples almacenes</small>` : '');
             
             html += `
-                <div class="col-md-6 col-lg-4 mb-3">
-                    <div class="item-resultado ${stockClass} position-relative" 
+                <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                    <div class="item-resultado ${stockClass} position-relative h-100"
                          onclick="intentarAgregarAlCarrito(${item.id}, '${item.nombre.replace(/'/g, "\\'")}', ${precio}, '${item.moneda}', '${item.codigo}', '${item.unidad}', ${tieneStock}, ${item.stock_disponible})">
                         ${stockBadge}
-                        
-                        <div class="d-flex align-items-start">
-                            <div class="me-3">
-                                <i class="fas fa-cogs fa-2x text-primary"></i>
+
+                        <div class="d-flex flex-column h-100">
+                            <div class="d-flex align-items-start mb-2">
+                                <div class="me-2">
+                                    <i class="fas fa-cogs text-primary" style="font-size: clamp(1rem, 4vw, 1.5rem);"></i>
+                                </div>
+                                <div class="flex-grow-1 min-width-0">
+                                    <h6 class="mb-1 fs-7 fs-md-6 text-break">${item.nombre}</h6>
+                                    <small class="text-muted d-block text-break">${item.codigo}</small>
+                                    <small class="text-muted d-block">${item.categoria || 'Sin categoría'}</small>
+                                    ${almacenInfo}
+                                </div>
                             </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">${item.nombre}</h6>
-                                <small class="text-muted d-block">${item.codigo}</small>
-                                <small class="text-muted">${item.categoria || 'Sin categoría'}</small>
-                                ${almacenInfo}
-                                
-                                <div class="mt-2 d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="h6 text-primary">${simboloMoneda} ${precio.toFixed(2)}</span>
+
+                            <div class="mt-auto pt-2">
+                                <div class="d-flex justify-content-between align-items-center gap-2">
+                                    <div class="flex-shrink-0">
+                                        <span class="h6 text-primary mb-0">${simboloMoneda} ${precio.toFixed(2)}</span>
                                         <small class="text-muted d-block">${item.unidad}</small>
                                     </div>
-                                    <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); intentarAgregarAlCarrito(${item.id}, '${item.nombre.replace(/'/g, "\\'")}', ${precio}, '${item.moneda}', '${item.codigo}', '${item.unidad}', ${tieneStock}, ${item.stock_disponible})">
-                                        <i class="fas fa-plus me-1"></i>Agregar
+                                    <button class="btn btn-sm btn-primary flex-shrink-0" onclick="event.stopPropagation(); intentarAgregarAlCarrito(${item.id}, '${item.nombre.replace(/'/g, "\\'")}', ${precio}, '${item.moneda}', '${item.codigo}', '${item.unidad}', ${tieneStock}, ${item.stock_disponible})">
+                                        <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">Agregar</span>
                                     </button>
                                 </div>
                             </div>

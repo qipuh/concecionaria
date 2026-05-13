@@ -60,16 +60,16 @@ class ReporteController extends Controller
             ->get();
 
         // Top productos más vendidos
-        $topProductos = DB::table('detalle_ventas')
-            ->join('ventas', 'detalle_ventas.venta_id', '=', 'ventas.id')
-            ->join('partes', 'detalle_ventas.producto_id', '=', 'partes.id')
+        $topProductos = DB::table('detalles_venta')
+            ->join('ventas', 'detalles_venta.venta_id', '=', 'ventas.id')
+            ->join('partes', 'detalles_venta.parte_id', '=', 'partes.id')
             ->whereBetween('ventas.fecha', [$fechaInicio, $fechaFin])
-            ->where('detalle_ventas.tipo_producto', 'parte')
+            ->where('detalles_venta.tipo_item', 'parte')
             ->select(
                 'partes.nombre',
                 'partes.codigo',
-                DB::raw('SUM(detalle_ventas.cantidad) as total_vendido'),
-                DB::raw('SUM(detalle_ventas.cantidad * detalle_ventas.precio_unitario) as total_monto')
+                DB::raw('SUM(detalles_venta.cantidad) as total_vendido'),
+                DB::raw('SUM(detalles_venta.cantidad * detalles_venta.precio_unitario) as total_monto')
             )
             ->groupBy('partes.id', 'partes.nombre', 'partes.codigo')
             ->orderBy('total_vendido', 'desc')

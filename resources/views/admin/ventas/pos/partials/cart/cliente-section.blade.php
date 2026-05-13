@@ -1,35 +1,35 @@
 {{-- resources/views/admin/ventas/pos/partials/cart/cliente-section.blade.php --}}
-<div class="p-3 border-bottom bg-light">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="mb-0">
-            <i class="fas fa-user-circle me-2 text-primary"></i>Cliente
+<div class="p-2 p-sm-3 border-bottom bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-2 mb-sm-3 gap-1">
+        <h6 class="mb-0 fs-7 fs-sm-6">
+            <i class="fas fa-user-circle me-2 text-primary"></i><span class="d-none d-sm-inline">Cliente</span>
         </h6>
-        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#clienteModal">
-            <i class="fas fa-plus me-1"></i>Seleccionar
+        <button type="button" class="btn btn-sm btn-primary fs-7 fs-sm-6" data-bs-toggle="modal" data-bs-target="#clienteModal">
+            <i class="fas fa-plus me-1"></i><span class="d-none d-sm-inline">Seleccionar</span>
         </button>
     </div>
-   
+
     <!-- Cliente seleccionado -->
     <div id="cliente-seleccionado" class="d-none">
-        <div class="d-flex align-items-center p-2 bg-white rounded border">
-            <div class="avatar-circle me-3">
+        <div class="d-flex align-items-center p-2 bg-white rounded border gap-2">
+            <div class="avatar-circle flex-shrink-0">
                 <i class="fas fa-user"></i>
             </div>
-            <div class="flex-grow-1">
-                <h6 class="mb-0 nombre-cliente">Nombre del Cliente</h6>
-                <small class="text-muted documento-cliente">DOC: 12345678</small>
+            <div class="flex-grow-1 min-width-0">
+                <h6 class="mb-0 nombre-cliente fs-7 fs-sm-6 text-break">Nombre del Cliente</h6>
+                <small class="text-muted documento-cliente d-block text-break">DOC: 12345678</small>
                 <input type="hidden" id="cliente-id" value="">
             </div>
-            <button type="button" class="btn btn-sm btn-outline-danger" id="btn-remove-cliente">
+            <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0" id="btn-remove-cliente">
                 <i class="fas fa-times"></i>
             </button>
         </div>
     </div>
-   
+
     <!-- Placeholder cliente -->
-    <div id="cliente-placeholder" class="text-center text-muted p-3 bg-white rounded border border-dashed">
-        <i class="fas fa-user-plus fa-2x mb-2 opacity-50"></i>
-        <p class="mb-0 small">Seleccione un cliente para continuar</p>
+    <div id="cliente-placeholder" class="text-center text-muted p-2 p-sm-3 bg-white rounded border border-dashed">
+        <i class="fas fa-user-plus mb-2 opacity-50" style="font-size: clamp(1.5rem, 8vw, 2rem);"></i>
+        <p class="mb-0 small">Seleccione un cliente</p>
     </div>
 </div>
 

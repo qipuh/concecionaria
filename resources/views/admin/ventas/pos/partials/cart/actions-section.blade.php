@@ -1,11 +1,11 @@
 {{-- resources/views/admin/ventas/pos/partials/cart/actions-section.blade.php --}}
-<div class="p-3">
+<div class="p-2 p-sm-3">
     <div class="d-grid gap-2">
-        <button type="button" class="btn btn-success btn-lg" id="btn-procesar" disabled>
-            <i class="fas fa-check-circle me-2"></i>Procesar Venta
+        <button type="button" class="btn btn-success" id="btn-procesar" disabled style="font-size: clamp(0.875rem, 3vw, 1rem); padding: clamp(0.375rem, 2vw, 0.75rem) clamp(0.5rem, 3vw, 1rem);">
+            <i class="fas fa-check-circle me-1 me-sm-2"></i><span class="d-none d-sm-inline">Procesar Venta</span><span class="d-sm-none">Procesar</span>
         </button>
-        <button type="button" class="btn btn-outline-danger" id="btn-cancelar">
-            <i class="fas fa-trash me-2"></i>Cancelar Venta
+        <button type="button" class="btn btn-outline-danger" id="btn-cancelar" style="font-size: clamp(0.875rem, 3vw, 1rem); padding: clamp(0.375rem, 2vw, 0.75rem) clamp(0.5rem, 3vw, 1rem);">
+            <i class="fas fa-trash me-1 me-sm-2"></i><span class="d-none d-sm-inline">Cancelar Venta</span><span class="d-sm-none">Cancelar</span>
         </button>
     </div>
 </div>

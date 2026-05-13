@@ -1,107 +1,104 @@
 {{-- resources/views/admin/ventas/pos/partials/cart/config-section.blade.php --}}
-<div class="p-3 border-bottom">
-    <h6 class="mb-3">
+<div class="p-2 p-sm-3 border-bottom">
+    <h6 class="mb-2 mb-sm-3 fs-7 fs-sm-6">
         <i class="fas fa-cog me-2 text-primary"></i>Configuración
     </h6>
-   
-    <!-- Configuración principal en una línea -->
-    <div class="d-flex gap-2 mb-3">
+
+    <!-- Configuración principal en dos líneas en móvil, una en desktop -->
+    <div class="d-flex flex-column flex-sm-row gap-2 gap-sm-3 mb-2 mb-sm-3">
         <!-- Moneda -->
         <div class="flex-fill">
-            <label class="form-label small fw-bold mb-1">
-                <i class="fas fa-coins me-1"></i>Moneda
+            <label class="form-label fs-7 fs-sm-6 fw-bold mb-1">
+                <i class="fas fa-coins me-1"></i><span class="d-none d-sm-inline">Moneda</span>
             </label>
             <div class="btn-group w-100" role="group" id="moneda-group">
                 <input type="radio" class="btn-check" name="moneda" id="moneda-soles" value="Soles" checked>
-                <label class="btn btn-outline-primary btn-sm" for="moneda-soles">
-                    <i class="fas fa-money-bill me-1"></i>S/
+                <label class="btn btn-outline-primary btn-sm fs-7 fs-sm-6" for="moneda-soles">
+                    <i class="fas fa-money-bill me-0 me-sm-1"></i><span class="d-none d-sm-inline">S/</span>
                 </label>
-                
+
                 <input type="radio" class="btn-check" name="moneda" id="moneda-dolares" value="Dólares">
-                <label class="btn btn-outline-primary btn-sm" for="moneda-dolares">
-                    <i class="fas fa-dollar-sign me-1"></i>US$
+                <label class="btn btn-outline-primary btn-sm fs-7 fs-sm-6" for="moneda-dolares">
+                    <i class="fas fa-dollar-sign me-0 me-sm-1"></i><span class="d-none d-sm-inline">US$</span>
                 </label>
             </div>
         </div>
-        
+
         <!-- Forma de Pago -->
         <div class="flex-fill">
-            <label class="form-label small fw-bold mb-1">
-                <i class="fas fa-credit-card me-1"></i>Pago
+            <label class="form-label fs-7 fs-sm-6 fw-bold mb-1">
+                <i class="fas fa-credit-card me-1"></i><span class="d-none d-sm-inline">Pago</span>
             </label>
             <div class="btn-group w-100" role="group" id="forma-pago-group">
                 <input type="radio" class="btn-check" name="forma_pago" id="pago-contado" value="Contado" checked>
-                <label class="btn btn-outline-success btn-sm" for="pago-contado">
-                    <i class="fas fa-money-bills me-1"></i>Contado
+                <label class="btn btn-outline-success btn-sm fs-7 fs-sm-6" for="pago-contado">
+                    <i class="fas fa-money-bills me-0 me-sm-1"></i><span class="d-none d-sm-inline">Contado</span>
                 </label>
-                
+
                 <input type="radio" class="btn-check" name="forma_pago" id="pago-credito" value="Crédito">
-                <label class="btn btn-outline-warning btn-sm" for="pago-credito">
-                    <i class="fas fa-calendar-days me-1"></i>Crédito
+                <label class="btn btn-outline-warning btn-sm fs-7 fs-sm-6" for="pago-credito">
+                    <i class="fas fa-calendar-days me-0 me-sm-1"></i><span class="d-none d-sm-inline">Crédito</span>
                 </label>
             </div>
         </div>
     </div>
     
     <!-- Tipo de Cambio (visible cuando hay USD/PEN) -->
-    <div class="mb-3" id="tipo-cambio-section">
-        <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-exchange-alt text-success me-2"></i>
-                <span class="small fw-bold">Tipo de Cambio:</span>
-                <button type="button" class="btn btn-link btn-sm p-0 ms-2" 
+    <div class="mb-2 mb-sm-3" id="tipo-cambio-section">
+        <div class="d-flex flex-column flex-sm-row align-items-start align-sm-items-center justify-content-between p-2 bg-light rounded gap-1">
+            <div class="d-flex align-items-center gap-1">
+                <i class="fas fa-exchange-alt text-success me-1"></i>
+                <span class="fs-7 fs-sm-6 fw-bold">TC:</span>
+                <button type="button" class="btn btn-link btn-sm p-0"
                         id="refresh-tc-btn" title="Actualizar tipo de cambio">
                     <i class="fas fa-refresh text-muted"></i>
                 </button>
             </div>
-            <div class="text-end">
-                <div class="small">
-                    <span class="badge bg-success" id="tc-compra">Compra: S/ 0.0000</span>
-                    <span class="badge bg-primary ms-1" id="tc-venta">Venta: S/ 0.0000</span>
+            <div class="text-start text-sm-end w-100 w-sm-auto">
+                <div class="fs-7 fs-sm-6">
+                    <span class="badge bg-success" id="tc-compra">C: 0.00</span>
+                    <span class="badge bg-primary" id="tc-venta">V: 0.00</span>
                 </div>
-                <div class="tiny text-muted mt-1" id="tc-fecha">Última actualización: --</div>
+                <div class="tiny text-muted mt-1" id="tc-fecha">--</div>
             </div>
         </div>
     </div>
     
     <!-- Porcentaje de Abono (solo visible en crédito) -->
-    <div class="mb-3 d-none" id="abono-section">
-        <div class="d-flex align-items-center gap-2">
-            <label class="form-label small fw-bold mb-0">
+    <div class="mb-2 mb-sm-3 d-none" id="abono-section">
+        <div class="d-flex flex-column flex-sm-row align-items-start align-sm-items-center gap-2 mb-1">
+            <label class="form-label fs-7 fs-sm-6 fw-bold mb-0">
                 <i class="fas fa-percentage me-1"></i>Abono:
             </label>
-            <div class="input-group input-group-sm" style="max-width: 120px;">
-                <button class="btn btn-outline-secondary" type="button" id="btn-abono-menos">
+            <div class="input-group input-group-sm" style="max-width: fit-content;">
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="btn-abono-menos">
                     <i class="fas fa-minus"></i>
                 </button>
-                <input type="number" class="form-control text-center" id="porcentaje-abono" 
-                       value="50" min="0" max="100" step="5">
-                <span class="input-group-text">%</span>
-                <button class="btn btn-outline-secondary" type="button" id="btn-abono-mas">
+                <input type="number" class="form-control text-center" id="porcentaje-abono"
+                       value="50" min="0" max="100" step="5" style="width: 50px;">
+                <span class="input-group-text fs-7 fs-sm-6">%</span>
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="btn-abono-mas">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
-            <div class="d-flex gap-1">
-                <button class="btn btn-outline-primary btn-xs" onclick="setAbono(0)">0%</button>
-                <button class="btn btn-outline-primary btn-xs" onclick="setAbono(50)">50%</button>
-                <button class="btn btn-outline-primary btn-xs" onclick="setAbono(100)">100%</button>
+            <div class="d-flex gap-1 flex-wrap">
+                <button class="btn btn-outline-primary btn-xs fs-7" onclick="setAbono(0)">0%</button>
+                <button class="btn btn-outline-primary btn-xs fs-7" onclick="setAbono(50)">50%</button>
+                <button class="btn btn-outline-primary btn-xs fs-7" onclick="setAbono(100)">100%</button>
             </div>
         </div>
-        <small class="text-muted mt-1 d-block" id="abono-info">
-            Abono: <span id="abono-monto">S/ 0.00</span> | 
-            Saldo: <span id="saldo-monto">S/ 0.00</span>
+        <small class="text-muted d-block fs-7 fs-sm-6" id="abono-info">
+            Abono: <span id="abono-monto">S/ 0.00</span> | Saldo: <span id="saldo-monto">S/ 0.00</span>
         </small>
     </div>
     
-    <!-- Opciones y acciones en una línea -->
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="d-flex gap-3">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="habilitar-descuentos">
-                <label class="form-check-label small" for="habilitar-descuentos">
-                    <i class="fas fa-percent me-1"></i>Habilitar descuentos
-                </label>
-            </div>
+    <!-- Opciones y acciones -->
+    <div class="d-flex justify-content-start align-items-center">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="habilitar-descuentos">
+            <label class="form-check-label fs-7 fs-sm-6" for="habilitar-descuentos">
+                <i class="fas fa-percent me-1"></i>Descuentos
+            </label>
         </div>
     </div>
 </div>

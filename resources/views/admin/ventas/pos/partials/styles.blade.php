@@ -109,6 +109,12 @@
         min-height: 400px;
         position: relative;
     }
+
+    @media (max-width: 576px) {
+        .search-results-container {
+            min-height: 300px;
+        }
+    }
     
     .price-badge {
         background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);
@@ -143,28 +149,50 @@
         box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
     }
     
-    @media (max-width: 768px) {
-        .col-md-8, .col-md-4 {
-            flex: 0 0 100%;
-            max-width: 100%;
-        }
-        
+    /* Tablets y pantallas medianas */
+    @media (max-width: 991px) {
         .sticky-sidebar {
             position: relative;
             top: auto;
             max-height: none;
+            margin-bottom: 2rem;
         }
-        
-        .row-cols-2 {
-            --bs-columns: 1;
+    }
+
+    /* Dispositivos móviles */
+    @media (max-width: 576px) {
+        .btn-filter {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
         }
-        
-        .row-cols-md-3 {
-            --bs-columns: 2;
+
+        .price-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
         }
-        
-        .row-cols-lg-4 {
-            --bs-columns: 2;
+
+        .avatar-circle {
+            width: 32px;
+            height: 32px;
+            font-size: 0.75rem;
+        }
+
+        .item-card {
+            margin-bottom: 1rem;
+        }
+
+        .badge-stock {
+            font-size: 0.6rem;
+        }
+    }
+
+    /* Pantallas grandes (desktop) */
+    @media (min-width: 1200px) {
+        .sticky-sidebar {
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
         }
     }
 </style>

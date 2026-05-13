@@ -59,6 +59,7 @@ use App\Http\Controllers\Admin\Ventas\POSController;
 use App\Http\Controllers\Admin\Ventas\PagoVentaController;
 use App\Http\Controllers\Admin\TipoCambioController;
 use App\Http\Controllers\Admin\PlanMantenimientoController;
+use App\Http\Middleware\CheckAdminAccess;
 
 
 ### Rutas públicas
@@ -73,8 +74,8 @@ Route::post('/login', [App\Http\Controllers\Auth\LoginController::class, 'login'
 Route::get('/tracking', [App\Http\Controllers\TrackingController::class, 'index'])->name('tracking.index');
 Route::post('/tracking/buscar', [App\Http\Controllers\TrackingController::class, 'buscarVenta'])->name('tracking.buscar');
 
-### Rutas protegidas por autenticación
-Route::middleware(['auth'])->group(function () {
+### Rutas protegidas por autenticación y acceso al admin
+Route::middleware(['auth', CheckAdminAccess::class])->group(function () {
     # Dashboard, Perfil y Logout
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');

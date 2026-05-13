@@ -61,10 +61,12 @@ class ProveedorController extends Controller
                 'total' => $proveedores->total(),
                 'table' => 'renderizado',
                 'pagination' => 'renderizado',
+                'modals' => 'renderizado',
             ]);
             return response()->json([
-                'table' => view('admin.compras.proveedores.partials.table', compact('proveedores'))->render(),
+                'table' => view('admin.compras.proveedores.partials.table', compact('proveedores', 'bancos'))->render(),
                 'pagination' => view('admin.compras.proveedores.partials.pagination', compact('proveedores'))->render(),
+                'modals' => view('admin.compras.proveedores.partials.table-modals', compact('proveedores', 'bancos'))->render(),
                 'total' => $proveedores->total(),
             ]);
         }

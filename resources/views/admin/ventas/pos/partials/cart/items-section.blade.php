@@ -1,10 +1,10 @@
 {{-- resources/views/admin/ventas/pos/partials/cart/items-section.blade.php --}}
-<div class="p-3 border-bottom" style="max-height: 400px; overflow-y: auto;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h6 class="mb-0">
+<div class="p-2 p-sm-3 border-bottom" style="max-height: clamp(250px, 50vh, 400px); overflow-y: auto;">
+    <div class="d-flex justify-content-between align-items-center mb-2 mb-sm-3">
+        <h6 class="mb-0 fs-7 fs-sm-6">
             <i class="fas fa-list me-2 text-primary"></i>Items
         </h6>
-        <span class="badge bg-primary rounded-pill" id="item-count">0</span>
+        <span class="badge bg-primary rounded-pill fs-7 fs-sm-6" id="item-count">0</span>
     </div>
     
     <div id="items-container">

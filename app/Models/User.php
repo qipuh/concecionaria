@@ -77,7 +77,27 @@ class User extends Authenticatable
         if (is_string($role)) {
             $role = Role::where('name', $role)->firstOrFail();
         }
-        
+
         return $this->roles()->detach($role);
+    }
+
+    /**
+     * Verifica si el usuario tiene un permiso a través de sus roles
+     */
+    public function hasPermission($permission)
+    {
+        $permissionName = is_string($permission) ? $permission : $permission->name;
+
+        // Un usuario con rol admin tiene acceso a todo
+        if ($this->hasRole('admin')) {
+            return true;
+        }
+
+        // Verificar si el permiso existe en alguno de sus roles
+        return $this->roles()
+            ->whereHas('permissions', function ($query) use ($permissionName) {
+                $query->where('name', $permissionName);
+            })
+            ->exists();
     }
 }

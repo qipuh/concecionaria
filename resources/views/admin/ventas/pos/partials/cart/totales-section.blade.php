@@ -1,58 +1,52 @@
 {{-- resources/views/admin/ventas/pos/partials/cart/totales-section.blade.php --}}
-<div class="p-3 border-bottom bg-light">
-    <div class="d-flex justify-content-between mb-2">
-        <span class="fw-bold">
-            <i class="fas fa-calculator me-1 text-muted"></i>Subtotal:
+<div class="p-2 p-sm-3 border-bottom bg-light">
+    <div class="d-flex justify-content-between mb-2 flex-wrap gap-1">
+        <span class="fw-bold fs-7 fs-sm-6">
+            <i class="fas fa-calculator me-1 text-muted"></i><span class="d-none d-sm-inline">Subtotal:</span>
         </span>
-        <span id="subtotal" class="fw-bold">S/ 0.00</span>
+        <span id="subtotal" class="fw-bold fs-7 fs-sm-6">S/ 0.00</span>
     </div>
-    <div class="d-flex justify-content-between mb-2">
-        <span>
-            <i class="fas fa-percent me-1 text-muted"></i>IGV (18%):
+    <div class="d-flex justify-content-between mb-2 flex-wrap gap-1">
+        <span class="fs-7 fs-sm-6">
+            <i class="fas fa-percent me-1 text-muted"></i><span class="d-none d-sm-inline">IGV (18%):</span><span class="d-sm-none">IGV:</span>
         </span>
-        <span id="igv">S/ 0.00</span>
+        <span id="igv" class="fs-7 fs-sm-6">S/ 0.00</span>
     </div>
     <hr class="my-2">
-    <div class="d-flex justify-content-between fw-bold fs-5">
-        <span class="text-primary">
-            <i class="fas fa-receipt me-1"></i>Total:
+    <div class="d-flex justify-content-between fw-bold gap-1">
+        <span class="text-primary" style="font-size: clamp(0.875rem, 4vw, 1.25rem);">
+            <i class="fas fa-receipt me-1"></i><span class="d-none d-sm-inline">Total:</span>
         </span>
-        <span id="total" class="text-primary">S/ 0.00</span>
+        <span id="total" class="text-primary" style="font-size: clamp(1rem, 4vw, 1.35rem);">S/ 0.00</span>
     </div>
-   
+
     <!-- Información de abono (se muestra dinámicamente) -->
-    <div id="abono-info" class="d-none mt-3 pt-2 border-top">
-        <div class="d-flex justify-content-between mb-2">
-            <span class="text-success">
+    <div id="abono-info" class="d-none mt-2 pt-2 border-top">
+        <div class="d-flex justify-content-between mb-2 flex-wrap gap-1">
+            <span class="text-success fs-7 fs-sm-6">
                 <i class="fas fa-hand-holding-dollar me-1"></i>Abono:
             </span>
-            <span id="abono-monto" class="text-success fw-bold">S/ 0.00</span>
+            <span id="abono-monto" class="text-success fw-bold fs-7 fs-sm-6">S/ 0.00</span>
         </div>
-        <div class="d-flex justify-content-between">
-            <span class="text-warning">
-                <i class="fas fa-hourglass-half me-1"></i>Saldo pendiente:
+        <div class="d-flex justify-content-between flex-wrap gap-1">
+            <span class="text-warning fs-7 fs-sm-6">
+                <i class="fas fa-hourglass-half me-1"></i>Saldo:
             </span>
-            <span id="saldo-pendiente" class="text-warning fw-bold">S/ 0.00</span>
+            <span id="saldo-pendiente" class="text-warning fw-bold fs-7 fs-sm-6">S/ 0.00</span>
         </div>
     </div>
-    
+
     <!-- Información adicional del carrito -->
-    <div class="mt-3 pt-2 border-top">
-        <!--div class="d-flex justify-content-between small text-muted">
+    <div class="mt-2 pt-2 border-top">
+        <div class="d-flex justify-content-between fs-7 fs-sm-6 text-muted gap-1" id="currency-info">
             <span>
-                <i class="fas fa-shopping-cart me-1"></i>Items en carrito:
+                <i class="fas fa-coins me-1"></i><span class="d-none d-sm-inline">Moneda:</span>
             </span>
-            <span id="items-count">0</span>
-        </div-->
-        <div class="d-flex justify-content-between small text-muted" id="currency-info">
-            <span>
-                <i class="fas fa-coins me-1"></i>Moneda:
-            </span>
-            <span id="currency-display">Soles (S/)</span>
+            <span id="currency-display">Soles</span>
         </div>
-        <div class="d-flex justify-content-between small text-muted" id="payment-info">
+        <div class="d-flex justify-content-between fs-7 fs-sm-6 text-muted gap-1" id="payment-info">
             <span>
-                <i class="fas fa-credit-card me-1"></i>Pago:
+                <i class="fas fa-credit-card me-1"></i><span class="d-none d-sm-inline">Pago:</span>
             </span>
             <span id="payment-display">Contado</span>
         </div>
