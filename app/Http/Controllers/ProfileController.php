@@ -12,4 +12,23 @@ class ProfileController extends Controller
             'user' => auth()->user(),
         ]);
     }
+
+    public function edit()
+    {
+        return view('profile.edit', [
+            'user' => auth()->user(),
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . auth()->id()],
+        ]);
+
+        auth()->user()->update($validated);
+
+        return redirect()->route('profile.show')->with('success', 'Perfil actualizado correctamente.');
+    }
 }

@@ -66,7 +66,7 @@
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{{ route('admin.productos-servicios.vehiculos.caracteristicas.vehiculo.index') }}">Volver</a>
+                        <a href="{{ route('admin.productos-servicios.vehiculos.index') }}">Volver</a>
                         <button type="submit" class="btn btn-primary">Guardar</button>
                     </div>
                 </form>

@@ -122,8 +122,9 @@
                                 </td>
                                 <td class="text-center pe-3">
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
-                                                type="button" data-bs-toggle="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                type="button" id="dropdownAcciones{{ $regla->id }}"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
                                             <i class="fas fa-cog"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">

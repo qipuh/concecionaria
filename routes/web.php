@@ -79,6 +79,8 @@ Route::middleware(['auth', CheckAdminAccess::class])->group(function () {
     # Dashboard, Perfil y Logout
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
     # Módulo Ventas - Cotizaciones
@@ -729,7 +731,7 @@ Route::middleware(['auth'])->prefix('admin/mantenimiento/tecnicos')->name('admin
         Route::get('/reporte-inventario', [InventarioReporteController::class, 'inventario'])->name('reporte-inventario');
     
         // Devoluciones
-        Route::get('devoluciones/buscar', [DevolucionProveedorController::class, 'buscarItems'])->name('devoluciones.buscar');
+        Route::get('devoluciones/buscar', [DevolucionProveedorController::class, 'buscarItems'])->name('devoluciones.buscar-items');
         Route::get('devoluciones', [DevolucionProveedorController::class, 'index'])->name('devoluciones.index');
         Route::get('devoluciones/create', [DevolucionProveedorController::class, 'create'])->name('devoluciones.create');
         Route::post('devoluciones', [DevolucionProveedorController::class, 'store'])->name('devoluciones.store');

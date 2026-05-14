@@ -156,8 +156,6 @@ class InventarioController extends Controller
 
         if ($tipoItem == 'parte') {
             $query->whereNotNull('parte_id');
-        } elseif ($tipoItem == 'vehiculo') {
-            $query->whereNotNull('vehiculo_id');
         }
 
         if ($fechaDesde) {

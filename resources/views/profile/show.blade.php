@@ -33,7 +33,7 @@
                                     <strong>Roles:</strong> {{ $user->roles->pluck('name')->join(', ') }}
                                 </p>
                             @endif
-                            <a href="#" class="btn btn-primary">Editar Perfil</a>
+                            <a href="{{ route('profile.edit') }}" class="btn btn-primary">Editar Perfil</a>
                         </div>
                     </div>
 
