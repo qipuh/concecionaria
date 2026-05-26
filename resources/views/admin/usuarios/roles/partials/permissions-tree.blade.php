@@ -45,6 +45,14 @@
     .perm-sidebar {
         position: sticky; top: 80px; max-height: calc(100vh - 140px);
         overflow-y: auto; border-right: 1px solid #e5e7eb;
+        background: white;
+    }
+    .perm-sidebar-title {
+        position: sticky; top: 0; z-index: 5;
+        background: white; padding: 8px 12px 10px;
+        border-bottom: 1px solid #e5e7eb; margin-bottom: 8px;
+        font-size: 11px; font-weight: 700; color: #64748b;
+        text-transform: uppercase; letter-spacing: .05em;
     }
     .perm-sidebar .nav-link {
         display: flex; align-items: center; padding: 8px 12px;
@@ -198,8 +206,10 @@
         {{-- Sidebar de módulos --}}
         <div class="col-lg-3">
             <div class="perm-sidebar pe-2">
-                <div class="small text-muted text-uppercase fw-bold mb-2 px-2">Módulos del sistema</div>
-                <nav class="nav flex-column" id="permModuleNav">
+                <div class="perm-sidebar-title">
+                    <i class="fas fa-th-large me-1"></i> Módulos del sistema
+                </div>
+                <nav class="nav flex-column px-1" id="permModuleNav">
                     @foreach ($permissions as $moduleKey => $moduleData)
                         @php
                             $modulePermIds = collect($moduleData['submodules'])->flatMap(fn($s) => collect($s['permissions'])->pluck('id'))->toArray();
