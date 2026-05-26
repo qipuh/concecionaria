@@ -41,11 +41,17 @@
 @endphp
 
 <style>
+    /* Importante: ningún ancestro de .perm-sidebar puede tener overflow:hidden/auto,
+       de lo contrario position:sticky no funciona. */
+    .perm-wrapper, .perm-wrapper .row, .perm-wrapper .col-lg-3, .perm-wrapper .col-lg-9 { overflow: visible !important; }
+    body.has-perm-tree .card, body.has-perm-tree .card-body, body.has-perm-tree main,
+    body.has-perm-tree .container, body.has-perm-tree .container-fluid { overflow: visible !important; }
     .perm-wrapper { position: relative; }
+    .perm-sidebar-col { align-self: flex-start; }
     .perm-sidebar {
-        position: sticky; top: 80px; max-height: calc(100vh - 140px);
+        position: sticky; top: 10px; max-height: calc(100vh - 30px);
         overflow-y: auto; border-right: 1px solid #e5e7eb;
-        background: white;
+        background: white; z-index: 20;
     }
     .perm-sidebar-title {
         position: sticky; top: 0; z-index: 5;
@@ -204,7 +210,7 @@
 
     <div class="row g-3">
         {{-- Sidebar de módulos --}}
-        <div class="col-lg-3">
+        <div class="col-lg-3 perm-sidebar-col">
             <div class="perm-sidebar pe-2">
                 <div class="perm-sidebar-title">
                     <i class="fas fa-th-large me-1"></i> Módulos del sistema
@@ -225,21 +231,30 @@
                         </a>
                     @endforeach
                 </nav>
+                <div class="mt-3 px-1 pb-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" id="showAllModules">
+                        <i class="fas fa-th"></i> Ver todos los módulos
+                    </button>
+                </div>
             </div>
         </div>
 
         {{-- Contenido principal --}}
         <div class="col-lg-9">
             <div id="permModulesContainer">
+                <div id="permPlaceholder" class="text-center py-5 px-4 rounded" style="background:#f8fafc; border:2px dashed #cbd5e1;">
+                    <div style="font-size:48px; color:#94a3b8;"><i class="fas fa-hand-pointer"></i></div>
+                    <h5 class="mt-3 text-muted">Selecciona un módulo</h5>
+                    <p class="text-muted mb-0 small">Haz clic en un módulo del panel izquierdo para configurar sus permisos, o usa <strong>"Ver todos los módulos"</strong> para mostrarlos todos.</p>
+                </div>
                 @forelse ($permissions as $moduleKey => $moduleData)
                     @php
                         $modulePermIds = collect($moduleData['submodules'])->flatMap(fn($s) => collect($s['permissions'])->pluck('id'))->toArray();
                         $modTotal = count($modulePermIds);
                         $modSel = count(array_intersect($modulePermIds, $assignedIds));
                         $icon = $moduleIcons[$moduleKey] ?? 'fas fa-folder';
-                        $startCollapsed = $modSel === 0;
                     @endphp
-                    <div class="perm-module-card {{ $startCollapsed ? 'collapsed' : '' }}"
+                    <div class="perm-module-card collapsed perm-hidden"
                          id="module-{{ $moduleKey }}"
                          data-module="{{ $moduleKey }}"
                          data-search="{{ strtolower($moduleData['label'] . ' ' . $moduleKey) }}">
@@ -261,7 +276,7 @@
                             <i class="fas fa-chevron-down perm-chevron"></i>
                         </div>
 
-                        <div class="perm-module-body {{ $startCollapsed ? 'collapsed' : '' }}">
+                        <div class="perm-module-body collapsed">
                             @foreach ($moduleData['submodules'] as $subKey => $subData)
                                 @php
                                     $subPermIds = collect($subData['permissions'])->pluck('id')->toArray();
@@ -361,6 +376,7 @@
 (function(){
     const wrapper = document.querySelector('.perm-wrapper');
     if (!wrapper) return;
+    document.body.classList.add('has-perm-tree');
 
     function setIndeterminate(checkbox, total, selected) {
         if (!checkbox) return;
@@ -480,30 +496,55 @@
         updateCounters();
     });
     document.getElementById('expandAllMods')?.addEventListener('click', () => {
-        wrapper.querySelectorAll('.perm-module-card').forEach(c => c.classList.remove('collapsed'));
-        wrapper.querySelectorAll('.perm-module-body').forEach(b => b.classList.remove('collapsed'));
+        wrapper.querySelectorAll('.perm-module-card:not(.perm-hidden)').forEach(c => {
+            c.classList.remove('collapsed');
+            c.querySelector('.perm-module-body')?.classList.remove('collapsed');
+        });
     });
     document.getElementById('collapseAllMods')?.addEventListener('click', () => {
-        wrapper.querySelectorAll('.perm-module-card').forEach(c => c.classList.add('collapsed'));
-        wrapper.querySelectorAll('.perm-module-body').forEach(b => b.classList.add('collapsed'));
+        wrapper.querySelectorAll('.perm-module-card:not(.perm-hidden)').forEach(c => {
+            c.classList.add('collapsed');
+            c.querySelector('.perm-module-body')?.classList.add('collapsed');
+        });
     });
 
-    // Sidebar nav: scroll y activación
+    const placeholder = document.getElementById('permPlaceholder');
+
+    function showOnlyModule(moduleKey) {
+        wrapper.querySelectorAll('.perm-module-card').forEach(c => {
+            const isTarget = c.dataset.module === moduleKey;
+            c.classList.toggle('perm-hidden', !isTarget);
+            if (isTarget) {
+                c.classList.remove('collapsed');
+                c.querySelector('.perm-module-body')?.classList.remove('collapsed');
+            }
+        });
+        if (placeholder) placeholder.style.display = 'none';
+        wrapper.querySelectorAll('#permModuleNav .nav-link').forEach(l => {
+            l.classList.toggle('active', l.dataset.targetModule === moduleKey);
+        });
+    }
+
+    function showAllModules() {
+        wrapper.querySelectorAll('.perm-module-card').forEach(c => {
+            c.classList.remove('perm-hidden');
+            c.classList.add('collapsed');
+            c.querySelector('.perm-module-body')?.classList.add('collapsed');
+        });
+        if (placeholder) placeholder.style.display = 'none';
+        wrapper.querySelectorAll('#permModuleNav .nav-link').forEach(l => l.classList.remove('active'));
+    }
+
+    // Sidebar nav: filtrar y mostrar solo el módulo clickeado
     wrapper.querySelectorAll('#permModuleNav .nav-link').forEach(link => {
         link.addEventListener('click', function(e){
             e.preventDefault();
-            const target = wrapper.querySelector(`#module-${this.dataset.targetModule}`);
-            if (!target) return;
-            // Asegurar que esté expandido
-            target.classList.remove('collapsed');
-            target.querySelector('.perm-module-body')?.classList.remove('collapsed');
-            // Scroll suave
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Marcar activo
-            wrapper.querySelectorAll('#permModuleNav .nav-link').forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
+            showOnlyModule(this.dataset.targetModule);
         });
     });
+
+    // Botón "Ver todos los módulos"
+    document.getElementById('showAllModules')?.addEventListener('click', showAllModules);
 
     // Búsqueda en vivo
     const search = document.getElementById('permSearch');
@@ -513,13 +554,27 @@
         q = q.trim().toLowerCase();
         clearBtn.style.display = q ? 'inline-block' : 'none';
 
+        if (q === '') {
+            // Restablecer: ocultar todos y mostrar placeholder
+            wrapper.querySelectorAll('.permission-item').forEach(i => i.classList.remove('perm-hidden'));
+            wrapper.querySelectorAll('.perm-sub-card').forEach(s => s.classList.remove('perm-hidden'));
+            wrapper.querySelectorAll('.perm-module-card').forEach(c => {
+                c.classList.add('perm-hidden', 'collapsed');
+                c.querySelector('.perm-module-body')?.classList.add('collapsed');
+            });
+            wrapper.querySelectorAll('#permModuleNav .nav-link').forEach(l => l.classList.remove('active'));
+            if (placeholder) placeholder.style.display = '';
+            return;
+        }
+
+        if (placeholder) placeholder.style.display = 'none';
+
         wrapper.querySelectorAll('.perm-module-card').forEach(mod => {
             let modVisible = false;
             mod.querySelectorAll('.perm-sub-card').forEach(sub => {
                 let subVisible = false;
                 sub.querySelectorAll('.permission-item').forEach(item => {
-                    const match = q === '' ||
-                        item.dataset.search.includes(q) ||
+                    const match = item.dataset.search.includes(q) ||
                         sub.dataset.search.includes(q) ||
                         mod.dataset.search.includes(q);
                     item.classList.toggle('perm-hidden', !match);
@@ -529,7 +584,7 @@
                 if (subVisible) modVisible = true;
             });
             mod.classList.toggle('perm-hidden', !modVisible);
-            if (q !== '' && modVisible) {
+            if (modVisible) {
                 mod.classList.remove('collapsed');
                 mod.querySelector('.perm-module-body')?.classList.remove('collapsed');
             }
@@ -542,18 +597,6 @@
         applySearch('');
         search.focus();
     });
-
-    // ScrollSpy: resaltar módulo en sidebar al hacer scroll
-    const navLinks = wrapper.querySelectorAll('#permModuleNav .nav-link');
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const moduleKey = entry.target.dataset.module;
-                navLinks.forEach(l => l.classList.toggle('active', l.dataset.targetModule === moduleKey));
-            }
-        });
-    }, { rootMargin: '-30% 0px -60% 0px' });
-    wrapper.querySelectorAll('.perm-module-card').forEach(c => observer.observe(c));
 
     updateCounters();
 })();
