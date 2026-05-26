@@ -16,7 +16,7 @@ class RolController extends Controller
 
     public function create()
     {
-        $permissions = Permission::groupedByModule();
+        $permissions = Permission::groupedByModuleAndSubmodule();
         return view('admin.usuarios.roles.create', compact('permissions'));
     }
 
@@ -48,9 +48,10 @@ class RolController extends Controller
 
     public function edit(Role $rol)
     {
-        $permissions = Permission::groupedByModule();
+        $permissions = Permission::groupedByModuleAndSubmodule();
         $rol->load('permissions');
-        return view('admin.usuarios.roles.edit', compact('rol', 'permissions'));
+        $assignedIds = $rol->permissions->pluck('id')->toArray();
+        return view('admin.usuarios.roles.edit', compact('rol', 'permissions', 'assignedIds'));
     }
 
     public function update(Request $request, Role $rol)
