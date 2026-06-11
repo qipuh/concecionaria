@@ -12,11 +12,38 @@ use App\Models\Color;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
-HeadingRowFormatter::default('none'); // Disable automatic slugging of headers
+HeadingRowFormatter::default('none');
+
+class VehiculoTemplateExport implements FromArray, WithHeadings
+{
+    public function array(): array
+    {
+        return [
+            ['2024-01-15', '25000.50', 'FAC-001', 'Toyota', 'Corolla', 'XLI', '2024', '1HGBH41JXMN109186', 'Blanco'],
+        ];
+    }
+
+    public function headings(): array
+    {
+        return [
+            'Fecha de compra',
+            'Precio compra',
+            'Nro de factura',
+            'Marca',
+            'Modelo',
+            'Version',
+            'Año',
+            'Serie VIN',
+            'Color',
+        ];
+    }
+}
 
 class VehiculoImport implements ToModel, WithHeadingRow
 {
@@ -126,6 +153,11 @@ class VehiculoImportController extends Controller
         return view('admin.productos-servicios.vehiculos.pestanas');
     }
 
+    public function downloadTemplate()
+    {
+        return Excel::download(new VehiculoTemplateExport, 'plantilla_vehiculos.xlsx');
+    }
+
     public function import(Request $request)
     {
         $request->validate([
@@ -134,9 +166,11 @@ class VehiculoImportController extends Controller
 
         try {
             Excel::import(new VehiculoImport, $request->file('file'));
-            return redirect()->back()->with('success', 'Vehículos importados exitosamente.');
+            return redirect()->route('admin.productos-servicios.vehiculos.import.form')
+                ->with('success', 'Vehículos importados exitosamente.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error al importar: ' . $e->getMessage());
+            return redirect()->route('admin.productos-servicios.vehiculos.import.form')
+                ->with('error', 'Error al importar: ' . $e->getMessage());
         }
     }
 }

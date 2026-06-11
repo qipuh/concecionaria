@@ -1,6 +1,12 @@
 @extends('admin.layouts.app')
-
 @section('title', 'Editar Proveedor')
+
+@push('styles')
+<style>
+.form-check-input { width: 2.5em; height: 1.25em; }
+.form-check-label { margin-left: 0.5em; }
+</style>
+@endpush
 
 @section('content')
 <div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
@@ -8,17 +14,18 @@
     <div class="container-fluid position-relative z-1">
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
             <div class="mb-3 mb-lg-0">
-                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25">
                     <i class="fas fa-edit text-info me-2"></i> Editar Proveedor
                 </div>
-                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm">
                     {{ $proveedor->razon_social ?? ($proveedor->nombres . ' ' . $proveedor->apellido_paterno) }}
                 </h2>
                 <p class="text-white-50 mb-0">Modifica la información de contacto o del documento.</p>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('admin.compras.proveedores.index') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
-                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver a Listado
+                <a href="{{ route('admin.compras.proveedores.index') }}"
+                   class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver al Listado
                 </a>
             </div>
         </div>
@@ -27,467 +34,508 @@
 
 <div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
 <div class="row justify-content-center">
-    <div class="col-12 col-lg-10">
+<div class="col-12 col-lg-10">
+
+    @if($errors->any())
+        <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+            <div class="fw-bold mb-1"><i class="fas fa-exclamation-circle me-2"></i>Corrija los siguientes errores:</div>
+            <ul class="mb-0 ps-3 small">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('admin.compras.proveedores.update', $proveedor) }}" class="needs-validation" novalidate>
+        @csrf
+        @method('PUT')
+
+        {{-- Sección: Documento --}}
         <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-id-card me-2 text-primary"></i> Información del Documento</h6>
+            </div>
             <div class="card-body p-4">
-                <form method="POST" action="{{ route('admin.compras.proveedores.update', $proveedor) }}" class="needs-validation" novalidate>
-                    @csrf
-                    @method('PUT')
-                    <div class="row g-3">
-                        <!-- Sección: Documento -->
-                        <div class="col-12">
-                            <h6 class="text-muted fw-semibold mb-3">Información del Documento</h6>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="tipo_documento" class="form-label small text-muted mb-1">Tipo de Documento *</label>
-                            <select name="tipo_documento" id="tipo_documento" class="form-select form-select-sm shadow-sm @error('tipo_documento') is-invalid @enderror" required>
-                                <option value="">Seleccione</option>
-                                <option value="DNI" {{ $proveedor->tipo_documento == 'DNI' ? 'selected' : '' }}>DNI</option>
-                                <option value="RUC" {{ $proveedor->tipo_documento == 'RUC' ? 'selected' : '' }}>RUC</option>
-                            </select>
-                            @error('tipo_documento') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="numero_documento" class="form-label small text-muted mb-1">Número de Documento *</label>
-                            <input type="text" name="numero_documento" id="numero_documento" class="form-control form-control-sm shadow-sm @error('numero_documento') is-invalid @enderror" value="{{ $proveedor->numero_documento }}" required>
-                            @error('numero_documento') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="button" id="validar_documento" class="btn btn-sm btn-primary w-100 shadow-sm">Validar Datos</button>
-                        </div>
-
-                        <!-- Campos para DNI -->
-                        <div class="col-12 dni-fields" style="display: {{ $proveedor->tipo_documento == 'DNI' ? 'block' : 'none' }};">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label for="apellido_paterno" class="form-label small text-muted mb-1">Apellido Paterno</label>
-                                    <input type="text" name="apellido_paterno" id="apellido_paterno" class="form-control form-control-sm shadow-sm @error('apellido_paterno') is-invalid @enderror" value="{{ $proveedor->apellido_paterno }}" readonly>
-                                    @error('apellido_paterno') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="apellido_materno" class="form-label small text-muted mb-1">Apellido Materno</label>
-                                    <input type="text" name="apellido_materno" id="apellido_materno" class="form-control form-control-sm shadow-sm @error('apellido_materno') is-invalid @enderror" value="{{ $proveedor->apellido_materno }}" readonly>
-                                    @error('apellido_materno') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="nombres" class="form-label small text-muted mb-1">Nombres</label>
-                                    <input type="text" name="nombres" id="nombres" class="form-control form-control-sm shadow-sm @error('nombres') is-invalid @enderror" value="{{ $proveedor->nombres }}" readonly>
-                                    @error('nombres') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Campo para RUC -->
-                        <div class="col-12 ruc-fields" style="display: {{ $proveedor->tipo_documento == 'RUC' ? 'block' : 'none' }};">
-                            <div class="row g-3">
-                                <div class="col-md-12">
-                                    <label for="razon_social" class="form-label small text-muted mb-1">Razón Social</label>
-                                    <input type="text" name="razon_social" id="razon_social" class="form-control form-control-sm shadow-sm @error('razon_social') is-invalid @enderror" value="{{ $proveedor->razon_social }}" readonly>
-                                    @error('razon_social') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sección: Ubicación -->
-                        <div class="col-12 mt-4">
-                            <h6 class="text-muted fw-semibold mb-3">Ubicación</h6>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="direccion" class="form-label small text-muted mb-1">Dirección</label>
-                            <input type="text" name="direccion" id="direccion" class="form-control form-control-sm shadow-sm @error('direccion') is-invalid @enderror" value="{{ $proveedor->direccion }}">
-                            @error('direccion') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-2">
-                            <label for="departamento" class="form-label small text-muted mb-1">Departamento *</label>
-                            <select name="departamento" id="departamento" class="form-select form-select-sm shadow-sm @error('departamento') is-invalid @enderror" required>
-                                <option value="">Seleccione</option>
-                                @foreach ($departamentos as $departamento)
-                                    <option value="{{ $departamento }}" {{ $proveedor->departamento == $departamento ? 'selected' : '' }}>{{ $departamento }}</option>
-                                @endforeach
-                            </select>
-                            @error('departamento') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-2">
-                            <label for="provincia" class="form-label small text-muted mb-1">Provincia *</label>
-                            <select name="provincia" id="provincia" class="form-select form-select-sm shadow-sm @error('provincia') is-invalid @enderror" required>
-                                <option value="">Seleccione</option>
-                                @foreach ($provincias as $provincia)
-                                    <option value="{{ $provincia }}" {{ $proveedor->provincia == $provincia ? 'selected' : '' }}>{{ $provincia }}</option>
-                                @endforeach
-                            </select>
-                            @error('provincia') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-2">
-                            <label for="distrito" class="form-label small text-muted mb-1">Distrito *</label>
-                            <select name="distrito" id="distrito" class="form-select form-select-sm shadow-sm @error('distrito') is-invalid @enderror" required>
-                                <option value="">Seleccione</option>
-                                @foreach ($distritos as $distrito)
-                                    <option value="{{ $distrito }}" {{ $proveedor->distrito == $distrito ? 'selected' : '' }}>{{ $distrito }}</option>
-                                @endforeach
-                            </select>
-                            @error('distrito') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <!-- Sección: Detalles del Proveedor -->
-                        <div class="col-12 mt-4">
-                            <h6 class="text-muted fw-semibold mb-3">Detalles del Proveedor</h6>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="categoria_proveedor_id" class="form-label small text-muted mb-1">Categoría Proveedor *</label>
-                            <select name="categoria_proveedor_id" id="categoria_proveedor_id" class="form-select form-select-sm shadow-sm @error('categoria_proveedor_id') is-invalid @enderror" required>
-                                <option value="">Seleccione</option>
-                                @foreach ($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}" {{ $proveedor->categoria_proveedor_id == $categoria->id ? 'selected' : '' }}>{{ $categoria->nombre_categoria_proveedor }}</option>
-                                @endforeach
-                            </select>
-                            @error('categoria_proveedor_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="cubre_garantias" class="form-label small text-muted mb-1">¿Cubre Garantías? *</label>
-                            <select name="cubre_garantias" id="cubre_garantias" class="form-select form-select-sm shadow-sm @error('cubre_garantias') is-invalid @enderror" required>
-                                <option value="">Seleccione</option>
-                                <option value="Sí" {{ $proveedor->cubre_garantias == 'Sí' ? 'selected' : '' }}>Sí</option>
-                                <option value="No" {{ $proveedor->cubre_garantias == 'No' ? 'selected' : '' }}>No</option>
-                            </select>
-                            @error('cubre_garantias') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="col-md-4">
-                            <label for="es_aseguradora" class="form-label small text-muted mb-1">¿Es Aseguradora? *</label>
-                            <select name="es_aseguradora" id="es_aseguradora" class="form-select form-select-sm shadow-sm @error('es_aseguradora') is-invalid @enderror" required>
-                                <option value="">Seleccione</option>
-                                <option value="Sí" {{ $proveedor->es_aseguradora == 'Sí' ? 'selected' : '' }}>Sí</option>
-                                <option value="No" {{ $proveedor->es_aseguradora == 'No' ? 'selected' : '' }}>No</option>
-                            </select>
-                            @error('es_aseguradora') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <!-- Sección: Correos -->
-                        <div class="col-12 mt-4">
-                            <h6 class="text-muted fw-semibold mb-3">Correos de Contacto</h6>
-                            <div id="correos-container">
-                                @foreach ($proveedor->correos as $index => $correo)
-                                    <div class="input-group mb-2 correo-entry">
-                                        <input type="email" name="correos[]" class="form-control form-control-sm shadow-sm" value="{{ $correo->correo }}" placeholder="Ej: proveedor@dominio.com" required>
-                                        <button type="button" class="btn btn-outline-danger btn-sm remove-correo">Eliminar</button>
-                                    </div>
-                                @endforeach
-                                @if ($proveedor->correos->isEmpty())
-                                    <div class="input-group mb-2 correo-entry">
-                                        <input type="email" name="correos[]" class="form-control form-control-sm shadow-sm" placeholder="Ej: proveedor@dominio.com" required>
-                                        <button type="button" class="btn btn-outline-danger btn-sm remove-correo">Eliminar</button>
-                                    </div>
-                                @endif
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-primary mt-2 shadow-sm" id="add-correo">+ Agregar Correo</button>
-                        </div>
-
-                        <!-- Sección: Contactos -->
-                        <div class="col-12 mt-4">
-                            <h6 class="text-muted fw-semibold mb-3">Contactos</h6>
-                            <div id="contactos-container">
-                                @foreach ($proveedor->contactos as $index => $contacto)
-                                    <div class="row mb-2 contacto-entry">
-                                        <div class="col-md-6">
-                                            <input type="text" name="contactos[{{ $index }}][nombre]" class="form-control form-control-sm shadow-sm" value="{{ $contacto->nombre }}" placeholder="Nombre del contacto" required>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <input type="text" name="contactos[{{ $index }}][telefono]" class="form-control form-control-sm shadow-sm" value="{{ $contacto->telefono }}" placeholder="Teléfono" required>
-                                        </div>
-                                        <div class="col-md-2 d-flex align-items-end">
-                                            <button type="button" class="btn btn-outline-danger btn-sm remove-contacto w-100">Eliminar</button>
-                                        </div>
-                                    </div>
-                                @endforeach
-                                @if ($proveedor->contactos->isEmpty())
-                                    <div class="row mb-2 contacto-entry">
-                                        <div class="col-md-6">
-                                            <input type="text" name="contactos[0][nombre]" class="form-control form-control-sm shadow-sm" placeholder="Nombre del contacto" required>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <input type="text" name="contactos[0][telefono]" class="form-control form-control-sm shadow-sm" placeholder="Teléfono" required>
-                                        </div>
-                                        <div class="col-md-2 d-flex align-items-end">
-                                            <button type="button" class="btn btn-outline-danger btn-sm remove-contacto w-100">Eliminar</button>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-primary mt-2 shadow-sm" id="add-contacto">+ Agregar Contacto</button>
-                        </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="tipo_documento" class="form-label fw-semibold small text-uppercase text-muted">
+                            Tipo de Documento <span class="text-danger">*</span>
+                        </label>
+                        <select name="tipo_documento" id="tipo_documento"
+                                class="form-select @error('tipo_documento') is-invalid @enderror" required>
+                            <option value="">Seleccione</option>
+                            <option value="DNI" {{ $proveedor->tipo_documento == 'DNI' ? 'selected' : '' }}>DNI</option>
+                            <option value="RUC" {{ $proveedor->tipo_documento == 'RUC' ? 'selected' : '' }}>RUC</option>
+                        </select>
+                        @error('tipo_documento') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-
-                    <!-- Botones de Acción -->
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <a href="{{ route('admin.compras.proveedores.index') }}" class="btn btn-outline-secondary btn-sm shadow-sm">
-                            Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-primary btn-sm d-flex align-items-center shadow-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="me-2" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                            </svg>
-                            Actualizar Proveedor
+                    <div class="col-md-4">
+                        <label for="numero_documento" class="form-label fw-semibold small text-uppercase text-muted">
+                            Número de Documento <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" name="numero_documento" id="numero_documento"
+                               class="form-control @error('numero_documento') is-invalid @enderror"
+                               value="{{ $proveedor->numero_documento }}" required>
+                        @error('numero_documento') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" id="validar_documento"
+                                class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm border-0 w-100">
+                            <i class="fas fa-search me-2"></i> Validar Datos
                         </button>
                     </div>
-                </form>
+
+                    {{-- Campos DNI --}}
+                    <div class="col-12 dni-fields" style="display: {{ $proveedor->tipo_documento == 'DNI' ? 'block' : 'none' }};">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="apellido_paterno" class="form-label fw-semibold small text-uppercase text-muted">Apellido Paterno</label>
+                                <input type="text" name="apellido_paterno" id="apellido_paterno"
+                                       class="form-control bg-light @error('apellido_paterno') is-invalid @enderror"
+                                       value="{{ $proveedor->apellido_paterno }}" readonly>
+                                @error('apellido_paterno') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label for="apellido_materno" class="form-label fw-semibold small text-uppercase text-muted">Apellido Materno</label>
+                                <input type="text" name="apellido_materno" id="apellido_materno"
+                                       class="form-control bg-light @error('apellido_materno') is-invalid @enderror"
+                                       value="{{ $proveedor->apellido_materno }}" readonly>
+                                @error('apellido_materno') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label for="nombres" class="form-label fw-semibold small text-uppercase text-muted">Nombres</label>
+                                <input type="text" name="nombres" id="nombres"
+                                       class="form-control bg-light @error('nombres') is-invalid @enderror"
+                                       value="{{ $proveedor->nombres }}" readonly>
+                                @error('nombres') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Campos RUC --}}
+                    <div class="col-12 ruc-fields" style="display: {{ $proveedor->tipo_documento == 'RUC' ? 'block' : 'none' }};">
+                        <label for="razon_social" class="form-label fw-semibold small text-uppercase text-muted">Razón Social</label>
+                        <input type="text" name="razon_social" id="razon_social"
+                               class="form-control bg-light @error('razon_social') is-invalid @enderror"
+                               value="{{ $proveedor->razon_social }}" readonly>
+                        @error('razon_social') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+
+        {{-- Sección: Ubicación --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-map-marker-alt me-2 text-primary"></i> Ubicación</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="direccion" class="form-label fw-semibold small text-uppercase text-muted">Dirección</label>
+                        <input type="text" name="direccion" id="direccion"
+                               class="form-control @error('direccion') is-invalid @enderror"
+                               value="{{ $proveedor->direccion }}" placeholder="Av. Ejemplo 123">
+                        @error('direccion') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-2">
+                        <label for="departamento" class="form-label fw-semibold small text-uppercase text-muted">
+                            Departamento <span class="text-danger">*</span>
+                        </label>
+                        <select name="departamento" id="departamento"
+                                class="form-select @error('departamento') is-invalid @enderror" required>
+                            <option value="">Seleccione</option>
+                            @foreach ($departamentos as $departamento)
+                                <option value="{{ $departamento }}" {{ $proveedor->departamento == $departamento ? 'selected' : '' }}>
+                                    {{ $departamento }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('departamento') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-2">
+                        <label for="provincia" class="form-label fw-semibold small text-uppercase text-muted">
+                            Provincia <span class="text-danger">*</span>
+                        </label>
+                        <select name="provincia" id="provincia"
+                                class="form-select @error('provincia') is-invalid @enderror" required>
+                            <option value="">Seleccione</option>
+                            @foreach ($provincias as $provincia)
+                                <option value="{{ $provincia }}" {{ $proveedor->provincia == $provincia ? 'selected' : '' }}>
+                                    {{ $provincia }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('provincia') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-2">
+                        <label for="distrito" class="form-label fw-semibold small text-uppercase text-muted">
+                            Distrito <span class="text-danger">*</span>
+                        </label>
+                        <select name="distrito" id="distrito"
+                                class="form-select @error('distrito') is-invalid @enderror" required>
+                            <option value="">Seleccione</option>
+                            @foreach ($distritos as $distrito)
+                                <option value="{{ $distrito }}" {{ $proveedor->distrito == $distrito ? 'selected' : '' }}>
+                                    {{ $distrito }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('distrito') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Sección: Detalles --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-sliders-h me-2 text-primary"></i> Detalles del Proveedor</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <label for="categoria_proveedor_id" class="form-label fw-semibold small text-uppercase text-muted">
+                            Categoría <span class="text-danger">*</span>
+                        </label>
+                        <select name="categoria_proveedor_id" id="categoria_proveedor_id"
+                                class="form-select @error('categoria_proveedor_id') is-invalid @enderror" required>
+                            <option value="">Seleccione</option>
+                            @foreach ($categorias as $categoria)
+                                <option value="{{ $categoria->id }}"
+                                    {{ $proveedor->categoria_proveedor_id == $categoria->id ? 'selected' : '' }}>
+                                    {{ $categoria->nombre_categoria_proveedor }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('categoria_proveedor_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small text-uppercase text-muted d-block">
+                            ¿Cubre Garantías? <span class="text-danger">*</span>
+                        </label>
+                        <div class="form-check form-switch mt-1">
+                            <input class="form-check-input" type="checkbox" name="cubre_garantias"
+                                   id="cubre_garantias" value="Sí"
+                                   {{ $proveedor->cubre_garantias == 'Sí' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="cubre_garantias" id="cubre_garantias_label">
+                                {{ $proveedor->cubre_garantias == 'Sí' ? 'Sí' : 'No' }}
+                            </label>
+                        </div>
+                        @error('cubre_garantias') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small text-uppercase text-muted d-block">
+                            ¿Es Aseguradora? <span class="text-danger">*</span>
+                        </label>
+                        <div class="form-check form-switch mt-1">
+                            <input class="form-check-input" type="checkbox" name="es_aseguradora"
+                                   id="es_aseguradora" value="Sí"
+                                   {{ $proveedor->es_aseguradora == 'Sí' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="es_aseguradora" id="es_aseguradora_label">
+                                {{ $proveedor->es_aseguradora == 'Sí' ? 'Sí' : 'No' }}
+                            </label>
+                        </div>
+                        @error('es_aseguradora') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Sección: Correos --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-envelope me-2 text-primary"></i> Correos de Contacto</h6>
+            </div>
+            <div class="card-body p-4">
+                <div id="correos-container" class="mb-3">
+                    @foreach ($proveedor->correos as $correo)
+                    <div class="d-flex gap-2 mb-2 correo-entry">
+                        <input type="email" name="correos[]" class="form-control"
+                               value="{{ $correo->correo }}" placeholder="Ej: proveedor@dominio.com" required>
+                        <button type="button"
+                                class="btn btn-outline-danger rounded-circle flex-shrink-0 remove-correo"
+                                style="width:38px;height:38px;" title="Eliminar">
+                            <i class="fas fa-trash small"></i>
+                        </button>
+                    </div>
+                    @endforeach
+                    @if ($proveedor->correos->isEmpty())
+                    <div class="d-flex gap-2 mb-2 correo-entry">
+                        <input type="email" name="correos[]" class="form-control"
+                               placeholder="Ej: proveedor@dominio.com" required>
+                        <button type="button"
+                                class="btn btn-outline-danger rounded-circle flex-shrink-0 remove-correo"
+                                style="width:38px;height:38px;" title="Eliminar">
+                            <i class="fas fa-trash small"></i>
+                        </button>
+                    </div>
+                    @endif
+                </div>
+                <button type="button" id="add-correo"
+                        class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold small">
+                    <i class="fas fa-plus me-1"></i> Agregar Correo
+                </button>
+            </div>
+        </div>
+
+        {{-- Sección: Contactos --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-phone me-2 text-primary"></i> Contactos</h6>
+            </div>
+            <div class="card-body p-4">
+                <div id="contactos-container" class="mb-3">
+                    @foreach ($proveedor->contactos as $index => $contacto)
+                    <div class="d-flex gap-2 mb-2 align-items-center contacto-entry">
+                        <input type="text" name="contactos[{{ $index }}][nombre]" class="form-control"
+                               value="{{ $contacto->nombre }}" placeholder="Nombre del contacto" required>
+                        <input type="text" name="contactos[{{ $index }}][telefono]" class="form-control"
+                               value="{{ $contacto->telefono }}" placeholder="Teléfono" required>
+                        <button type="button"
+                                class="btn btn-outline-danger rounded-circle flex-shrink-0 remove-contacto"
+                                style="width:38px;height:38px;" title="Eliminar">
+                            <i class="fas fa-trash small"></i>
+                        </button>
+                    </div>
+                    @endforeach
+                    @if ($proveedor->contactos->isEmpty())
+                    <div class="d-flex gap-2 mb-2 align-items-center contacto-entry">
+                        <input type="text" name="contactos[0][nombre]" class="form-control"
+                               placeholder="Nombre del contacto" required>
+                        <input type="text" name="contactos[0][telefono]" class="form-control"
+                               placeholder="Teléfono" required>
+                        <button type="button"
+                                class="btn btn-outline-danger rounded-circle flex-shrink-0 remove-contacto"
+                                style="width:38px;height:38px;" title="Eliminar">
+                            <i class="fas fa-trash small"></i>
+                        </button>
+                    </div>
+                    @endif
+                </div>
+                <button type="button" id="add-contacto"
+                        class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold small">
+                    <i class="fas fa-plus me-1"></i> Agregar Contacto
+                </button>
+            </div>
+        </div>
+
+        {{-- Botones --}}
+        <div class="d-flex justify-content-end gap-2 pb-4">
+            <a href="{{ route('admin.compras.proveedores.index') }}"
+               class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold border-0">
+                <i class="fas fa-times me-2"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
+                <i class="fas fa-save me-2"></i> Actualizar Proveedor
+            </button>
+        </div>
+
+    </form>
+</div>
 </div>
 </div>
 @endsection
 
 @push('scripts')
-    <script>
-        (function () {
-            'use strict';
+<script>
+(function () {
+    'use strict';
 
-            // Validación del formulario
-            window.addEventListener('load', function () {
-                var forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.filter.call(forms, function (form) {
-                    form.addEventListener('submit', function (event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
+    function updateSwitchLabels() {
+        document.querySelectorAll('.form-check-input').forEach(sw => {
+            const label = sw.nextElementSibling;
+            if (label) label.textContent = sw.checked ? 'Sí' : 'No';
+        });
+    }
 
-                // Cargar provincias y distritos al inicio si hay valores preseleccionados
-                const departamentoSelect = document.getElementById('departamento');
-                const provinciaSelect = document.getElementById('provincia');
-                if (departamentoSelect.value) {
-                    const departamentoEvent = new Event('change');
-                    departamentoSelect.dispatchEvent(departamentoEvent);
+    window.addEventListener('load', function () {
+        var forms = document.getElementsByClassName('needs-validation');
+        Array.prototype.filter.call(forms, function (form) {
+            form.addEventListener('submit', function (event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
-                if (provinciaSelect.value) {
-                    const provinciaEvent = new Event('change');
-                    provinciaSelect.dispatchEvent(provinciaEvent);
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        const departamentoSelect = document.getElementById('departamento');
+        const provinciaSelect    = document.getElementById('provincia');
+        if (departamentoSelect.value) departamentoSelect.dispatchEvent(new Event('change'));
+        if (provinciaSelect.value)    provinciaSelect.dispatchEvent(new Event('change'));
+
+        updateSwitchLabels();
+    });
+
+    function resetForm() {
+        document.getElementById('numero_documento').value = '';
+        document.getElementById('apellido_paterno').value = '';
+        document.getElementById('apellido_materno').value = '';
+        document.getElementById('nombres').value = '';
+        document.getElementById('razon_social').value = '';
+        document.getElementById('direccion').value = '';
+        document.getElementById('departamento').value = '';
+        document.getElementById('provincia').innerHTML = '<option value="">Seleccione</option>';
+        document.getElementById('distrito').innerHTML  = '<option value="">Seleccione</option>';
+        document.getElementById('categoria_proveedor_id').value = '';
+        document.getElementById('cubre_garantias').checked = false;
+        document.getElementById('es_aseguradora').checked  = false;
+        updateSwitchLabels();
+
+        document.querySelectorAll('.dni-fields').forEach(f => f.style.display = 'none');
+        document.querySelectorAll('.ruc-fields').forEach(f => f.style.display = 'none');
+
+        document.getElementById('correos-container').innerHTML = `
+            <div class="d-flex gap-2 mb-2 correo-entry">
+                <input type="email" name="correos[]" class="form-control" placeholder="Ej: proveedor@dominio.com" required>
+                <button type="button" class="btn btn-outline-danger rounded-circle flex-shrink-0 remove-correo" style="width:38px;height:38px;" title="Eliminar">
+                    <i class="fas fa-trash small"></i>
+                </button>
+            </div>`;
+        correoIndex = 1;
+
+        document.getElementById('contactos-container').innerHTML = `
+            <div class="d-flex gap-2 mb-2 align-items-center contacto-entry">
+                <input type="text" name="contactos[0][nombre]" class="form-control" placeholder="Nombre del contacto" required>
+                <input type="text" name="contactos[0][telefono]" class="form-control" placeholder="Teléfono" required>
+                <button type="button" class="btn btn-outline-danger rounded-circle flex-shrink-0 remove-contacto" style="width:38px;height:38px;" title="Eliminar">
+                    <i class="fas fa-trash small"></i>
+                </button>
+            </div>`;
+        contactoIndex = 1;
+
+        document.querySelector('form.needs-validation').classList.remove('was-validated');
+    }
+
+    document.getElementById('tipo_documento').addEventListener('change', resetForm);
+
+    document.getElementById('validar_documento').addEventListener('click', function () {
+        const tipoDocumento   = document.getElementById('tipo_documento').value;
+        const numeroDocumento = document.getElementById('numero_documento').value;
+
+        if (!tipoDocumento || !numeroDocumento) {
+            alert('Por favor, seleccione el tipo de documento y proporcione el número.');
+            return;
+        }
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Validando...';
+
+        fetch('{{ route('admin.compras.proveedores.validar.documento') }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ tipo_documento: tipoDocumento, numero_documento: numeroDocumento }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                if (tipoDocumento === 'DNI') {
+                    document.querySelectorAll('.dni-fields').forEach(f => f.style.display = 'block');
+                    document.querySelectorAll('.ruc-fields').forEach(f => f.style.display = 'none');
+                    document.getElementById('apellido_paterno').value = data.data.apellido_paterno || '';
+                    document.getElementById('apellido_materno').value = data.data.apellido_materno || '';
+                    document.getElementById('nombres').value = data.data.nombres || '';
+                } else if (tipoDocumento === 'RUC') {
+                    document.querySelectorAll('.dni-fields').forEach(f => f.style.display = 'none');
+                    document.querySelectorAll('.ruc-fields').forEach(f => f.style.display = 'block');
+                    document.getElementById('razon_social').value = data.data.nombre_o_razon_social || '';
+                    document.getElementById('apellido_paterno').value = '';
+                    document.getElementById('apellido_materno').value = '';
+                    document.getElementById('nombres').value = '';
+                    document.getElementById('direccion').value = data.data.direccion || '';
+                    document.getElementById('departamento').value = data.data.departamento || '';
+                    document.getElementById('departamento').dispatchEvent(new Event('change'));
+                    setTimeout(() => {
+                        document.getElementById('provincia').value = data.data.provincia || '';
+                        document.getElementById('provincia').dispatchEvent(new Event('change'));
+                        setTimeout(() => { document.getElementById('distrito').value = data.data.distrito || ''; }, 500);
+                    }, 500);
                 }
-            });
-
-            // Función para resetear el formulario
-            function resetForm() {
-                // Resetear campos de texto y selectores
-                document.getElementById('numero_documento').value = '';
-                document.getElementById('apellido_paterno').value = '';
-                document.getElementById('apellido_materno').value = '';
-                document.getElementById('nombres').value = '';
-                document.getElementById('razon_social').value = '';
-                document.getElementById('direccion').value = '';
-                document.getElementById('departamento').value = '';
-                document.getElementById('provincia').innerHTML = '<option value="">Seleccione</option>';
-                document.getElementById('distrito').innerHTML = '<option value="">Seleccione</option>';
-                document.getElementById('categoria_proveedor_id').value = '';
-                document.getElementById('cubre_garantias').value = '';
-                document.getElementById('es_aseguradora').value = '';
-
-                // Ocultar campos de DNI y RUC
-                document.querySelectorAll('.dni-fields').forEach(field => field.style.display = 'none');
-                document.querySelectorAll('.ruc-fields').forEach(field => field.style.display = 'none');
-
-                // Resetear correos
-                const correosContainer = document.getElementById('correos-container');
-                correosContainer.innerHTML = `
-                    <div class="input-group mb-2 correo-entry">
-                        <input type="email" name="correos[]" class="form-control form-control-sm shadow-sm" placeholder="Ej: proveedor@dominio.com" required>
-                        <button type="button" class="btn btn-outline-danger btn-sm remove-correo">Eliminar</button>
-                    </div>`;
-                correoIndex = 1;
-
-                // Resetear contactos
-                const contactosContainer = document.getElementById('contactos-container');
-                contactosContainer.innerHTML = `
-                    <div class="row mb-2 contacto-entry">
-                        <div class="col-md-6">
-                            <input type="text" name="contactos[0][nombre]" class="form-control form-control-sm shadow-sm" placeholder="Nombre del contacto" required>
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" name="contactos[0][telefono]" class="form-control form-control-sm shadow-sm" placeholder="Teléfono" required>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="button" class="btn btn-outline-danger btn-sm remove-contacto w-100">Eliminar</button>
-                        </div>
-                    </div>`;
-                contactoIndex = 1;
-
-                // Remover la clase 'was-validated' para limpiar la validación
-                document.querySelector('form.needs-validation').classList.remove('was-validated');
+            } else {
+                alert(data.message);
             }
+        })
+        .catch(() => alert('Error al validar el documento.'))
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-search me-2"></i> Validar Datos';
+        });
+    });
 
-            // Resetear el formulario al cambiar el tipo de documento
-            document.getElementById('tipo_documento').addEventListener('change', function () {
-                resetForm();
-            });
+    document.getElementById('departamento').addEventListener('change', function () {
+        const dep = this.value;
+        const provSel  = document.getElementById('provincia');
+        const distSel  = document.getElementById('distrito');
+        provSel.innerHTML = '<option value="">Seleccione</option>';
+        distSel.innerHTML = '<option value="">Seleccione</option>';
+        if (!dep) return;
+        fetch('{{ route('admin.compras.proveedores.provincias') }}?departamento=' + encodeURIComponent(dep))
+            .then(r => r.json())
+            .then(provincias => provincias.forEach(p => provSel.innerHTML += `<option value="${p}">${p}</option>`))
+            .catch(() => alert('Error al cargar las provincias.'));
+    });
 
-            // Validar documento con API
-            document.getElementById('validar_documento').addEventListener('click', function () {
-                const tipoDocumento = document.getElementById('tipo_documento').value;
-                const numeroDocumento = document.getElementById('numero_documento').value;
+    document.getElementById('provincia').addEventListener('change', function () {
+        const dep  = document.getElementById('departamento').value;
+        const prov = this.value;
+        const distSel = document.getElementById('distrito');
+        distSel.innerHTML = '<option value="">Seleccione</option>';
+        if (!dep || !prov) return;
+        fetch('{{ route('admin.compras.proveedores.distritos') }}?departamento=' + encodeURIComponent(dep) + '&provincia=' + encodeURIComponent(prov))
+            .then(r => r.json())
+            .then(distritos => distritos.forEach(d => distSel.innerHTML += `<option value="${d}">${d}</option>`))
+            .catch(() => alert('Error al cargar los distritos.'));
+    });
 
-                if (!tipoDocumento || !numeroDocumento) {
-                    alert('Por favor, seleccione el tipo de documento y proporcione el número.');
-                    return;
-                }
+    let correoIndex = {{ $proveedor->correos->count() ?: 1 }};
+    document.getElementById('add-correo').addEventListener('click', function () {
+        document.getElementById('correos-container').insertAdjacentHTML('beforeend', `
+            <div class="d-flex gap-2 mb-2 correo-entry">
+                <input type="email" name="correos[]" class="form-control" placeholder="Ej: proveedor@dominio.com" required>
+                <button type="button" class="btn btn-outline-danger rounded-circle flex-shrink-0 remove-correo" style="width:38px;height:38px;" title="Eliminar">
+                    <i class="fas fa-trash small"></i>
+                </button>
+            </div>`);
+        correoIndex++;
+    });
 
-                console.log('Enviando solicitud para validar documento:', { tipo_documento: tipoDocumento, numero_documento: numeroDocumento });
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.remove-correo')) {
+            if (document.querySelectorAll('.correo-entry').length > 1)
+                e.target.closest('.correo-entry').remove();
+        }
+    });
 
-                fetch('{{ route('admin.compras.proveedores.validar.documento') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    },
-                    body: JSON.stringify({
-                        tipo_documento: tipoDocumento,
-                        numero_documento: numeroDocumento,
-                    }),
-                })
-                .then(response => {
-                    console.log('Estado de la respuesta:', response.status);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Datos recibidos:', data);
-                    if (data.success) {
-                        if (tipoDocumento === 'DNI') {
-                            document.querySelectorAll('.dni-fields').forEach(field => field.style.display = 'block');
-                            document.querySelectorAll('.ruc-fields').forEach(field => field.style.display = 'none');
-                            document.getElementById('apellido_paterno').value = data.data.apellido_paterno || '';
-                            document.getElementById('apellido_materno').value = data.data.apellido_materno || '';
-                            document.getElementById('nombres').value = data.data.nombres || '';
-                            document.getElementById('razon_social').value = '';
-                        } else if (tipoDocumento === 'RUC') {
-                            document.querySelectorAll('.dni-fields').forEach(field => field.style.display = 'none');
-                            document.querySelectorAll('.ruc-fields').forEach(field => field.style.display = 'block');
-                            document.getElementById('razon_social').value = data.data.nombre_o_razon_social || '';
-                            document.getElementById('apellido_paterno').value = '';
-                            document.getElementById('apellido_materno').value = '';
-                            document.getElementById('nombres').value = '';
+    let contactoIndex = {{ $proveedor->contactos->count() ?: 1 }};
+    document.getElementById('add-contacto').addEventListener('click', function () {
+        document.getElementById('contactos-container').insertAdjacentHTML('beforeend', `
+            <div class="d-flex gap-2 mb-2 align-items-center contacto-entry">
+                <input type="text" name="contactos[${contactoIndex}][nombre]" class="form-control" placeholder="Nombre del contacto" required>
+                <input type="text" name="contactos[${contactoIndex}][telefono]" class="form-control" placeholder="Teléfono" required>
+                <button type="button" class="btn btn-outline-danger rounded-circle flex-shrink-0 remove-contacto" style="width:38px;height:38px;" title="Eliminar">
+                    <i class="fas fa-trash small"></i>
+                </button>
+            </div>`);
+        contactoIndex++;
+    });
 
-                            // Autocompletar dirección y ubicación
-                            document.getElementById('direccion').value = data.data.direccion || '';
-                            document.getElementById('departamento').value = data.data.departamento || '';
-                            
-                            // Simular el evento 'change' en el departamento para cargar las provincias
-                            const departamentoEvent = new Event('change');
-                            document.getElementById('departamento').dispatchEvent(departamentoEvent);
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.remove-contacto')) {
+            if (document.querySelectorAll('.contacto-entry').length > 1)
+                e.target.closest('.contacto-entry').remove();
+        }
+    });
 
-                            // Esperar un momento para que las provincias se carguen y luego seleccionar la provincia
-                            setTimeout(() => {
-                                document.getElementById('provincia').value = data.data.provincia || '';
-                                const provinciaEvent = new Event('change');
-                                document.getElementById('provincia').dispatchEvent(provinciaEvent);
-
-                                // Esperar un momento para que los distritos se carguen y luego seleccionar el distrito
-                                setTimeout(() => {
-                                    document.getElementById('distrito').value = data.data.distrito || '';
-                                }, 500);
-                            }, 500);
-                        }
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en la solicitud:', error);
-                    alert('Error al validar el documento.');
-                });
-            });
-
-            // Cargar provincias y distritos dinámicamente
-            document.getElementById('departamento').addEventListener('change', function () {
-                const departamento = this.value;
-                if (departamento) {
-                    fetch('{{ route('admin.compras.proveedores.provincias') }}?departamento=' + encodeURIComponent(departamento))
-                        .then(response => response.json())
-                        .then(provincias => {
-                            const provinciaSelect = document.getElementById('provincia');
-                            provinciaSelect.innerHTML = '<option value="">Seleccione</option>';
-                            provincias.forEach(provincia => {
-                                provinciaSelect.innerHTML += `<option value="${provincia}">${provincia}</option>`;
-                            });
-                            document.getElementById('distrito').innerHTML = '<option value="">Seleccione</option>';
-                        })
-                        .catch(error => {
-                            console.error('Error al cargar provincias:', error);
-                        });
-                } else {
-                    document.getElementById('provincia').innerHTML = '<option value="">Seleccione</option>';
-                    document.getElementById('distrito').innerHTML = '<option value="">Seleccione</option>';
-                }
-            });
-
-            document.getElementById('provincia').addEventListener('change', function () {
-                const departamento = document.getElementById('departamento').value;
-                const provincia = this.value;
-                if (departamento && provincia) {
-                    fetch('{{ route('admin.compras.proveedores.distritos') }}?departamento=' + encodeURIComponent(departamento) + '&provincia=' + encodeURIComponent(provincia))
-                        .then(response => response.json())
-                        .then(distritos => {
-                            const distritoSelect = document.getElementById('distrito');
-                            distritoSelect.innerHTML = '<option value="">Seleccione</option>';
-                            distritos.forEach(distrito => {
-                                distritoSelect.innerHTML += `<option value="${distrito}">${distrito}</option>`;
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error al cargar distritos:', error);
-                        });
-                } else {
-                    document.getElementById('distrito').innerHTML = '<option value="">Seleccione</option>';
-                }
-            });
-
-            // Agregar y eliminar correos dinámicamente
-            let correoIndex = {{ $proveedor->correos->count() ?: 1 }};
-            document.getElementById('add-correo').addEventListener('click', function () {
-                const container = document.getElementById('correos-container');
-                const newCorreo = `
-                    <div class="input-group mb-2 correo-entry">
-                        <input type="email" name="correos[]" class="form-control form-control-sm shadow-sm" placeholder="Ej: proveedor@dominio.com" required>
-                        <button type="button" class="btn btn-outline-danger btn-sm remove-correo">Eliminar</button>
-                    </div>`;
-                container.insertAdjacentHTML('beforeend', newCorreo);
-                correoIndex++;
-            });
-
-            document.addEventListener('click', function (e) {
-                if (e.target.classList.contains('remove-correo')) {
-                    if (document.querySelectorAll('.correo-entry').length > 1) {
-                        e.target.closest('.correo-entry').remove();
-                    }
-                }
-            });
-
-            // Agregar y eliminar contactos dinámicamente
-            let contactoIndex = {{ $proveedor->contactos->count() ?: 1 }};
-            document.getElementById('add-contacto').addEventListener('click', function () {
-                const container = document.getElementById('contactos-container');
-                const newContacto = `
-                    <div class="row mb-2 contacto-entry">
-                        <div class="col-md-6">
-                            <input type="text" name="contactos[${contactoIndex}][nombre]" class="form-control form-control-sm shadow-sm" placeholder="Nombre del contacto" required>
-                        </div>
-                        <div class="col-md-4">
-                            <input type="text" name="contactos[${contactoIndex}][telefono]" class="form-control form-control-sm shadow-sm" placeholder="Teléfono" required>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="button" class="btn btn-outline-danger btn-sm remove-contacto w-100">Eliminar</button>
-                        </div>
-                    </div>`;
-                container.insertAdjacentHTML('beforeend', newContacto);
-                contactoIndex++;
-            });
-
-            document.addEventListener('click', function (e) {
-                if (e.target.classList.contains('remove-contacto')) {
-                    if (document.querySelectorAll('.contacto-entry').length > 1) {
-                        e.target.closest('.contacto-entry').remove();
-                    }
-                }
-            });
-        })();
-    </script>
+    document.querySelectorAll('.form-check-input').forEach(sw => {
+        sw.addEventListener('change', function () {
+            const label = this.nextElementSibling;
+            if (label) label.textContent = this.checked ? 'Sí' : 'No';
+        });
+    });
+})();
+</script>
 @endpush

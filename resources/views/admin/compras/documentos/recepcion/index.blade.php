@@ -10,16 +10,16 @@
                 <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25 backdrop-blur">
                     <i class="fas fa-truck-loading text-info me-2"></i> Documentos
                 </div>
-                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm d-flex align-items-center">
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm">
                     Recepción de Órdenes
                 </h2>
-                <p class="text-white-50 mb-0">Gestiona y recepciona las órdenes de compra</p>
+                <p class="text-white-50 mb-0">Gestiona y recepciona las órdenes de compra aprobadas</p>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ route('admin.inventario.kardex.consulta') }}" class="btn bg-info text-white rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
-                    <i class="fas fa-search me-2"></i> Consultar Kardex
+                <a href="{{ route('admin.inventario.kardex.consulta') }}" class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold shadow-sm border border-white border-opacity-25">
+                    <i class="fas fa-search me-2"></i> Kardex
                 </a>
-                <a href="{{ route('admin.recepcion.historial') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm transition hover:scale-105 border-0">
+                <a href="{{ route('admin.recepcion.historial') }}" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
                     <i class="fas fa-history text-primary me-2"></i> Historial
                 </a>
             </div>
@@ -27,211 +27,189 @@
     </div>
 </div>
 
-<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
-    <!-- Tabs Navigation -->
-    <div class="card dashboard-card border-0 shadow-sm mb-4">
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;"
+     x-data="recepcionIndex()">
+
+    {{-- Tarjetas de estadísticas --}}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3 p-3">
+                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle flex-shrink-0">
+                        <i class="fas fa-shopping-cart text-primary"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-4 text-primary">{{ $ordenes->count() }}</div>
+                        <div class="text-muted small text-uppercase fw-semibold">Total</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3 p-3">
+                    <div class="bg-secondary bg-opacity-10 p-3 rounded-circle flex-shrink-0">
+                        <i class="fas fa-clock text-secondary"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-4 text-secondary">{{ $ordenes->whereNotIn('estado_recepcion', ['parcial','completo','completo_con_faltantes'])->count() }}</div>
+                        <div class="text-muted small text-uppercase fw-semibold">Pendientes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3 p-3">
+                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle flex-shrink-0">
+                        <i class="fas fa-pause-circle text-warning"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-4 text-warning">{{ $ordenes->where('estado_recepcion', 'parcial')->count() }}</div>
+                        <div class="text-muted small text-uppercase fw-semibold">Parciales</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3 p-3">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-circle flex-shrink-0">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-4 text-success">{{ $ordenes->where('estado_recepcion', 'completo')->count() }}</div>
+                        <div class="text-muted small text-uppercase fw-semibold">Completas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Card principal con tabs --}}
+    <div class="card dashboard-card border-0 shadow-sm">
         <div class="card-body p-0">
 
-            <ul class="nav nav-tabs nav-fill" id="recepcionTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active fw-bold px-4 py-3" 
-                            id="pendientes-tab" 
-                            data-bs-toggle="tab" 
-                            data-bs-target="#pendientes" 
-                            type="button" 
-                            role="tab">
-                        <i class="fas fa-clock me-2"></i>
-                        Pendientes
-                        <span class="badge bg-warning text-dark ms-2">{{ $ordenes->where('estado_recepcion', '!=', 'completo')->count() }}</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold px-4 py-3" 
-                            id="parciales-tab" 
-                            data-bs-toggle="tab" 
-                            data-bs-target="#parciales" 
-                            type="button" 
-                            role="tab">
-                        <i class="fas fa-pause-circle me-2"></i>
-                        Parciales
-                        <span class="badge bg-info ms-2">{{ $ordenes->where('estado_recepcion', 'parcial')->count() }}</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold px-4 py-3" 
-                            id="completas-tab" 
-                            data-bs-toggle="tab" 
-                            data-bs-target="#completas" 
-                            type="button" 
-                            role="tab">
-                        <i class="fas fa-check-circle me-2"></i>
-                        Completas
-                        <span class="badge bg-success ms-2">{{ $ordenes->where('estado_recepcion', 'completo')->count() }}</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link fw-bold px-4 py-3" 
-                            id="todas-tab" 
-                            data-bs-toggle="tab" 
-                            data-bs-target="#todas" 
-                            type="button" 
-                            role="tab">
-                        <i class="fas fa-list me-2"></i>
-                        Todas
-                        <span class="badge bg-primary ms-2">{{ $ordenes->count() }}</span>
-                    </button>
-                </li>
-            </ul>
+            {{-- Barra superior: tabs + búsqueda --}}
+            <div class="d-flex flex-column flex-md-row align-items-md-center border-bottom">
+                <ul class="nav premium-tabs nav-fill flex-grow-1 border-0" id="recepcionTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-3 active" data-bs-toggle="tab" data-bs-target="#pendientes"
+                                @click="tabActivo = 'pendientes'" type="button">
+                            <i class="fas fa-clock me-2"></i> Pendientes
+                            <span class="badge bg-secondary-subtle text-secondary ms-1 rounded-pill">{{ $ordenes->whereNotIn('estado_recepcion', ['parcial','completo','completo_con_faltantes'])->count() }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-3" data-bs-toggle="tab" data-bs-target="#parciales"
+                                @click="tabActivo = 'parciales'" type="button">
+                            <i class="fas fa-pause-circle me-2"></i> Parciales
+                            <span class="badge bg-warning-subtle text-warning ms-1 rounded-pill">{{ $ordenes->where('estado_recepcion', 'parcial')->count() }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-3" data-bs-toggle="tab" data-bs-target="#completas"
+                                @click="tabActivo = 'completas'" type="button">
+                            <i class="fas fa-check-circle me-2"></i> Completas
+                            <span class="badge bg-success-subtle text-success ms-1 rounded-pill">{{ $ordenes->where('estado_recepcion', 'completo')->count() }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold py-3" data-bs-toggle="tab" data-bs-target="#todas"
+                                @click="tabActivo = 'todas'" type="button">
+                            <i class="fas fa-list me-2"></i> Todas
+                            <span class="badge bg-primary-subtle text-primary ms-1 rounded-pill">{{ $ordenes->count() }}</span>
+                        </button>
+                    </li>
+                </ul>
+                <div class="px-3 py-2">
+                    <div class="input-group input-group-sm" style="min-width: 220px;">
+                        <span class="input-group-text bg-light border-0 rounded-start-pill">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-0 bg-light rounded-end-pill"
+                               placeholder="Buscar orden o proveedor..."
+                               x-model="busqueda">
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="pendientes">
+                    @include('admin.compras.documentos.recepcion.partials.table', [
+                        'ordenes' => $ordenes->whereNotIn('estado_recepcion', ['parcial','completo','completo_con_faltantes']),
+                        'mostrarAcciones' => true
+                    ])
+                </div>
+                <div class="tab-pane fade" id="parciales">
+                    @include('admin.compras.documentos.recepcion.partials.table', [
+                        'ordenes' => $ordenes->where('estado_recepcion', 'parcial'),
+                        'mostrarAcciones' => true
+                    ])
+                </div>
+                <div class="tab-pane fade" id="completas">
+                    @include('admin.compras.documentos.recepcion.partials.table', [
+                        'ordenes' => $ordenes->where('estado_recepcion', 'completo'),
+                        'mostrarAcciones' => false
+                    ])
+                </div>
+                <div class="tab-pane fade" id="todas">
+                    @include('admin.compras.documentos.recepcion.partials.table', [
+                        'ordenes' => $ordenes,
+                        'mostrarAcciones' => true
+                    ])
+                </div>
+            </div>
+
         </div>
     </div>
-
-    <!-- Tab Content -->
-    <div class="tab-content" id="recepcionTabsContent">
-        <!-- Pendientes Tab -->
-        <div class="tab-pane fade show active" id="pendientes" role="tabpanel">
-            @include('admin.compras.documentos.recepcion.partials.table', [
-                'ordenes' => $ordenes->where('estado_recepcion', '!=', 'completo'),
-                'titulo' => 'Órdenes Pendientes de Recepción',
-                'mostrarAcciones' => true
-            ])
-        </div>
-
-        <!-- Parciales Tab -->
-        <div class="tab-pane fade" id="parciales" role="tabpanel">
-            @include('admin.compras.documentos.recepcion.partials.table', [
-                'ordenes' => $ordenes->where('estado_recepcion', 'parcial'),
-                'titulo' => 'Órdenes con Recepción Parcial',
-                'mostrarAcciones' => true
-            ])
-        </div>
-
-        <!-- Completas Tab -->
-        <div class="tab-pane fade" id="completas" role="tabpanel">
-            @include('admin.compras.documentos.recepcion.partials.table', [
-                'ordenes' => $ordenes->where('estado_recepcion', 'completo'),
-                'titulo' => 'Órdenes Completamente Recibidas',
-                'mostrarAcciones' => false
-            ])
-        </div>
-
-        <!-- Todas Tab -->
-        <div class="tab-pane fade" id="todas" role="tabpanel">
-            @include('admin.compras.documentos.recepcion.partials.table', [
-                'ordenes' => $ordenes,
-                'titulo' => 'Todas las Órdenes',
-                'mostrarAcciones' => true
-            ])
-        </div>
-    </div>
-
-    <!-- Statistics Cards -->
-    @if($ordenes->count() > 0)
-    <div class="row mt-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card dashboard-card border-0 text-center h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="bg-primary bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
-                        <i class="fas fa-shopping-cart text-primary fa-2x"></i>
-                    </div>
-                    <h2 class="fw-bold text-primary mb-2">{{ $ordenes->count() }}</h2>
-                    <p class="text-muted mb-0 small text-uppercase fw-bold">Total Órdenes</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card dashboard-card border-0 text-center h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="bg-warning bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
-                        <i class="fas fa-clock text-warning fa-2x"></i>
-                    </div>
-                    <h2 class="fw-bold text-warning mb-2">{{ $ordenes->where('estado_recepcion', 'parcial')->count() }}</h2>
-                    <p class="text-muted mb-0 small text-uppercase fw-bold">Recepciones Parciales</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card dashboard-card border-0 text-center h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="bg-info bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
-                        <i class="fas fa-boxes text-info fa-2x"></i>
-                    </div>
-                    <h2 class="fw-bold text-info mb-2">{{ $ordenes->sum(function($orden) { return $orden->detalles->sum('cantidad_en_compra'); }) }}</h2>
-                    <p class="text-muted mb-0 small text-uppercase fw-bold">Items Totales</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card dashboard-card border-0 text-center h-100 shadow-sm">
-                <div class="card-body p-4">
-                    <div class="bg-success bg-opacity-10 p-3 rounded-circle d-inline-block mb-3">
-                        <i class="fas fa-check-double text-success fa-2x"></i>
-                    </div>
-                    <h2 class="fw-bold text-success mb-2">{{ $ordenes->sum(function($orden) { return $orden->detalles->sum('cantidad_recibida'); }) }}</h2>
-                    <p class="text-muted mb-0 small text-uppercase fw-bold">Items Recibidos</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
 </div>
-</div>
+
+@push('styles')
+<style>
+.premium-tabs .nav-link {
+    color: #6c757d;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    transition: all 0.25s ease;
+}
+.premium-tabs .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+    color: #0d6efd;
+}
+.premium-tabs .nav-link.active {
+    color: #0d6efd;
+    background-color: transparent;
+    border-bottom-color: #0d6efd;
+}
+</style>
+@endpush
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Efecto hover para las tarjetas de estadísticas
-    const statCards = document.querySelectorAll('.col-lg-3 .card');
-    statCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(0px)';
-            this.style.transition = 'all 0.3s ease';
-            this.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.15)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.08)';
-        });
-    });
-    
-    // Animación de entrada para las estadísticas
-    const animateCounters = () => {
-        const counters = document.querySelectorAll('.col-lg-3 h2');
-        counters.forEach(counter => {
-            const target = parseInt(counter.textContent);
-            const duration = 1500;
-            const step = target / (duration / 16);
-            let current = 0;
-            
-            const updateCounter = () => {
-                current += step;
-                if (current < target) {
-                    counter.textContent = Math.floor(current);
-                    requestAnimationFrame(updateCounter);
-                } else {
-                    counter.textContent = target;
-                }
-            };
-            
-            updateCounter();
-        });
-    };
-    
-    // Observador para activar animación cuando las estadísticas sean visibles
-    const statsObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                animateCounters();
-                statsObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.5 });
-    
-    const statsSection = document.querySelector('.row.mt-4');
-    if (statsSection) {
-        statsObserver.observe(statsSection);
+function recepcionIndex() {
+    return {
+        busqueda: '',
+        tabActivo: 'pendientes',
+        init() {
+            this.$watch('busqueda', val => this.filtrar(val));
+        },
+        filtrar(val) {
+            const term = val.toLowerCase();
+            document.querySelectorAll('.tab-pane.active .orden-row').forEach(row => {
+                const texto = row.dataset.search || '';
+                row.style.display = texto.includes(term) ? '' : 'none';
+            });
+            // Actualizar mensaje vacío
+            document.querySelectorAll('.tab-pane.active').forEach(pane => {
+                const visibles = pane.querySelectorAll('.orden-row:not([style*="none"])').length;
+                const noResults = pane.querySelector('.no-results-filter');
+                if (noResults) noResults.style.display = visibles === 0 && term ? '' : 'none';
+            });
+        }
     }
-});
+}
 </script>
 @endpush
 @endsection

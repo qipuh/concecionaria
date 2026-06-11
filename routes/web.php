@@ -496,6 +496,8 @@ Route::middleware(['auth'])->prefix('admin/mantenimiento/tecnicos')->name('admin
         Route::get('/', [ParteController::class, 'index'])->name('index');
         Route::get('/create', [ParteController::class, 'create'])->name('create');
         Route::post('/', [ParteController::class, 'store'])->name('store');
+        Route::get('/import/template', [\App\Http\Controllers\Admin\Almacenes\ParteImportController::class, 'downloadTemplate'])->name('import.template');
+        Route::post('/import', [\App\Http\Controllers\Admin\Almacenes\ParteImportController::class, 'import'])->name('import');
         Route::get('/{parte}/edit', [ParteController::class, 'edit'])->name('edit');
         Route::put('/{parte}', [ParteController::class, 'update'])->name('update');
         Route::delete('/{parte}', [ParteController::class, 'destroy'])->name('destroy');
@@ -881,6 +883,7 @@ Route::group(['middleware' => ['auth']], function () {
 });
 Route::get('/admin/productos-servicios/vehiculos/import', [App\Http\Controllers\Admin\VehiculoImportController::class, 'showImportForm'])->name('admin.productos-servicios.vehiculos.import.form');
 Route::post('/admin/productos-servicios/vehiculos/import', [App\Http\Controllers\Admin\VehiculoImportController::class, 'import'])->name('admin.productos-servicios.vehiculos.import');
+Route::get('/admin/productos-servicios/vehiculos/import/template', [App\Http\Controllers\Admin\VehiculoImportController::class, 'downloadTemplate'])->name('admin.productos-servicios.vehiculos.import.template');
 
 
 #RECEPCIÓN PRODUCTOS
@@ -916,4 +919,7 @@ Route::prefix('admin/compras/devoluciones')->name('admin.devoluciones.')->group(
     Route::get('/{devolucion}/edit', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'edit'])->name('edit');
     Route::put('/{devolucion}', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'update'])->name('update');
     Route::delete('/{devolucion}', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'destroy'])->name('destroy');
+    Route::patch('/{devolucion}/aprobar', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'aprobar'])->name('aprobar');
+    Route::patch('/{devolucion}/rechazar', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'rechazar'])->name('rechazar');
+    Route::patch('/{devolucion}/procesar', [\App\Http\Controllers\Admin\Compras\DevolucionController::class, 'procesar'])->name('procesar');
 });

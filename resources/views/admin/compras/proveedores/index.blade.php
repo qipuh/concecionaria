@@ -30,44 +30,41 @@
 <div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
 
 @if (session('success'))
-    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center gap-2 alert-dismissible fade show">
+        <i class="fas fa-check-circle text-success"></i> {{ session('success') }}
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
 @endif
-
 @if (session('error'))
-    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center gap-2 alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle text-danger"></i> {{ session('error') }}
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
     </div>
 @endif
 
-<!-- Formulario de Filtros -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form id="filter-form" class="row g-3">
-            <div class="col-md-1">
-                <label for="cubre_garantias" class="form-label small text-muted">¿Cubre Garantías?</label>
-                <div class="form-check form-switch">
-                    <input class="form-check-input filter-input" type="checkbox" name="cubre_garantias" id="cubre_garantias" value="Sí" {{ request('cubre_garantias') == 'Sí' ? 'checked' : '' }}>
-                    <label class="form-check-label" for="cubre_garantias" id="cubre_garantias_label">
-                        {{ request('cubre_garantias') == 'Sí' ? 'Sí' : 'No' }}
-                    </label>
-                </div>
-            </div>
-            <div class="col-md-1">
-                <label for="es_aseguradora" class="form-label small text-muted">¿Es Aseguradora?</label>
-                <div class="form-check form-switch">
-                    <input class="form-check-input filter-input" type="checkbox" name="es_aseguradora" id="es_aseguradora" value="Sí" {{ request('es_aseguradora') == 'Sí' ? 'checked' : '' }}>
-                    <label class="form-check-label" for="es_aseguradora" id="es_aseguradora_label">
-                        {{ request('es_aseguradora') == 'Sí' ? 'Sí' : 'No' }}
-                    </label>
+{{-- Filtros --}}
+<div class="card dashboard-card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+        <h6 class="fw-bold mb-0"><i class="fas fa-filter me-2 text-primary"></i> Filtros</h6>
+    </div>
+    <div class="card-body p-4">
+        <form id="filter-form" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label for="search" class="form-label fw-semibold small text-uppercase text-muted">Buscar</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0 text-muted"><i class="fas fa-search small"></i></span>
+                    <input type="text" name="search" id="search"
+                           class="form-control bg-light border-0 ps-0 filter-input"
+                           placeholder="Nro. documento o proveedor..."
+                           value="{{ request('search') }}">
+                    <button type="button" class="btn btn-light border-0 text-muted" id="clear-search" title="Limpiar">
+                        <i class="fas fa-times small"></i>
+                    </button>
                 </div>
             </div>
             <div class="col-md-2">
-                <label for="categoria_proveedor_id" class="form-label small text-muted">Categoría</label>
-                <select name="categoria_proveedor_id" id="categoria_proveedor_id" class="form-select form-select-sm filter-input">
+                <label for="categoria_proveedor_id" class="form-label fw-semibold small text-uppercase text-muted">Categoría</label>
+                <select name="categoria_proveedor_id" id="categoria_proveedor_id" class="form-select filter-input">
                     <option value="">Todas</option>
                     @foreach ($categorias as $categoria)
                         <option value="{{ $categoria->id }}" {{ request('categoria_proveedor_id') == $categoria->id ? 'selected' : '' }}>
@@ -77,38 +74,60 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label for="tipo_documento" class="form-label small text-muted">Tipo de Documento</label>
-                <select name="tipo_documento" id="tipo_documento" class="form-select form-select-sm filter-input">
+                <label for="tipo_documento" class="form-label fw-semibold small text-uppercase text-muted">Tipo Doc.</label>
+                <select name="tipo_documento" id="tipo_documento" class="form-select filter-input">
                     <option value="">Todos</option>
                     <option value="DNI" {{ request('tipo_documento') == 'DNI' ? 'selected' : '' }}>DNI</option>
                     <option value="RUC" {{ request('tipo_documento') == 'RUC' ? 'selected' : '' }}>RUC</option>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label for="search" class="form-label small text-muted">Buscar por Nro. Documento o Proveedor</label>
-                <div class="input-group input-group-sm">
-                    <input type="text" name="search" id="search" class="form-control filter-input" placeholder="Buscar..." value="{{ request('search') }}">
-                    <button type="button" class="btn btn-primary" id="clear-search">
-                        <svg xmlns="http://www.w3.org/2000/svg" style="height: 1rem; width: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small text-uppercase text-muted d-block">Cubre Garantías</label>
+                <div class="form-check form-switch mt-1">
+                    <input class="form-check-input filter-input" type="checkbox" name="cubre_garantias"
+                           id="cubre_garantias" value="Sí" {{ request('cubre_garantias') == 'Sí' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="cubre_garantias" id="cubre_garantias_label">
+                        {{ request('cubre_garantias') == 'Sí' ? 'Sí' : 'No' }}
+                    </label>
                 </div>
             </div>
-            <div class="col-md-3 text-end">
-                <a href="{{ route('admin.compras.proveedores.index') }}" class="btn btn-sm btn-outline-secondary mt-3">Limpiar Filtros</a>
+            <div class="col-md-2">
+                <label class="form-label fw-semibold small text-uppercase text-muted d-block">Es Aseguradora</label>
+                <div class="form-check form-switch mt-1">
+                    <input class="form-check-input filter-input" type="checkbox" name="es_aseguradora"
+                           id="es_aseguradora" value="Sí" {{ request('es_aseguradora') == 'Sí' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="es_aseguradora" id="es_aseguradora_label">
+                        {{ request('es_aseguradora') == 'Sí' ? 'Sí' : 'No' }}
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-1 text-end">
+                <a href="{{ route('admin.compras.proveedores.index') }}"
+                   class="btn btn-outline-secondary rounded-pill px-3 py-2 small fw-semibold border-0">
+                    <i class="fas fa-redo me-1"></i> Limpiar
+                </a>
             </div>
         </form>
     </div>
 </div>
 
-<div class="table-responsive" id="proveedores-table">
-    @include('admin.compras.proveedores.partials.table')
+{{-- Tabla --}}
+<div class="card dashboard-card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0 pt-4 pb-0 px-4 d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold mb-0"><i class="fas fa-list me-2 text-primary"></i> Proveedores</h6>
+        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 small" id="total-badge">
+            <span id="total-proveedores">{{ $proveedores->total() }}</span> registros
+        </span>
+    </div>
+    <div class="card-body p-0" id="proveedores-table">
+        @include('admin.compras.proveedores.partials.table')
+    </div>
 </div>
 
-<div class="mt-4" id="proveedores-pagination">
+<div class="px-4 py-3" id="proveedores-pagination">
     @include('admin.compras.proveedores.partials.pagination')
 </div>
+
 </div>
 
 <!-- Contenedor para los modales -->
@@ -119,31 +138,16 @@
 @endsection
 
 @push('styles')
-    <style>
-        .form-check-input {
-            width: 2.5em;
-            height: 1.25em;
-        }
-        .form-check-label {
-            margin-left: 0.5em;
-        }
-        .table-responsive {
-            position: relative;
-        }
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            display: none;
-        }
-    </style>
+<style>
+.form-check-input { width: 2.5em; height: 1.25em; }
+.form-check-label  { margin-left: 0.5em; }
+#proveedores-table { position: relative; }
+.loading-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.75); display: none;
+    justify-content: center; align-items: center; z-index: 10;
+}
+</style>
 @endpush
 
 @push('scripts')

@@ -5,102 +5,156 @@
 @section('header', 'Reporte Kardex Vehículos')
 
 @section('content')
-<div class="container">
-    <div class="card">
-        <div class="card-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <h3>Reporte Kardex Vehículos</h3>
-                <div>
-                    <button class="btn btn-primary" onclick="window.print()">Imprimir</button>
-                    <a href="{{ route('admin.inventario.kardex.form') }}" class="btn btn-secondary">Volver</a>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25">
+                    <i class="fas fa-chart-line text-info me-2"></i> Inventario
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm">Reporte Kardex Vehículo</h2>
+                <p class="text-white-50 mb-0">Historial de movimientos del vehículo</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm border-0" onclick="window.print()">
+                    <i class="fas fa-print me-2"></i> Imprimir
+                </button>
+                <a href="{{ route('admin.inventario.kardex.form') }}" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold border-0" style="color:white; border-color: rgba(255,255,255,0.5);">
+                    <i class="fas fa-arrow-left me-2"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+
+    <div class="row mb-4">
+        <!-- Información del Vehículo -->
+        <div class="col-md-6 mb-4 mb-md-0">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-car me-2 text-primary"></i> Información del Vehículo</h6>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted small fw-semibold">Marca</span>
+                            <span class="fw-semibold">{{ $vehiculo->marca->nombre ?? 'N/A' }}</span>
+                        </li>
+                        <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted small fw-semibold">Modelo</span>
+                            <span class="fw-semibold">{{ $vehiculo->modelo->nombre ?? 'N/A' }}</span>
+                        </li>
+                        <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <span class="text-muted small fw-semibold">Versión</span>
+                            <span class="fw-semibold">{{ $vehiculo->version->nombre ?? 'N/A' }}</span>
+                        </li>
+                        <li class="d-flex justify-content-between align-items-center py-2">
+                            <span class="text-muted small fw-semibold">Año Modelo</span>
+                            <span class="fw-semibold">{{ $vehiculo->anioModelo->nombre ?? 'N/A' }}</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-        
-        <div class="card-body">
-            <!-- Información del vehículo -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h4>Información del Vehículo</h4>
-                    <table class="table table-sm">
-                        <tr>
-                            <th>Marca:</th>
-                            <td>{{ $vehiculo->marca->nombre ?? 'N/A' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Modelo:</th>
-                            <td>{{ $vehiculo->modelo->nombre ?? 'N/A' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Versión:</th>
-                            <td>{{ $vehiculo->version->nombre ?? 'N/A' }}</td>
-                        </tr>
-                        <tr>
-                            <th>Año Modelo:</th>
-                            <td>{{ $vehiculo->anioModelo->nombre ?? 'N/A' }}</td>
-                        </tr>
-                    </table>
+
+        <!-- Stock Actual -->
+        <div class="col-md-6">
+            <div class="card dashboard-card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-warehouse me-2 text-primary"></i> Stock Actual</h6>
                 </div>
-                <div class="col-md-6">
-                    <h4>Stock Actual</h4>
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Almacén</th>
-                                <th>Disponible</th>
-                                <th>Reservado</th>
-                                <th>Stock Mínimo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($stockActual as $stock)
-                            <tr>
-                                <td>{{ $stock->almacen->nombre }}</td>
-                                <td class="text-right">{{ number_format($stock->stock_disponible, 2) }}</td>
-                                <td class="text-right">{{ number_format($stock->stock_reservado, 2) }}</td>
-                                <td class="text-right">{{ number_format($stock->stock_minimo, 2) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="py-2 border-0 text-uppercase small">Almacén</th>
+                                    <th class="py-2 border-0 text-uppercase small text-end">Disponible</th>
+                                    <th class="py-2 border-0 text-uppercase small text-end">Reservado</th>
+                                    <th class="py-2 border-0 text-uppercase small text-end">Mínimo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($stockActual as $stock)
+                                <tr>
+                                    <td>{{ $stock->almacen->nombre }}</td>
+                                    <td class="text-end fw-bold text-success">{{ number_format($stock->stock_disponible, 2) }}</td>
+                                    <td class="text-end fw-semibold text-warning">{{ number_format($stock->stock_reservado, 2) }}</td>
+                                    <td class="text-end fw-semibold text-danger">{{ number_format($stock->stock_minimo, 2) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            
-            <!-- Tabla de movimientos -->
-            <h4>Movimientos {{ $almacen ? 'en '.$almacen->nombre : 'en todos los almacenes' }}</h4>
+        </div>
+    </div>
+
+    <!-- Tabla de Movimientos -->
+    <div class="card dashboard-card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+            <h6 class="fw-bold mb-0">
+                <i class="fas fa-exchange-alt me-2 text-primary"></i>
+                Movimientos {{ $almacen ? 'en '.$almacen->nombre : 'en todos los almacenes' }}
+            </h6>
+        </div>
+        <div class="card-body p-4">
             <div class="table-responsive">
-                <table class="table table-striped table-bordered">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <th>Fecha</th>
-                            <th>Tipo</th>
-                            <th>Documento</th>
-                            <th>Almacén</th>
-                            <th>Entrada</th>
-                            <th>Salida</th>
-                            <th>Existencia</th>
-                            <th>Costo Unit.</th>
-                            <th>Valor</th>
-                            <th>Usuario</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small">Fecha</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small">Tipo</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small">Documento</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small">Almacén</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small text-end">Entrada</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small text-end">Salida</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small text-end">Existencia</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small text-end">Costo Unit.</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small text-end">Valor</th>
+                            <th class="py-3 px-4 border-0 text-uppercase small">Usuario</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($movimientos as $movimiento)
                         <tr>
-                            <td>{{ \Carbon\Carbon::parse($movimiento->fecha_movimiento)->format('d/m/Y H:i') }}</td>
-                            <td>{{ $movimiento->tipoMovimiento->nombre }}</td>
-                            <td>{{ $movimiento->documento_referencia }}</td>
-                            <td>{{ $movimiento->almacen->nombre }}</td>
-                            <td class="text-right">
-                                {{ $movimiento->tipoMovimiento->afecta_stock > 0 ? number_format($movimiento->cantidad, 2) : '' }}
+                            <td class="px-4 small text-muted fw-semibold">
+                                {{ \Carbon\Carbon::parse($movimiento->fecha_movimiento)->format('d/m/Y H:i') }}
                             </td>
-                            <td class="text-right">
-                                {{ $movimiento->tipoMovimiento->afecta_stock < 0 ? number_format($movimiento->cantidad, 2) : '' }}
+                            <td class="px-4">
+                                @php
+                                    $tipoClass = $movimiento->tipoMovimiento->afecta_stock > 0
+                                        ? 'bg-success-subtle text-success'
+                                        : ($movimiento->tipoMovimiento->afecta_stock < 0 ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning');
+                                @endphp
+                                <span class="badge {{ $tipoClass }} rounded-pill px-3">{{ $movimiento->tipoMovimiento->nombre }}</span>
                             </td>
-                            <td class="text-right">{{ number_format($movimiento->stock_resultante, 2) }}</td>
-                            <td class="text-right">{{ number_format($movimiento->costo_unitario, 2) }}</td>
-                            <td class="text-right">{{ number_format($movimiento->cantidad * $movimiento->costo_unitario, 2) }}</td>
-                            <td>{{ $movimiento->usuario->name }}</td>
+                            <td class="px-4">
+                                <code class="bg-light px-2 py-1 rounded small">{{ $movimiento->documento_referencia }}</code>
+                            </td>
+                            <td class="px-4">{{ $movimiento->almacen->nombre }}</td>
+                            <td class="px-4 text-end">
+                                @if($movimiento->tipoMovimiento->afecta_stock > 0)
+                                    <span class="fw-bold text-success">+{{ number_format($movimiento->cantidad, 2) }}</span>
+                                @endif
+                            </td>
+                            <td class="px-4 text-end">
+                                @if($movimiento->tipoMovimiento->afecta_stock < 0)
+                                    <span class="fw-bold text-danger">-{{ number_format($movimiento->cantidad, 2) }}</span>
+                                @endif
+                            </td>
+                            <td class="px-4 text-end">
+                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3">{{ number_format($movimiento->stock_resultante, 2) }}</span>
+                            </td>
+                            <td class="px-4 text-end">S/ {{ number_format($movimiento->costo_unitario, 2) }}</td>
+                            <td class="px-4 text-end fw-semibold">S/ {{ number_format($movimiento->cantidad * $movimiento->costo_unitario, 2) }}</td>
+                            <td class="px-4">
+                                <span class="text-muted small"><i class="fas fa-user me-1"></i>{{ $movimiento->usuario->name }}</span>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

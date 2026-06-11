@@ -212,6 +212,39 @@ class DevolucionController extends Controller
         }
     }
 
+    public function aprobar($id)
+    {
+        $devolucion = ValeDevolucion::findOrFail($id);
+        if ($devolucion->estado !== 'pendiente') {
+            return back()->with('error', 'Solo se pueden aprobar vales en estado pendiente.');
+        }
+        $devolucion->aprobar(Auth::id());
+        return redirect()->route('admin.devoluciones.show', $id)
+            ->with('success', "Vale {$devolucion->numero} aprobado correctamente.");
+    }
+
+    public function rechazar($id)
+    {
+        $devolucion = ValeDevolucion::findOrFail($id);
+        if (!in_array($devolucion->estado, ['pendiente', 'aprobado'])) {
+            return back()->with('error', 'No se puede rechazar un vale en este estado.');
+        }
+        $devolucion->rechazar();
+        return redirect()->route('admin.devoluciones.show', $id)
+            ->with('success', "Vale {$devolucion->numero} rechazado.");
+    }
+
+    public function procesar($id)
+    {
+        $devolucion = ValeDevolucion::findOrFail($id);
+        if ($devolucion->estado !== 'aprobado') {
+            return back()->with('error', 'Solo se pueden procesar vales aprobados.');
+        }
+        $devolucion->procesar();
+        return redirect()->route('admin.devoluciones.show', $id)
+            ->with('success', "Vale {$devolucion->numero} marcado como procesado.");
+    }
+
     public function buscarProductos(Request $request)
     {
         $search = $request->input('search', '');

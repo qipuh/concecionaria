@@ -5,7 +5,12 @@
       "Bash(php artisan:*)",
       "Bash(ls:*)",
       "Bash(/c/laragon/bin/php/php-8.2.12-Win32-vs16-x64/php.exe artisan migrate:*)",
-      "Bash(c:/laragon/bin/php/php-8.2.29/php.exe:*)"
+      "Bash(c:/laragon/bin/php/php-8.2.29/php.exe:*)",
+      "Bash(xargs grep -l \"table.*orden_compra\\\\|table.*recepcion\")",
+      "Bash(xargs grep -l \"devoluciones\\\\|DevolucionProveedor\\\\|DevolucionOrdenCompra\")",
+      "PowerShell(php artisan migrate --path=database/migrations/2026_01_14_000000_create_tecnicos_table.php)",
+      "PowerShell($env:PATH += \";C:\\\\laragon\\\\bin\\\\php\\\\php-8.3.30-Win32-vs16-x64\"; php artisan migrate --path=database/migrations/2026_01_14_000000_create_tecnicos_table.php 2>&1)",
+      "PowerShell($env:PATH += \";C:\\\\laragon\\\\bin\\\\php\\\\php-8.3.30-Win32-vs16-x64\"; php artisan migrate:status 2>&1 | Select-String \"pending|No\")"
     ],
     "deny": [],
     "ask": []

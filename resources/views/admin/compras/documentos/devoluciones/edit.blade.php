@@ -1,169 +1,212 @@
 @extends('admin.layouts.app')
+@section('title', 'Editar Vale ' . $devolucion->numero)
 
-@section('title', 'Editar Vale de Devolución')
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+@endpush
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>Editar Vale de Devolución</h5>
-                    <div>
-                        <a href="{{ route('admin.devoluciones.show', $devolucion->id) }}" class="btn btn-sm btn-info me-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16">
-                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                            </svg>
-                            Ver
-                        </a>
-                        <a href="{{ route('admin.devoluciones.index') }}" class="btn btn-sm btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-                            </svg>
-                            Volver
-                        </a>
-                    </div>
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25">
+                    <i class="fas fa-pencil-alt text-info me-2"></i> Editar Documento
                 </div>
-                <div class="card-body">
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    <form action="{{ route('admin.devoluciones.update', $devolucion->id) }}" method="POST" id="form-devolucion">
-                        @csrf
-                        @method('PUT')
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="numero" class="form-label">Número de Vale</label>
-                                    <input type="text" class="form-control" id="numero" name="numero" value="{{ $devolucion->numero }}" disabled>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="fecha" class="form-label">Fecha <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control @error('fecha') is-invalid @enderror" 
-                                           id="fecha" name="fecha" value="{{ old('fecha', $devolucion->fecha) }}" required>
-                                    @error('fecha')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="proveedor_id" class="form-label">Proveedor <span class="text-danger">*</span></label>
-                                    <select class="form-control @error('proveedor_id') is-invalid @enderror" 
-                                            id="proveedor_id" name="proveedor_id" required>
-                                        <option value="">Seleccione un proveedor</option>
-                                        @foreach($proveedores as $proveedor)
-                                            <option value="{{ $proveedor->id }}" 
-                                                {{ old('proveedor_id', $devolucion->proveedor_id) == $proveedor->id ? 'selected' : '' }}>
-                                                {{ $proveedor->razon_social }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('proveedor_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="motivo" class="form-label">Motivo de Devolución <span class="text-danger">*</span></label>
-                                    <select class="form-control @error('motivo') is-invalid @enderror" 
-                                            id="motivo" name="motivo" required>
-                                        <option value="">Seleccione el motivo</option>
-                                        <option value="producto_defectuoso" {{ old('motivo', $devolucion->motivo) == 'producto_defectuoso' ? 'selected' : '' }}>Producto defectuoso</option>
-                                        <option value="producto_incorrecto" {{ old('motivo', $devolucion->motivo) == 'producto_incorrecto' ? 'selected' : '' }}>Producto incorrecto</option>
-                                        <option value="exceso_inventario" {{ old('motivo', $devolucion->motivo) == 'exceso_inventario' ? 'selected' : '' }}>Exceso de inventario</option>
-                                        <option value="otros" {{ old('motivo', $devolucion->motivo) == 'otros' ? 'selected' : '' }}>Otros</option>
-                                    </select>
-                                    @error('motivo')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group mb-3">
-                                    <label for="observaciones" class="form-label">Observaciones</label>
-                                    <textarea class="form-control @error('observaciones') is-invalid @enderror" 
-                                              id="observaciones" name="observaciones" rows="3" 
-                                              placeholder="Ingrese observaciones adicionales...">{{ old('observaciones', $devolucion->observaciones) }}</textarea>
-                                    @error('observaciones')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Productos existentes -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h6 class="border-bottom pb-2 mb-3">Productos en la Devolución</h6>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th>Producto</th>
-                                                <th>Código</th>
-                                                <th>Tipo</th>
-                                                <th>Cantidad</th>
-                                                <th>Precio Unit.</th>
-                                                <th>Subtotal</th>
-                                                <th>Motivo</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($devolucion->detalles as $index => $detalle)
-                                                <tr>
-                                                    <td>{{ $detalle->nombre_producto }}</td>
-                                                    <td>{{ $detalle->codigo_producto }}</td>
-                                                    <td>
-                                                        <span class="badge bg-primary">{{ ucfirst($detalle->tipo_producto) }}</span>
-                                                    </td>
-                                                    <td>{{ number_format($detalle->cantidad, 2) }}</td>
-                                                    <td>${{ number_format($detalle->precio_unitario, 2) }}</td>
-                                                    <td>${{ number_format($detalle->subtotal, 2) }}</td>
-                                                    <td>{{ $detalle->motivo_detalle ?: '-' }}</td>
-                                                </tr>
-                                                <!-- Hidden inputs para mantener los productos existentes -->
-                                                <input type="hidden" name="productos[{{ $index }}][id]" value="{{ $detalle->producto_id }}">
-                                                <input type="hidden" name="productos[{{ $index }}][tipo]" value="{{ $detalle->tipo_producto }}">
-                                                <input type="hidden" name="productos[{{ $index }}][cantidad]" value="{{ $detalle->cantidad }}">
-                                                <input type="hidden" name="productos[{{ $index }}][precio]" value="{{ $detalle->precio_unitario }}">
-                                                <input type="hidden" name="productos[{{ $index }}][motivo]" value="{{ $detalle->motivo_detalle }}">
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="text-muted small mt-2">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Para modificar los productos, deberá crear un nuevo vale de devolución.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-end mt-4">
-                            <a href="{{ route('admin.devoluciones.show', $devolucion->id) }}" class="btn btn-secondary me-2">Cancelar</a>
-                            <button type="submit" class="btn btn-primary">Actualizar Vale</button>
-                        </div>
-                    </form>
-                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm">
+                    Editar {{ $devolucion->numero }}
+                </h2>
+                <p class="text-white-50 mb-0">Modificar datos del vale de devolución en estado pendiente</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.devoluciones.show', $devolucion->id) }}"
+                   class="btn bg-white bg-opacity-10 text-white rounded-pill px-4 py-2 fw-bold shadow-sm border border-white border-opacity-25">
+                    <i class="fas fa-eye me-2"></i> Ver
+                </a>
+                <a href="{{ route('admin.devoluciones.index') }}"
+                   class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
+
+    @if($errors->any())
+        <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4">
+            <div class="fw-bold mb-1"><i class="fas fa-exclamation-circle me-2"></i> Corrija los siguientes errores:</div>
+            <ul class="mb-0 ps-3 small">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('admin.devoluciones.update', $devolucion->id) }}" method="POST" id="form-devolucion">
+        @csrf
+        @method('PUT')
+
+        {{-- Datos generales --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-file-alt me-2 text-primary"></i> Datos del Vale</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-2">
+                        <label class="form-label fw-semibold small text-uppercase text-muted">Número</label>
+                        <input type="text" class="form-control bg-light border-0" value="{{ $devolucion->numero }}" disabled>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="fecha" class="form-label fw-semibold small text-uppercase text-muted">
+                            Fecha <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" class="form-control @error('fecha') is-invalid @enderror"
+                               id="fecha" name="fecha" value="{{ old('fecha', $devolucion->fecha->format('Y-m-d')) }}" required>
+                        @error('fecha')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label for="proveedor_id" class="form-label fw-semibold small text-uppercase text-muted">
+                            Proveedor <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select @error('proveedor_id') is-invalid @enderror"
+                                id="proveedor_id" name="proveedor_id" required>
+                            <option value="">Seleccione un proveedor</option>
+                            @foreach($proveedores as $proveedor)
+                                <option value="{{ $proveedor->id }}"
+                                    {{ old('proveedor_id', $devolucion->proveedor_id) == $proveedor->id ? 'selected' : '' }}>
+                                    {{ $proveedor->razon_social }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('proveedor_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label for="motivo" class="form-label fw-semibold small text-uppercase text-muted">
+                            Motivo <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control @error('motivo') is-invalid @enderror"
+                               id="motivo" name="motivo"
+                               value="{{ old('motivo', $devolucion->motivo) }}"
+                               placeholder="Ej: Productos defectuosos, Error en pedido..." required>
+                        @error('motivo')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-12">
+                        <label for="observaciones" class="form-label fw-semibold small text-uppercase text-muted">
+                            Observaciones
+                        </label>
+                        <textarea class="form-control @error('observaciones') is-invalid @enderror"
+                                  id="observaciones" name="observaciones" rows="2"
+                                  placeholder="Observaciones adicionales (opcional)">{{ old('observaciones', $devolucion->observaciones) }}</textarea>
+                        @error('observaciones')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Productos (solo lectura) --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold mb-0"><i class="fas fa-boxes me-2 text-primary"></i> Productos en el Vale</h6>
+                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1 small">
+                    {{ $devolucion->detalles->count() }} ítems
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="py-3 px-4 border-0 text-uppercase small">Producto</th>
+                                <th class="py-3 px-4 border-0 text-uppercase small">Código</th>
+                                <th class="py-3 px-4 border-0 text-uppercase small text-center">Tipo</th>
+                                <th class="py-3 px-4 border-0 text-uppercase small text-center">Cantidad</th>
+                                <th class="py-3 px-4 border-0 text-uppercase small text-end">Precio Unit.</th>
+                                <th class="py-3 px-4 border-0 text-uppercase small text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($devolucion->detalles as $index => $detalle)
+                            <tr>
+                                <td class="px-4 py-3 fw-semibold small">{{ $detalle->nombre_producto }}</td>
+                                <td class="px-4 py-3 font-monospace small text-muted">{{ $detalle->codigo_producto }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 small">
+                                        {{ ucfirst($detalle->tipo_producto) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-center">{{ number_format($detalle->cantidad, 2) }}</td>
+                                <td class="px-4 py-3 text-end">S/. {{ number_format($detalle->precio_unitario, 2) }}</td>
+                                <td class="px-4 py-3 text-end fw-bold text-primary">
+                                    S/. {{ number_format($detalle->subtotal ?? ($detalle->cantidad * $detalle->precio_unitario), 2) }}
+                                </td>
+
+                                {{-- Hidden inputs para mantener los productos al actualizar --}}
+                                <input type="hidden" name="productos[{{ $index }}][id]" value="{{ $detalle->producto_id }}">
+                                <input type="hidden" name="productos[{{ $index }}][tipo]" value="{{ $detalle->tipo_producto }}">
+                                <input type="hidden" name="productos[{{ $index }}][cantidad]" value="{{ $detalle->cantidad }}">
+                                <input type="hidden" name="productos[{{ $index }}][precio]" value="{{ $detalle->precio_unitario }}">
+                                <input type="hidden" name="productos[{{ $index }}][motivo]" value="{{ $detalle->motivo_detalle }}">
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <td colspan="5" class="px-4 py-3 text-end fw-bold text-uppercase small">Total</td>
+                                <td class="px-4 py-3 text-end fw-bold text-primary">
+                                    S/. {{ number_format($devolucion->total ?? 0, 2) }}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="px-4 py-3 border-top bg-light">
+                    <div class="text-muted small">
+                        <i class="fas fa-info-circle me-1 text-primary"></i>
+                        Para modificar los productos, elimine este vale y cree uno nuevo.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Botones --}}
+        <div class="d-flex justify-content-end gap-2 pb-4">
+            <a href="{{ route('admin.devoluciones.show', $devolucion->id) }}"
+               class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold border-0">
+                <i class="fas fa-times me-2"></i> Cancelar
+            </a>
+            <button type="submit"
+                    class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
+                <i class="fas fa-save me-2"></i> Actualizar Vale
+            </button>
+        </div>
+    </form>
+</div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#proveedor_id').select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Seleccione un proveedor',
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>
+@endpush
