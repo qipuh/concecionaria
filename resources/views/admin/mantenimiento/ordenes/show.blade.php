@@ -4,252 +4,109 @@
 
 @push('styles')
 <style>
-    body {
-        background-color: #f7f7f7;
-    }
-    .card {
-        border-radius: 0.5rem;
-        overflow: hidden;
-    }
-    .nav-tabs {
-        border-bottom: none;
-    }
-    .nav-tabs .nav-link {
-        border: none;
-        font-weight: 500;
-        color: #6c757d;
-        border-radius: 0;
-        border-bottom: 3px solid transparent;
-        transition: all 0.2s ease;
-    }
-    .nav-tabs .nav-link:hover {
-        color: #0d6efd;
-        border-color: transparent;
-        background-color: rgba(13, 110, 253, 0.05);
-    }
-    .nav-tabs .nav-link.active {
-        color: #0d6efd;
-        border-bottom: 3px solid #0d6efd;
-        background-color: #fff;
-    }
-    .avatar-circle {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 0.5rem;
-    }
-    .detail-icon {
-        width: 36px;
-        min-width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background-color: rgba(13, 110, 253, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 12px;
-    }
-    .detail-text {
-        flex-grow: 1;
-        border-left: 2px solid #e9ecef;
-        padding-left: 1rem;
-    }
-    .timeline-container {
-        max-height: 600px;
-        overflow-y: auto;
-        scrollbar-width: thin;
-    }
-    .timeline {
-        position: relative;
-        padding-left: 30px;
-    }
-    .timeline::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 15px;
-        height: 100%;
-        width: 2px;
-        background-color: #dee2e6;
-    }
-    .timeline-item {
-        position: relative;
-        margin-bottom: 20px;
-    }
-    .timeline-badge {
-        position: absolute;
-        left: -30px;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        text-align: center;
-        line-height: 30px;
-        color: white;
-        top: 0;
-        z-index: 1;
-    }
-    .timeline-panel {
-        padding: 15px;
-        background-color: #f8f9fa;
-        border-radius: 4px;
-        border: 1px solid #dee2e6;
-    }
-    .timeline-title {
-        margin-top: 0;
-        font-weight: bold;
-    }
-    .timeline-date {
-        font-size: 0.9em;
-        color: #6c757d;
-    }
-    .card-header.bg-gradient-primary {
-        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-    }
-    .hover-shadow-lg {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .hover-shadow-lg:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
-    }
-    .tab-pane {
-        padding: 20px;
-    }
-    @media (max-width: 991.98px) {
-        .col-lg-3.mb-4 .card {
-            margin-bottom: 1rem;
-        }
-        .nav-tabs {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            overflow-y: hidden;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-        }
-        .nav-tabs .nav-link {
-            padding: 0.75rem 1rem;
-        }
-        .nav-tabs::-webkit-scrollbar {
-            height: 4px;
-        }
-        .nav-tabs::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        .nav-tabs::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 2px;
-        }
-    }
+.detail-icon { width:36px; min-width:36px; height:36px; border-radius:50%; background-color:rgba(13,110,253,.1); display:flex; align-items:center; justify-content:center; }
+.detail-text  { flex-grow:1; border-left:2px solid #e9ecef; padding-left:1rem; }
+.timeline-container { max-height:600px; overflow-y:auto; scrollbar-width:thin; }
+.timeline { position:relative; padding-left:30px; }
+.timeline::before { content:''; position:absolute; top:0; left:15px; height:100%; width:2px; background-color:#dee2e6; }
+.timeline-item { position:relative; margin-bottom:20px; }
+.timeline-badge { position:absolute; left:-30px; width:30px; height:30px; border-radius:50%; text-align:center; line-height:30px; color:#fff; top:0; z-index:1; }
+.timeline-panel { padding:15px; background-color:#f8f9fa; border-radius:4px; border:1px solid #dee2e6; }
+.timeline-title { margin-top:0; font-weight:bold; }
+.timeline-date { font-size:.9em; color:#6c757d; }
+.nav-tabs { border-bottom:none; }
+.nav-tabs .nav-link { border:none; font-weight:500; color:#6c757d; border-radius:0; border-bottom:3px solid transparent; transition:all .2s ease; }
+.nav-tabs .nav-link.active { color:#0d6efd; border-bottom:3px solid #0d6efd; background-color:#fff; }
+.nav-tabs::-webkit-scrollbar { height:4px; }
+.nav-tabs::-webkit-scrollbar-thumb { background:#c1c1c1; border-radius:2px; }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid px-3 px-lg-4">
-    <div class="d-flex justify-content-between flex-wrap bg-light flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <div class="">
-            <span class="color-secondary">Orden de Trabajo</span> <br>
-            <div class="d-flex">
-                <h1 style="font-size: 20pt;font-weight: 700;">{{ $orden->codigo_orden }}</h1>
-                @switch($orden->estado)
-                        @case('diagnostico')
-                            <span class="badge bg-info fs-6 me-3">Diagnóstico</span>
-                            @break
-                        @case('espera_aprobacion')
-                            <span class="badge bg-warning fs-6 me-3">Esperando Aprobación</span>
-                            @break
-                        @case('en_progreso')
-                            <span class="badge bg-primary fs-6 me-3">En Progreso</span>
-                            @break
-                        @case('finalizado')
-                            <span class="badge bg-success fs-6 me-3">Finalizado</span>
-                            @break
-                        @case('facturado')
-                            <span class="badge bg-secondary fs-6 me-3">Facturado</span>
-                            @break
-                        @case('entregado')
-                            <span class="badge bg-dark fs-6 me-3">Entregado</span>
-                            @break
-                        @default
-                            <span class="badge bg-secondary fs-6 me-3">{{ $orden->estado }}</span>
-                    @endswitch
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25">
+                    <i class="fas fa-tools text-warning me-2"></i> Mantenimiento
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-1">
+                    <h2 class="fw-bold mb-0 tracking-tight text-white display-6 text-shadow-sm">{{ $orden->codigo_orden }}</h2>
+                    @php
+                        $estadoBadge = match($orden->estado) {
+                            'diagnostico'       => ['bg-info-subtle text-info',     'Diagnóstico'],
+                            'espera_aprobacion' => ['bg-warning-subtle text-warning','Esperando Aprobación'],
+                            'en_progreso'       => ['bg-primary-subtle text-primary','En Progreso'],
+                            'finalizado'        => ['bg-success-subtle text-success','Finalizado'],
+                            'facturado'         => ['bg-secondary-subtle text-secondary','Facturado'],
+                            'entregado'         => ['bg-dark-subtle text-dark',     'Entregado'],
+                            default             => ['bg-secondary-subtle text-secondary', ucfirst($orden->estado)],
+                        };
+                    @endphp
+                    <span class="badge {{ $estadoBadge[0] }} rounded-pill px-3 py-2 fs-6">{{ $estadoBadge[1] }}</span>
+                </div>
+                <p class="text-white-50 mb-0">Orden de trabajo de mantenimiento</p>
             </div>
-        </div>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-                <!--a href="{{ route('admin.mantenimiento.ordenes.index') }}" class="btn">
-                    <i class="fas fa-arrow-left"></i> Volver
-                </a-->
-                <form action="{{ route('admin.mantenimiento.ordenes.update', ['orden' => $orden->id]) }}" method="POST" class="d-flex align-items-center">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                {{-- Cambio rápido de estado --}}
+                <form action="{{ route('admin.mantenimiento.ordenes.update', ['orden' => $orden->id]) }}" method="POST" class="d-flex gap-2">
                     @csrf
                     @method('PUT')
-                    
-                    <select name="estado" id="estado" class="form-select me-2" style="width: auto;">
+                    <select name="estado" class="form-select rounded-pill px-3 py-2" style="min-width:160px;">
                         @foreach($states as $state)
                             <option value="{{ $state }}" {{ $orden->estado == $state ? 'selected' : '' }}>{{ ucfirst($state) }}</option>
                         @endforeach
                     </select>
-                    
-                    <button type="submit" class="btn btn-primary btn-sm">
-                        <i class="fas fa-save"></i>
+                    <button type="submit" class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
+                        <i class="fas fa-save text-primary me-1"></i> Guardar
                     </button>
                 </form>
-                <div class="btn">
-                    <!-- Acciones según estado -->
-                    @switch($orden->estado)
-                        @case('diagnostico')
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#diagnosticoModal">
-                                <i class="fas fa-clipboard-check"></i> Registrar Diagnóstico
-                            </button>
-                            @break
-                        @case('espera_aprobacion')
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#aprobacionModal">
-                                <i class="fas fa-thumbs-up"></i> Registrar Aprobación del Cliente
-                            </button>
-                            @break
-                        @case('en_progreso')
-                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#finalizarTrabajoModal">
-                                <i class="fas fa-check-circle"></i> Finalizar Trabajo
-                            </button>
-                            @break
-                        @case('finalizado')
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generarFacturaModal">
-                                <i class="fas fa-file-invoice-dollar"></i> Generar Factura
-                            </button>
-                            @break
-                        @case('facturado')
-                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registrarPagoModal">
-                                <i class="fas fa-money-bill-wave"></i> Registrar Pago
-                            </button>
-                            @break
-                    @endswitch
-                </div>
+                {{-- Acciones según estado --}}
+                @switch($orden->estado)
+                    @case('diagnostico')
+                        <button type="button" class="btn btn-info rounded-pill px-4 py-2 fw-bold shadow-sm border-0" data-bs-toggle="modal" data-bs-target="#diagnosticoModal">
+                            <i class="fas fa-clipboard-check me-2"></i> Registrar Diagnóstico
+                        </button>
+                        @break
+                    @case('espera_aprobacion')
+                        <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm border-0" data-bs-toggle="modal" data-bs-target="#aprobacionModal">
+                            <i class="fas fa-thumbs-up me-2"></i> Registrar Aprobación
+                        </button>
+                        @break
+                    @case('en_progreso')
+                        <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold shadow-sm border-0" data-bs-toggle="modal" data-bs-target="#finalizarTrabajoModal">
+                            <i class="fas fa-check-circle me-2"></i> Finalizar Trabajo
+                        </button>
+                        @break
+                    @case('finalizado')
+                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm border-0" data-bs-toggle="modal" data-bs-target="#generarFacturaModal">
+                            <i class="fas fa-file-invoice-dollar me-2"></i> Generar Factura
+                        </button>
+                        @break
+                    @case('facturado')
+                        <button type="button" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm border-0" data-bs-toggle="modal" data-bs-target="#registrarPagoModal">
+                            <i class="fas fa-money-bill-wave me-2"></i> Registrar Pago
+                        </button>
+                        @break
+                @endswitch
+                <a href="{{ route('admin.mantenimiento.ordenes.index') }}"
+                   class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver
+                </a>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Estado Actual de la Orden -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-3">
-
-            </div>
-        </div>
-    </div>
-
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
     <div class="row">
         <!-- Panel izquierdo - Información del cliente y vehículo -->
         <div class="col-lg-3 mb-4">
             <!-- Datos del Cliente -->
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden hover-shadow-lg transition-all mb-4">
-                <div class="card-header bg-primary text-white py-3">
-                    <h5 class="card-title mb-0 fw-bold fs-5 d-flex align-items-center">
-                        <i class="fas fa-user-circle me-2 fs-4"></i> 
-                        Datos del Cliente
-                    </h5>
+            <div class="card dashboard-card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-user-circle me-2 text-primary"></i> Datos del Cliente</h6>
                 </div>
                 
                 <div class="card-body px-4">
@@ -337,12 +194,9 @@
             </div>
             
             <!-- Datos del Vehículo -->
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden hover-shadow-lg transition-all">
-                <div class="card-header bg-primary text-white py-3">
-                    <h5 class="card-title mb-0 fw-bold fs-5 d-flex align-items-center">
-                        <i class="fas fa-car me-2 fs-4"></i> 
-                        Datos del Vehículo
-                    </h5>
+            <div class="card dashboard-card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-car me-2 text-primary"></i> Datos del Vehículo</h6>
                 </div>
                 
                 <div class="card-body px-4">
@@ -1250,6 +1104,7 @@
         </div>
     </div>
 </div>
+</div>{{-- /container-fluid --}}
 @endsection
 
 @push('scripts')

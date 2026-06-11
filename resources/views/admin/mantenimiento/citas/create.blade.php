@@ -1,4 +1,3 @@
-```blade
 @extends('admin.layouts.app')
 
 @section('title', 'Nueva Cita de Mantenimiento')
@@ -38,24 +37,35 @@
 @endpush
 
 @section('content')
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Nueva Cita de Mantenimiento</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-                <a href="{{ route('admin.mantenimiento.citas.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver
+<div class="dashboard-hero" style="padding: 2rem 2rem; border-radius: 0 0 1.5rem 1.5rem; margin-bottom: 2.5rem;">
+    <div class="hero-glow-alt" style="top: -50px; right: 0; filter: blur(60px); opacity: 0.2;"></div>
+    <div class="container-fluid position-relative z-1">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
+            <div class="mb-3 mb-lg-0">
+                <div class="d-inline-flex align-items-center px-3 py-1 bg-white bg-opacity-10 rounded-pill fs-6 mb-3 border border-white border-opacity-25">
+                    <i class="fas fa-tools text-warning me-2"></i> Mantenimiento
+                </div>
+                <h2 class="fw-bold mb-1 tracking-tight text-white display-6 text-shadow-sm">Nueva Cita</h2>
+                <p class="text-white-50 mb-0">Registra una nueva cita de mantenimiento.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ route('admin.mantenimiento.citas.index') }}"
+                   class="btn bg-white text-dark rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
+                    <i class="fas fa-arrow-left text-primary me-2"></i> Volver al Listado
                 </a>
             </div>
         </div>
     </div>
+</div>
 
+<div class="container-fluid px-3 px-lg-4 position-relative" style="top: -3.5rem; z-index: 10;">
     <form id="citaForm" action="{{ route('admin.mantenimiento.citas.store') }}" method="POST">
         @csrf
-        
-        <!-- Datos del Cliente -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5>Datos del Cliente</h5>
+
+        {{-- Datos del Cliente --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-user me-2 text-primary"></i> Datos del Cliente</h6>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
@@ -256,10 +266,10 @@
             </div>
         </div>
         
-        <!-- Datos del Vehículo -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5>Datos del Vehículo</h5>
+        {{-- Datos del Vehículo --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-car me-2 text-primary"></i> Datos del Vehículo</h6>
             </div>
             <div class="card-body">
                 <div id="vehiculos-container">
@@ -380,10 +390,10 @@
             </div>
         </div>
         
-        <!-- Datos de la Cita -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5>Datos de la Cita</h5>
+        {{-- Datos de la Cita --}}
+        <div class="card dashboard-card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                <h6 class="fw-bold mb-0"><i class="fas fa-calendar-alt me-2 text-primary"></i> Datos de la Cita</h6>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -450,15 +460,19 @@
             </div>
         </div>
         
-        <div class="d-grid gap-2 mb-4">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-calendar-check"></i> Registrar Cita
+        <div class="d-flex justify-content-end gap-2 pb-4">
+            <a href="{{ route('admin.mantenimiento.citas.index') }}"
+               class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold border-0">
+                <i class="fas fa-times me-2"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm border-0">
+                <i class="fas fa-calendar-check me-2"></i> Registrar Cita
             </button>
         </div>
     </form>
+</div>
 @endsection
 
-```blade
 @push('scripts')
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
